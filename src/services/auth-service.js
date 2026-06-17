@@ -1,6 +1,6 @@
 import axios from "axios";
 import useAuthStore from "../stores/auth";
-import router from "../router";
+import router from "../router/router.js";
 
 export const login = async (loginData) => {
   const authStore = useAuthStore();

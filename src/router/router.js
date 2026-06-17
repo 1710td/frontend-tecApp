@@ -1,4 +1,3 @@
-
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "../components/auth/Login.vue";
 import LoginAlumno from "../components/auth/LoginAlumno.vue";
@@ -19,9 +18,22 @@ const routes = [
   { path: "/objetos-perdidos", component: Inicio },
   { path: "/cursos", component: Inicio },
 
-  { path: "/administrador/login", component: LoginAdministrador },
-  { path: "/administrador/registro", component: RegistroAdministrador },
-  { path: "/dashboard-administrador", component: DashboardAdministrador },
+  {
+    path: "/dashboard-administrador",
+    component: DashboardAdministrador,
+    meta: {
+      requiresAuth: true,
+      role: "administrador",
+    },
+  },
+  {
+    path: "/login",
+    component: LoginAdministrador,
+  },
+  {
+    path: "/registro",
+    component: RegistroAdministrador,
+  },
 ];
 
 export default createRouter({

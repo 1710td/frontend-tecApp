@@ -345,7 +345,7 @@ import { ref, onMounted } from "vue";
 import {
     obtenerCursos,
     crearCurso,
-    //actualizarCurso,
+    modificarCurso,
     eliminarCurso,
 } from "../../../services/academico-service.js";
 
@@ -427,7 +427,7 @@ const fetchCursos = async () => {
     }
 };
 
-// POST / PUT — separados y usando el service
+// POST / PATCH — separados y usando el service
 const guardarCurso = async () => {
     errorGuardar.value = "";
     exitoGuardar.value = false;
@@ -437,7 +437,8 @@ const guardarCurso = async () => {
         if (vistaActiva.value === "crear") {
             await crearCurso(form.value);
         } else {
-            await actualizarCurso(form.value.id_curso, form.value);
+            // CORRECCIÓN: Usamos modificarCurso y le pasamos el form completo
+            await modificarCurso(form.value);
         }
         exitoGuardar.value = true;
         await fetchCursos();

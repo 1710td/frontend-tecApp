@@ -1,186 +1,407 @@
 <template>
-    <div class="metrics">
-        <div class="metric-card">
-            <div class="metric-label">
-                <i class="ti ti-school" aria-hidden="true"></i>Alumnos
-            </div>
-            <div class="metric-value">248</div>
-            <span class="metric-badge badge-green">
-                <i class="ti ti-arrow-up"></i>+12 este mes
-            </span>
-        </div>
-        <div class="metric-card">
-            <div class="metric-label">
-                <i class="ti ti-chalkboard" aria-hidden="true"></i>Docentes
-            </div>
-            <div class="metric-value">31</div>
-            <span class="metric-badge badge-gray">3 sin asignación</span>
-        </div>
-        <div class="metric-card">
-            <div class="metric-label">
-                <i class="ti ti-book" aria-hidden="true"></i>Cursos activos
-            </div>
-            <div class="metric-value">18</div>
-            <span class="metric-badge badge-green">Todos con aula</span>
-        </div>
-        <div class="metric-card">
-            <div class="metric-label">
-                <i class="ti ti-books" aria-hidden="true"></i>Préstamos activos
-            </div>
-            <div class="metric-value">43</div>
-            <span class="metric-badge badge-red">
-                <i class="ti ti-alert-circle"></i>5 vencidos
-            </span>
-        </div>
-    </div>
-
-    <div class="row3">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">
-                    <i class="ti ti-activity" aria-hidden="true"></i>
-                    Actividad reciente
+    <div class="alumnos-wrapper">
+        <div v-if="vistaActiva === 'lista'" class="metrics animate-fade-in">
+            <div class="metric-card">
+                <div class="metric-label">
+                    <i class="ti ti-school" aria-hidden="true"></i>Total Alumnos
                 </div>
-                <button class="card-action">Ver todo</button>
+                <div class="metric-value">{{ alumnos.length }}</div>
+                <span class="metric-badge badge-green">
+                    <i class="ti ti-arrow-up"></i>Activos en sistema
+                </span>
             </div>
-            <div
-                v-for="actividad in actividadReciente"
-                :key="actividad.id"
-                class="activity-item"
-            >
-                <div class="act-icon" :style="{ background: actividad.iconBg }">
-                    <i
-                        :class="`ti ${actividad.icon}`"
-                        :style="{
-                            color: actividad.iconColor,
-                            fontSize: '13px',
-                        }"
-                    ></i>
+            <div class="metric-card">
+                <div class="metric-label">
+                    <i class="ti ti-chart-pie" aria-hidden="true"></i>Asistencia
+                    Promedio
                 </div>
-                <div>
-                    <div class="act-text">
-                        <strong>{{ actividad.titulo }}</strong>
-                        — {{ actividad.descripcion }}
-                    </div>
-                    <div class="act-time">{{ actividad.tiempo }}</div>
-                </div>
-            </div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 12px">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <i class="ti ti-chart-pie" aria-hidden="true"></i>
-                        Asistencia hoy
-                    </div>
-                </div>
-                <div class="progress-row">
-                    <div class="prog-item">
-                        <div class="prog-label">
-                            <span>Presentes</span><span>81%</span>
-                        </div>
-                        <div class="prog-bar">
-                            <div class="prog-fill g" style="width: 81%"></div>
-                        </div>
-                    </div>
-                    <div class="prog-item">
-                        <div class="prog-label">
-                            <span>Ausentes</span><span>11%</span>
-                        </div>
-                        <div class="prog-bar">
-                            <div class="prog-fill a" style="width: 11%"></div>
-                        </div>
-                    </div>
-                    <div class="prog-item">
-                        <div class="prog-label">
-                            <span>Tardanzas</span><span>8%</span>
-                        </div>
-                        <div class="prog-bar">
-                            <div class="prog-fill" style="width: 8%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <i class="ti ti-search" aria-hidden="true"></i>
-                        Objetos perdidos
-                    </div>
-                </div>
-                <div class="metric-value">7</div>
-                <div class="metric-sub">sin reclamar esta semana</div>
-                <button
-                    class="card-action"
-                    style="margin-top: 8px; display: block"
+                <div class="metric-value">81%</div>
+                <span class="metric-badge badge-gray"
+                    >Ciclo lectivo actual</span
                 >
-                    Ver listado →
-                </button>
             </div>
         </div>
-    </div>
 
-    <div class="row2">
-        <div class="card">
+        <div
+            v-if="vistaActiva === 'lista'"
+            class="card animate-fade-in"
+            style="margin-top: 12px"
+        >
             <div class="card-header">
                 <div class="card-title">
                     <i class="ti ti-users" aria-hidden="true"></i>
-                    Últimos alumnos registrados
+                    Gestión de Alumnos
                 </div>
                 <button
-                    class="card-action"
-                    @click="$emit('cambiar-vista', 'alumnos')"
+                    @click="cambiarVista('crear')"
+                    class="tb-btn primary sm"
                 >
-                    Ver todos
+                    <i class="ti ti-plus" aria-hidden="true"></i> Nuevo Alumno
                 </button>
             </div>
-            <table class="mini" aria-label="Últimos alumnos registrados">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Curso</th>
-                        <th>DNI</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="alumno in ultimosAlumnos" :key="alumno.dni">
-                        <td>{{ alumno.nombre }}</td>
-                        <td>{{ alumno.curso }}</td>
-                        <td>{{ alumno.dni }}</td>
-                        <td>
-                            <button class="icon-btn" aria-label="Editar">
-                                <i
-                                    class="ti ti-edit"
-                                    style="font-size: 13px"
-                                ></i>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
 
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">
-                    <i class="ti ti-calendar" aria-hidden="true"></i>
-                    Horarios — hoy
+            <div class="table-responsive">
+                <div v-if="cargando" class="empty-state">
+                    <i
+                        class="ti ti-loader animate-spin"
+                        style="font-size: 24px; color: #cd322c"
+                    ></i>
+                    <p>Cargando legajos de alumnos...</p>
+                </div>
+
+                <div
+                    v-else-if="errorCarga"
+                    class="error-banner"
+                    style="margin: 16px"
+                >
+                    <i class="ti ti-alert-circle"></i> {{ errorCarga }}
+                    <button
+                        class="tb-btn sm outline"
+                        @click="fetchAlumnos"
+                        style="margin-left: auto"
+                    >
+                        Reintentar
+                    </button>
+                </div>
+
+                <table
+                    v-else-if="alumnos.length > 0"
+                    class="mini"
+                    aria-label="Listado de alumnos"
+                >
+                    <thead>
+                        <tr>
+                            <th>Alumno</th>
+                            <th>DNI</th>
+                            <th>Curso asignado</th>
+                            <th class="action-cell">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr
+                            v-for="alumno in alumnos"
+                            :key="alumno.id_alumno"
+                            class="table-row"
+                        >
+                            <td>
+                                <strong>{{ alumno.apellido }}</strong
+                                >, {{ alumno.nombre }}
+                            </td>
+                            <td class="mono">{{ alumno.dni }}</td>
+                            <td>
+                                {{ alumno.curso.nombre_curso || "Sin asignar" }}
+                            </td>
+
+                            <td class="action-cell">
+                                <div class="action-buttons">
+                                    <button
+                                        @click="
+                                            cambiarVista('detalles', alumno)
+                                        "
+                                        class="icon-btn view"
+                                        title="Ver legajo completo"
+                                    >
+                                        <i class="ti ti-eye"></i>
+                                    </button>
+                                    <button
+                                        @click="cambiarVista('editar', alumno)"
+                                        class="icon-btn edit"
+                                        title="Editar"
+                                    >
+                                        <i class="ti ti-edit"></i>
+                                    </button>
+                                    <button
+                                        @click="pedirConfirmacion(alumno)"
+                                        class="icon-btn delete"
+                                        title="Eliminar"
+                                    >
+                                        <i class="ti ti-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div v-else class="empty-state">
+                    <i
+                        class="ti ti-user-x"
+                        style="font-size: 28px; opacity: 0.4"
+                    ></i>
+                    <p>
+                        No se encontraron alumnos registrados en la institución.
+                    </p>
                 </div>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 6px">
-                <div
-                    v-for="horario in horariosHoy"
-                    :key="horario.hora"
-                    class="list-item"
+        </div>
+
+        <div
+            v-if="vistaActiva === 'detalles' && alumnoSeleccionado"
+            class="card animate-fade-in"
+        >
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="ti ti-id-badge"></i>
+                    Legajo Digital — {{ alumnoSeleccionado.apellido }},
+                    {{ alumnoSeleccionado.nombre }}
+                </div>
+                <button
+                    @click="cambiarVista('lista')"
+                    class="icon-btn"
+                    aria-label="Volver"
                 >
-                    <div class="hora">{{ horario.hora }}</div>
-                    <div class="li-info">
-                        <div class="li-name">{{ horario.materia }}</div>
-                        <div class="li-sub">{{ horario.detalle }}</div>
+                    <i class="ti ti-arrow-left"></i>
+                </button>
+            </div>
+
+            <div class="card-body details-view">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Apellido y Nombre</span>
+                        <span class="detail-value"
+                            >{{ alumnoSeleccionado.apellido }},
+                            {{ alumnoSeleccionado.nombre }}</span
+                        >
                     </div>
+                    <div class="detail-item">
+                        <span class="detail-label"
+                            >Documento Nacional de Identidad (DNI)</span
+                        >
+                        <span class="detail-value mono">{{
+                            alumnoSeleccionado.dni
+                        }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label"
+                            >División / Curso Actual</span
+                        >
+                        <span class="detail-value">{{
+                            alumnoSeleccionado.curso || "No matriculado"
+                        }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Condición de Matrícula</span>
+                        <span
+                            :class="[
+                                'status-pill',
+                                `sp-${alumnoSeleccionado.estado}`,
+                            ]"
+                            style="width: fit-content"
+                        >
+                            {{
+                                etiquetaEstado[alumnoSeleccionado.estado] ||
+                                alumnoSeleccionado.estado
+                            }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <i class="ti ti-activity"></i>
+                    <p>
+                        Módulo de historial académico unificado: Próximamente se
+                        integrarán las inasistencias acumuladas y boletín de
+                        calificaciones de las materias correspondientes a
+                        {{ alumnoSeleccionado.curso }}.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <button @click="cambiarVista('lista')" class="tb-btn outline">
+                    Volver al listado
+                </button>
+                <button
+                    @click="cambiarVista('editar', alumnoSeleccionado)"
+                    class="tb-btn primary"
+                >
+                    <i class="ti ti-edit"></i> Editar Ficha
+                </button>
+            </div>
+        </div>
+
+        <div
+            v-if="['crear', 'editar'].includes(vistaActiva)"
+            class="card animate-fade-in"
+        >
+            <div class="card-header">
+                <div class="card-title">
+                    <i
+                        :class="
+                            vistaActiva === 'crear'
+                                ? 'ti ti-user-plus'
+                                : 'ti ti-edit'
+                        "
+                    ></i>
+                    {{
+                        vistaActiva === "crear"
+                            ? "Inscribir Nuevo Alumno"
+                            : "Modificar Ficha de Alumno"
+                    }}
+                </div>
+                <button
+                    @click="cambiarVista('lista')"
+                    class="icon-btn"
+                    aria-label="Volver"
+                >
+                    <i class="ti ti-arrow-left"></i>
+                </button>
+            </div>
+
+            <form @submit.prevent="guardarAlumno" class="form-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input
+                            id="nombre"
+                            v-model="form.nombre"
+                            type="text"
+                            placeholder="Ej: Valentina"
+                            required
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="apellido">Apellido</label>
+                        <input
+                            id="apellido"
+                            v-model="form.apellido"
+                            type="text"
+                            placeholder="Ej: Ríos"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dni">Número de DNI</label>
+                        <input
+                            id="dni"
+                            v-model="form.dni"
+                            type="text"
+                            placeholder="Ej: 45321098"
+                            required
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_curso">Curso / División asignada</label>
+                        <select id="id_curso" v-model="form.id_curso" required>
+                            <option value="" disabled>
+                                Seleccione un curso...
+                            </option>
+                            <option
+                                v-for="curso in cursosDisponibles"
+                                :key="curso.id_curso"
+                                :value="curso.id_curso"
+                            >
+                                {{ curso.nombre_curso }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div
+                    class="card-footer"
+                    style="
+                        padding: 14px 0 0 0;
+                        border: none;
+                        background: transparent;
+                    "
+                >
+                    <div v-if="errorGuardar" class="error-banner">
+                        <i class="ti ti-alert-circle"></i> {{ errorGuardar }}
+                    </div>
+                    <div v-if="exitoGuardar" class="exito-banner">
+                        <i class="ti ti-check"></i> Los cambios en el legajo se
+                        guardaron correctamente.
+                    </div>
+                    <button
+                        type="button"
+                        @click="cambiarVista('lista')"
+                        class="tb-btn outline"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        type="submit"
+                        class="tb-btn primary"
+                        :disabled="guardando"
+                    >
+                        <i
+                            class="ti ti-loader animate-spin"
+                            v-if="guardando"
+                        ></i>
+                        {{
+                            guardando
+                                ? "Guardando legajo..."
+                                : vistaActiva === "crear"
+                                  ? "Confirmar Inscripción"
+                                  : "Actualizar Alumno"
+                        }}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div
+            v-if="alumnoAEliminar"
+            class="modal-overlay"
+            @click.self="alumnoAEliminar = null"
+        >
+            <div class="modal-card animate-fade-in">
+                <div class="modal-header">
+                    <i
+                        class="ti ti-alert-triangle"
+                        style="color: #cd322c; font-size: 20px"
+                    ></i>
+                    <h3>Dar de baja legajo institucional</h3>
+                </div>
+
+                <p class="modal-body">
+                    ¿Estás seguro de que querés eliminar el registro de
+                    <strong
+                        >{{ alumnoAEliminar.nombre }}
+                        {{ alumnoAEliminar.apellido }}</strong
+                    >
+                    (DNI: {{ alumnoAEliminar.dni }})? Esta operación purgará los
+                    datos de las listas activas de divisiones.
+                </p>
+
+                <div
+                    v-if="errorEliminar"
+                    class="error-banner"
+                    style="
+                        margin-bottom: 16px;
+                        width: 100%;
+                        box-sizing: border-box;
+                    "
+                >
+                    <i class="ti ti-alert-circle"></i> {{ errorEliminar }}
+                </div>
+
+                <div class="modal-footer">
+                    <button
+                        class="tb-btn outline"
+                        @click="alumnoAEliminar = null"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        class="tb-btn danger"
+                        @click="confirmarEliminar"
+                        :disabled="eliminando"
+                    >
+                        <i
+                            class="ti ti-loader animate-spin"
+                            v-if="eliminando"
+                        ></i>
+                        {{
+                            eliminando
+                                ? "Eliminando..."
+                                : "Eliminar de forma definitiva"
+                        }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -188,124 +409,213 @@
 </template>
 
 <script setup>
-defineEmits(["cambiar-vista"]);
+import { ref, onMounted } from "vue";
+import {
+    obtenerAlumnos,
+    crearAlumno,
+    modificarAlumno,
+    eliminarAlumno,
+    obtenerCursos, // ← IMPORTANTE: Asegurate de tener esta función en tu academico-service.js
+} from "../../../services/academico-service.js";
 
-const actividadReciente = [
-    {
-        id: 1,
-        iconBg: "#eaf3de",
-        icon: "ti-user-plus",
-        iconColor: "#3b6d11",
-        titulo: "Nuevo alumno registrado",
-        descripcion: "Valentina Ríos, 3°B",
-        tiempo: "Hace 12 min",
-    },
-    {
-        id: 2,
-        iconBg: "#faeeda",
-        icon: "ti-books",
-        iconColor: "#854f0b",
-        titulo: "Préstamo vencido",
-        descripcion: '"Historia Argentina T.2" sin devolver',
-        tiempo: "Hace 1 h",
-    },
-    {
-        id: 3,
-        iconBg: "#fbf0f0",
-        icon: "ti-edit",
-        iconColor: "#a52420",
-        titulo: "Curso modificado",
-        descripcion: "4°A cambió de aula (302→105)",
-        tiempo: "Hace 2 h",
-    },
-    {
-        id: 4,
-        iconBg: "#e6f1fb",
-        icon: "ti-speakerphone",
-        iconColor: "#185fa5",
-        titulo: "Novedad publicada",
-        descripcion: '"Acto 25 de Mayo: resumen"',
-        tiempo: "Ayer, 16:30",
-    },
-    {
-        id: 5,
-        iconBg: "#eaf3de",
-        icon: "ti-user-check",
-        iconColor: "#3b6d11",
-        titulo: "Docente asignado",
-        descripcion: "Prof. Garmendia → Matemáticas 5°A",
-        tiempo: "Ayer, 11:05",
-    },
-];
+// ── Estado Reactivo ──────────────────────────────────────────────────────────
+const alumnos = ref([]);
+const cursosDisponibles = ref([]); // ← Nuevo estado para el select
+const cargando = ref(false);
+const guardando = ref(false);
+const eliminando = ref(false);
 
-const ultimosAlumnos = [
-    { nombre: "Valentina Ríos", curso: "3°B", dni: "45.321.098" },
-    { nombre: "Matías Acosta", curso: "1°A", dni: "46.102.774" },
-    { nombre: "Lucía Ferreyra", curso: "2°C", dni: "44.987.001" },
-];
+const vistaActiva = ref("lista");
+const alumnoSeleccionado = ref(null);
+const alumnoAEliminar = ref(null);
 
-const horariosHoy = [
-    {
-        hora: "07:30",
-        materia: "Matemáticas 5°A",
-        detalle: "Aula 102 · Prof. Garmendia",
-    },
-    {
-        hora: "09:00",
-        materia: "Historia 4°B",
-        detalle: "Aula 205 · Prof. Molina",
-    },
-    {
-        hora: "10:30",
-        materia: "Biología 3°A",
-        detalle: "Lab. 1 · Prof. Castro",
-    },
-    {
-        hora: "13:00",
-        materia: "Lengua 2°C",
-        detalle: "Aula 110 · Prof. Suárez",
-    },
-];
+const errorCarga = ref("");
+const errorGuardar = ref("");
+const errorEliminar = ref("");
+const exitoGuardar = ref(false);
+
+const etiquetaEstado = {
+    active: "Regular",
+    pending: "Pendiente",
+    inactive: "Baja / Inactivo",
+};
+
+// Modificamos el payload para que maneje relaciones por ID
+const formVacio = () => ({
+    id_alumno: null,
+    nombre: "",
+    apellido: "",
+    dni: "",
+    id_curso: "", // ← Cambiado de 'curso' a 'id_curso'
+    estado: "active",
+});
+const form = ref(formVacio());
+
+// ── Navegación de Flujos ─────────────────────────────────────────────────────
+const cambiarVista = (nuevaVista, alumno = null) => {
+    vistaActiva.value = nuevaVista;
+    errorGuardar.value = "";
+    exitoGuardar.value = false;
+
+    if (nuevaVista === "editar" && alumno) {
+        // Al editar, nos aseguramos de bindear correctamente el id_curso
+        form.value = { ...alumno, id_curso: alumno.id_curso || "" };
+    } else if (nuevaVista === "crear") {
+        form.value = formVacio();
+    } else if (nuevaVista === "detalles" && alumno) {
+        alumnoSeleccionado.value = alumno;
+    }
+};
+
+// ── Controladores CRUD Async ──────────────────────────────────────────────────
+const fetchAlumnos = async () => {
+    cargando.value = true;
+    errorCarga.value = "";
+    try {
+        const res = await obtenerAlumnos();
+        alumnos.value = Array.isArray(res.data) ? res.data : [];
+    } catch {
+        errorCarga.value =
+            "Error crítico de red al sincronizar el padrón de alumnos.";
+    } finally {
+        cargando.value = false;
+    }
+};
+
+// Traemos los cursos para popular el Select
+const fetchCursos = async () => {
+    try {
+        const res = await obtenerCursos();
+        cursosDisponibles.value = Array.isArray(res.data) ? res.data : [];
+    } catch (e) {
+        console.error("No se pudieron cargar los cursos disponibles:", e);
+    }
+};
+
+const guardarAlumno = async () => {
+    errorGuardar.value = "";
+    exitoGuardar.value = false;
+    guardando.value = true;
+
+    try {
+        if (vistaActiva.value === "crear") {
+            await crearAlumno(form.value);
+        } else {
+            await modificarAlumno(form.value);
+        }
+        exitoGuardar.value = true;
+        await fetchAlumnos();
+        setTimeout(() => cambiarVista("lista"), 800);
+    } catch (e) {
+        errorGuardar.value =
+            e?.response?.data?.mensaje ||
+            "No se pudo actualizar la ficha del alumno.";
+    } finally {
+        guardando.value = false;
+    }
+};
+
+const pedirConfirmacion = (alumno) => {
+    alumnoAEliminar.value = alumno;
+    errorEliminar.value = "";
+};
+
+const confirmarEliminar = async () => {
+    eliminando.value = true;
+    errorEliminar.value = "";
+
+    try {
+        const respuesta = await eliminarAlumno(alumnoAEliminar.value.id_alumno);
+        if (respuesta.success) {
+            alumnos.value = alumnos.value.filter(
+                (a) => a.id_alumno !== alumnoAEliminar.value.id_alumno,
+            );
+            alumnoAEliminar.value = null;
+        } else {
+            errorEliminar.value = respuesta.message;
+        }
+    } catch {
+        errorEliminar.value =
+            "Ocurrió un error inesperado al dar de baja el registro.";
+    } finally {
+        eliminando.value = false;
+    }
+};
+
+// ── Hooks de entrada ─────────────────────────────────────────────────────────
+onMounted(() => {
+    fetchAlumnos();
+    fetchCursos(); // Disparamos la carga de cursos en paralelo
+});
 </script>
 
 <style scoped>
-.metrics {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+/* Transiciones y Microanimaciones */
+.animate-fade-in {
+    animation: fadeIn 0.22s ease-in-out;
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+.animate-spin {
+    animation: spin 0.85s linear infinite;
+    display: inline-block;
 }
 
+.alumnos-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 950px;
+    width: 100%;
+}
+
+/* Tablero de métricas */
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
 .metric-card {
     background: var(--color-background-secondary, #ffffff);
     border-radius: 8px;
-    padding: 14px;
+    padding: 14px 18px;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border: 0.5px solid var(--color-border-tertiary, #e5e7eb);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
-
 .metric-label {
     font-size: 11px;
     color: var(--color-text-tertiary, #6b7280);
     display: flex;
     align-items: center;
-    gap: 5px;
-}
-
-.metric-value {
-    font-size: 22px;
+    gap: 6px;
     font-weight: 500;
+}
+.metric-label i {
+    color: #cd322c;
+    font-size: 13px;
+}
+.metric-value {
+    font-size: 24px;
+    font-weight: 600;
     color: var(--color-text-primary, #111827);
     line-height: 1.1;
 }
-
-.metric-sub {
-    font-size: 11px;
-    color: var(--color-text-tertiary, #6b7280);
-    margin-top: 2px;
-}
-
 .metric-badge {
     display: inline-flex;
     align-items: center;
@@ -314,229 +624,372 @@ const horariosHoy = [
     padding: 2px 6px;
     border-radius: 4px;
     margin-top: 2px;
+    width: fit-content;
 }
-
 .badge-green {
     background: #eaf3de;
     color: #3b6d11;
 }
-.badge-red {
-    background: #fcebeb;
-    color: #a32d2d;
-}
 .badge-gray {
-    background: var(--color-background-tertiary, #f3f4f6);
-    color: var(--color-text-secondary, #4b5563);
+    background: #f3f4f6;
+    color: #4b5563;
 }
 
-.row2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-.row3 {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 12px;
-}
-
+/* UI Container Card */
 .card {
-    background: var(--color-background-primary, #ffffff);
+    background: var(--color-background-primary, #fff);
     border: 0.5px solid var(--color-border-tertiary, #e5e7eb);
     border-radius: 8px;
-    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
 }
-
 .card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #fafafa;
 }
-
-.card-title {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--color-text-primary, #111827);
+.card-body {
+    padding: 20px;
+}
+.card-footer {
     display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.card-title i {
-    font-size: 15px;
-    color: #cd322c;
-}
-
-.card-action {
-    font-size: 11px;
-    color: #cd322c;
-    cursor: pointer;
-    border: none;
-    background: none;
-    padding: 0;
-}
-
-.card-action:hover {
-    text-decoration: underline;
-}
-
-.activity-item {
-    display: flex;
-    gap: 8px;
-    padding: 7px 0;
-    border-bottom: 0.5px solid var(--color-border-tertiary, #e5e7eb);
-    align-items: flex-start;
-}
-
-.activity-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-.activity-item:first-child {
-    padding-top: 0;
-}
-
-.act-icon {
-    width: 26px;
-    height: 26px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-}
-
-.act-text {
-    font-size: 12px;
-    color: var(--color-text-secondary, #4b5563);
-    line-height: 1.4;
-}
-
-.act-text strong {
-    color: var(--color-text-primary, #111827);
-    font-weight: 500;
-}
-
-.act-time {
-    font-size: 10px;
-    color: var(--color-text-tertiary, #6b7280);
-    margin-top: 2px;
-}
-
-.progress-row {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.prog-item {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.prog-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: var(--color-text-secondary, #4b5563);
-}
-
-.prog-bar {
-    height: 5px;
-    background: var(--color-background-tertiary, #e5e7eb);
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.prog-fill {
-    height: 100%;
-    border-radius: 10px;
-    background: #cd322c;
-}
-.prog-fill.g {
-    background: #639922;
-}
-.prog-fill.a {
-    background: #ba7517;
-}
-
-.list-item {
-    display: flex;
+    justify-content: flex-end;
     align-items: center;
     gap: 10px;
-    padding: 8px 0;
-    border-bottom: 0.5px solid var(--color-border-tertiary, #e5e7eb);
+    padding: 14px 20px;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
 }
-
-.list-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-.list-item:first-child {
-    padding-top: 0;
-}
-
-.hora {
-    font-size: 10px;
-    color: var(--color-text-tertiary, #6b7280);
-    min-width: 36px;
-}
-
-.li-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.li-name {
-    font-size: 12.5px;
-    font-weight: 500;
+.card-title {
+    font-size: 13.5px;
+    font-weight: 600;
     color: var(--color-text-primary, #111827);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.card-title i {
+    font-size: 16px;
+    color: #cd322c;
 }
 
-.li-sub {
-    font-size: 11px;
-    color: var(--color-text-tertiary, #6b7280);
+/* Tabla Estilo Compacto */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    padding: 12px;
 }
-
 .mini {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12px;
+    font-size: 12.5px;
 }
 .mini th {
     text-align: left;
-    padding: 6px 8px;
+    padding: 8px 10px;
     color: var(--color-text-tertiary, #6b7280);
-    font-weight: 400;
-    font-size: 11px;
-    border-bottom: 0.5px solid var(--color-border-tertiary, #e5e7eb);
+    font-weight: 500;
+    font-size: 11.5px;
+    border-bottom: 1px solid #e5e7eb;
 }
 .mini td {
-    padding: 7px 8px;
-    border-bottom: 0.5px solid var(--color-border-tertiary, #e5e7eb);
+    padding: 9px 10px;
+    border-bottom: 0.5px solid #e5e7eb;
     color: var(--color-text-primary, #111827);
+    vertical-align: middle;
 }
-.mini tr:last-child td {
-    border-bottom: none;
+.table-row:hover {
+    background: var(--color-background-secondary, #f9fafb);
+}
+.mono {
+    font-family: monospace;
+    font-size: 11.5px;
+    color: #4b5563;
 }
 
+/* Estado Badges */
+.status-pill {
+    font-size: 10.5px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 600;
+    display: inline-block;
+}
+.sp-active {
+    background: #eaf3de;
+    color: #3b6d11;
+}
+.sp-pending {
+    background: #fef08a;
+    color: #a16207;
+}
+.sp-inactive {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+/* Control de Acciones */
+.action-cell {
+    text-align: right;
+    width: 110px;
+}
+.action-buttons {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+    align-items: center;
+}
 .icon-btn {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     border-radius: 5px;
-    border: 0.5px solid var(--color-border-tertiary, #e5e7eb);
-    background: none;
+    border: 1px solid #e5e7eb;
+    background: white;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-text-secondary, #4b5563);
+    transition: all 0.12s;
+    color: #4b5563;
+    font-size: 14px;
+    padding: 0;
+}
+.icon-btn i {
+    pointer-events: none;
+}
+.icon-btn:hover {
+    background: #f3f4f6;
+}
+.icon-btn.view:hover {
+    background: #f0f9ff;
+    border-color: #bae6fd;
+    color: #0284c7;
+}
+.icon-btn.edit:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+.icon-btn.delete:hover {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #ef4444;
 }
 
-.icon-btn:hover {
-    background: var(--color-background-secondary, #f3f4f6);
+/* Botonería Semántica */
+.tb-btn {
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.12s;
+}
+.tb-btn.primary {
+    background: #cd322c;
+    color: #fff;
+    border-color: #cd322c;
+}
+.tb-btn.primary:hover {
+    background: #a52420;
+}
+.tb-btn.outline {
+    background: white;
+    color: #4b5563;
+    border-color: #d1d5db;
+}
+.tb-btn.outline:hover {
+    background: #f9fafb;
+    color: #111827;
+}
+.tb-btn.danger {
+    background: #cd322c;
+    color: white;
+}
+.tb-btn.danger:hover {
+    background: #a52420;
+}
+.tb-btn.sm {
+    padding: 5px 10px;
+    font-size: 11.5px;
+}
+.tb-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Formularios de Inscripción */
+.form-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px;
+}
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.form-group label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #4b5563;
+}
+.form-group input,
+.form-group select {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 12.5px;
+    outline: none;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+    background: #fff;
+}
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #cd322c;
+    box-shadow: 0 0 0 2px rgba(205, 50, 44, 0.08);
+}
+
+/* Legajos / Detalles estructurados */
+.details-view {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: #f9fafb;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #f3f4f6;
+}
+.detail-label {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    color: #6b7280;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+.detail-value {
+    font-size: 13.5px;
+    color: #111827;
+    font-weight: 500;
+}
+
+/* Callouts Informativos */
+.info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    padding: 12px;
+    border-radius: 6px;
+    color: #1e3a8a;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.info-box i {
+    font-size: 15px;
+    color: #3b82f6;
+    margin-top: 1px;
+}
+
+/* Banners y Alertas de Servidor */
+.error-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    color: #991b1b;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-right: auto;
+}
+.exito-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #eaf3de;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-right: auto;
+}
+.empty-state {
+    padding: 36px 16px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 12.5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Capa de Modales */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+}
+.modal-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 22px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.modal-header h3 {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #111827;
+}
+.modal-body {
+    font-size: 12.5px;
+    color: #4b5563;
+    margin-bottom: 18px;
+    line-height: 1.5;
+}
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
 }
 </style>

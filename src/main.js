@@ -1,15 +1,32 @@
 import { createApp } from "vue";
-import App from "./app.vue"; // Ensure component name is capitalized (App vs app)
-import router from "./router";
+import App from "./app.vue";
+import router from "./router/router";
 import { createPinia } from "pinia";
+import useAuthStore from "./stores/auth";
 
 const app = createApp(App);
 const pinia = createPinia();
 
-// 1. Install Pinia FIRST
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore;
+  if (to.meta.requiresAuth) {
+    if (!authStore.estaAutenticado) {
+      return next({
+        path: "/login",
+      });
+    }
+
+    // 2. ¿El usuario tiene el rol necesario?
+    if (to.meta.role && authStore.userRole !== to.meta.role) {
+      return next({
+        path: "/unauthorized",
+      }); // O al Dashboard principal
+    }
+  }
+});
+
 app.use(pinia);
 
-// 2. Install Router SECOND (so guards can access stores)
 app.use(router);
 
 // 3. Mount

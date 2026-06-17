@@ -17,6 +17,7 @@
                 <AlumnosView v-if="currentView === 'alumnos'" />
                 <ProfesoresView v-if="currentView === 'profesores'" />
                 <CursosView v-if="currentView === 'cursos'" />
+                <NoticiasView v-if="currentView === 'noticias'" />
             </div>
         </div>
     </div>
@@ -31,6 +32,7 @@ import OverviewView from "./views/Overview.vue";
 import AlumnosView from "./views/AlumnosView.vue";
 import ProfesoresView from "./views/ProfesoresView.vue";
 import CursosView from "./views/CursosView.vue";
+import NoticiasView from "./views/NoticiasView.vue";
 
 const currentView = ref("overview");
 

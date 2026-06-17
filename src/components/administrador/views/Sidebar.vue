@@ -16,7 +16,7 @@
             :class="{ active: vistaActual === 'overview' }"
             @click="$emit('cambiar-vista', 'overview')"
         >
-            <i class="ti ti-layout-dashboard" aria-hidden="true"></i>Resumen
+            <i class="ti ti-layout-dashboard" aria-hidden="true"></i>Inicio
         </div>
         <div
             class="nav-item"
@@ -77,21 +77,6 @@
             @click="$emit('cambiar-vista', 'asignaciones')"
         >
             <i class="ti ti-git-branch" aria-hidden="true"></i>Asignaciones
-        </div>
-
-        <div class="sidebar-footer">
-            <div class="user-pill">
-                <div class="user-avatar">AD</div>
-                <div class="user-info">
-                    <p>Administrador</p>
-                    <span>Root · Sesión activa</span>
-                </div>
-                <i
-                    class="ti ti-logout"
-                    aria-hidden="true"
-                    style="font-size: 15px; margin-left: auto; cursor: pointer"
-                ></i>
-            </div>
         </div>
     </aside>
 </template>
