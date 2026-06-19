@@ -1,5 +1,5 @@
 import axios from "axios";
-import useAuthStore from "../stores/auth.js";
+import { useAuthStore } from "../stores/auth.js";
 
 // ========== FALTA IMPLEMENTAR EL ENVIO TOKENS EN LAS REQUEST ==========
 export const obtenerNoticias = async () => {

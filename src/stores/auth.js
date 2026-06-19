@@ -1,27 +1,49 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 
-const useAuthStore = defineStore("auth", () => {
-  // Inicializamos el token leyendo el localStorage por si el usuario recargó la página
+export const useAuthStore = defineStore("auth", () => {
+  // 1. Estado inicial leyendo de localStorage
   const token = ref(localStorage.getItem("token") || null);
-  const usuario = ref(null);
+  // Leemos el usuario, recordando convertir el string JSON de vuelta a un objeto
+  const usuario = ref(JSON.parse(localStorage.getItem("usuario")) || null);
 
-  // Un "getter" para saber si hay sesión activa
+  // 2. Getters (computed)
   const estaAutenticado = computed(() => !!token.value);
+  // Exponemos el rol para que el router.beforeEach lo pueda leer
+  const rol = computed(() => usuario.value?.nombre_rol || null);
+  // Exponemos los permisos para usarlos en los componentes (ej. ocultar botones)
+  const permisos = computed(() => usuario.value?.permisos || []);
 
-  // Acciones
-  const setToken = (nuevoToken) => {
+  // 3. Acciones
+  // Cambiamos 'setToken' por 'login' para guardar ambas cosas a la vez
+  const login = (nuevoToken, datosUsuario) => {
     token.value = nuevoToken;
-    localStorage.setItem("token", nuevoToken); // Lo guardamos físicamente
+    usuario.value = datosUsuario;
+
+    localStorage.setItem("token", nuevoToken);
+    // localStorage solo guarda strings, así que convertimos el objeto
+    localStorage.setItem("usuario", JSON.stringify(datosUsuario));
   };
 
   const logout = () => {
     token.value = null;
     usuario.value = null;
-    localStorage.removeItem("token"); // Lo borramos físicamente
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
   };
 
-  return { token, usuario, estaAutenticado, setToken, logout };
-});
+  // Extra: Un helper muy útil para usar con v-if en tus componentes Vue
+  const tienePermiso = (permiso) => permisos.value.includes(permiso);
 
-export default useAuthStore;
+  return {
+    token,
+    usuario,
+    estaAutenticado,
+    rol,
+    permisos,
+    login,
+    logout,
+    tienePermiso,
+  };
+});

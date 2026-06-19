@@ -35,24 +35,12 @@
                     <div class="dropdown-divider"></div>
 
                     <div class="dropdown-body">
-                        <div class="user-badge">
-                            <span class="badge-label">Curso</span>
-                            <span class="badge-value">{{ userCurso }}</span>
-                        </div>
-
                         <RouterLink
                             to="/perfil"
                             class="dropdown-item"
                             @click="menuAbierto = false"
                         >
                             <i class="fas fa-user-circle"></i> Mi Perfil
-                        </RouterLink>
-                        <RouterLink
-                            to="/cursos"
-                            class="dropdown-item"
-                            @click="menuAbierto = false"
-                        >
-                            <i class="fas fa-book-open"></i> Mis Cursos
                         </RouterLink>
                     </div>
 
@@ -73,6 +61,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "../../../stores/auth";
 
 defineProps({
     currentPage: { type: String, default: "Inicio" },
@@ -81,10 +70,9 @@ defineProps({
 const router = useRouter();
 const menuAbierto = ref(false);
 const profileMenuRef = ref(null);
+const authStore = useAuthStore();
 
-const userName = ref(localStorage.getItem("userName") || "Usuario");
-const userDni = ref(localStorage.getItem("userDni") || "Sin especificar");
-const userCurso = ref(localStorage.getItem("userCurso") || "No asignado");
+const userName = ref(authStore.usuario?.nombre || "NULL");
 
 const avatarUrl = computed(() => {
     const name = userName.value.split(" ").join("+");

@@ -140,37 +140,65 @@
                 <div class="detail-grid">
                     <div class="detail-item">
                         <span class="detail-label">Nombre completo</span>
-                        <span class="detail-value">
-                            {{ profesorSeleccionado.apellido }},
-                            {{ profesorSeleccionado.nombre }}
-                        </span>
+                        <span class="detail-value"
+                            >{{ profesorSeleccionado.nombre }}
+                            {{ profesorSeleccionado.apellido }}</span
+                        >
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Email Institucional</span>
+                        <span class="detail-label">Email</span>
                         <span class="detail-value">{{
                             profesorSeleccionado.email
                         }}</span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Estado</span>
-                        <span
-                            :class="[
-                                'status-pill',
-                                `sp-${profesorSeleccionado.estado}`,
-                            ]"
-                            style="width: fit-content"
-                        >
-                            {{
-                                etiquetaEstado[profesorSeleccionado.estado] ||
-                                profesorSeleccionado.estado
-                            }}
-                        </span>
+                        <span class="detail-label">DNI</span>
+                        <span class="detail-value">{{
+                            profesorSeleccionado.dni
+                        }}</span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">ID interno</span>
-                        <span class="detail-value mono"
-                            >#{{ profesorSeleccionado.id_profesor }}</span
-                        >
+                        <span class="detail-label">Teléfono</span>
+                        <span class="detail-value">{{
+                            profesorSeleccionado.telefono
+                        }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Domicilio</span>
+                        <span class="detail-value">{{
+                            profesorSeleccionado.domicilio
+                        }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha de nacimiento</span>
+                        <span class="detail-value">{{
+                            profesorSeleccionado.fecha_nacimiento
+                        }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha de contratación</span>
+                        <span class="detail-value">{{
+                            profesorSeleccionado.fecha_contratacion
+                        }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Especialidad</span>
+                        <span class="detail-value">{{
+                            profesorSeleccionado.especialidad || "-"
+                        }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Título</span>
+                        <span class="detail-value">{{
+                            profesorSeleccionado.titulo_habilitante || "-"
+                        }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Estado</span>
+                        <span class="detail-value">{{
+                            etiquetaEstado[profesorSeleccionado.estado] ||
+                            profesorSeleccionado.estado
+                        }}</span>
                     </div>
                 </div>
 
@@ -227,48 +255,68 @@
             <form @submit.prevent="guardarProfesor" class="form-body">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="nombre">Nombre</label>
-                        <input
-                            id="nombre"
-                            v-model="form.nombre"
-                            type="text"
-                            placeholder="Ej: Laura"
+                        <label>Nombre</label
+                        ><input v-model="form.nombre" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido</label
+                        ><input v-model="form.apellido" required />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>DNI</label><input v-model="form.dni" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label
+                        ><input v-model="form.email" type="email" required />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Teléfono</label
+                        ><input v-model="form.telefono" type="tel" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Domicilio</label
+                        ><input v-model="form.domicilio" required />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nacimiento</label
+                        ><input
+                            v-model="form.fecha_nacimiento"
+                            type="date"
                             required
                         />
                     </div>
                     <div class="form-group">
-                        <label for="apellido">Apellido</label>
-                        <input
-                            id="apellido"
-                            v-model="form.apellido"
-                            type="text"
-                            placeholder="Ej: González"
+                        <label>Contratación</label
+                        ><input
+                            v-model="form.fecha_contratacion"
+                            type="date"
                             required
                         />
                     </div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="email">Email institucional</label>
-                        <input
-                            id="email"
-                            v-model="form.email"
-                            type="email"
-                            placeholder="docente@esc.edu"
-                            required
-                        />
+                        <label>Título</label
+                        ><input v-model="form.titulo_habilitante" />
                     </div>
                     <div class="form-group">
-                        <label for="estado">Estado</label>
-                        <select id="estado" v-model="form.estado" required>
-                            <option value="active">Activo</option>
-                            <option value="pending">
-                                Pendiente / Sin asignación
-                            </option>
-                            <option value="inactive">Inactivo</option>
-                        </select>
+                        <label>Especialidad</label
+                        ><input v-model="form.especialidad" />
                     </div>
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select v-model="form.estado" required>
+                        <option value="activo">Activo</option>
+                        <option value="licencia">Licencia</option>
+                        <option value="baja">Baja</option>
+                    </select>
                 </div>
 
                 <div
@@ -396,9 +444,9 @@ const errorGuardar = ref("");
 const exitoGuardar = ref(false);
 
 const etiquetaEstado = {
-    active: "Activo",
-    pending: "Pendiente",
-    inactive: "Inactivo",
+    activo: "Activo",
+    licencia: "Licencia",
+    baja: "Baja",
 };
 
 const formVacio = () => ({
@@ -406,7 +454,16 @@ const formVacio = () => ({
     nombre: "",
     apellido: "",
     email: "",
+    dni: "",
+    telefono: "",
+    fecha_nacimiento: "",
+    domicilio: "",
+    fecha_contratacion: "",
+    estado: "activo",
+    titulo_habilitante: "",
+    especialidad: "",
 });
+
 const form = ref(formVacio());
 
 // ── Navegación entre vistas ──────────────────────────────────────────────────

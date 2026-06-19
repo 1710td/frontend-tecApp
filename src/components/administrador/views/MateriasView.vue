@@ -1,27 +1,27 @@
 <template>
     <div class="alumnos-wrapper">
+        <!-- MÉTRICAS -->
         <div v-if="vistaActiva === 'lista'" class="metrics animate-fade-in">
             <div class="metric-card">
                 <div class="metric-label">
-                    <i class="ti ti-school" aria-hidden="true"></i>Total Alumnos
+                    <i class="ti ti-books" aria-hidden="true"></i>Total Materias
                 </div>
-                <div class="metric-value">{{ alumnos.length }}</div>
+                <div class="metric-value">{{ materias.length }}</div>
                 <span class="metric-badge badge-green">
-                    <i class="ti ti-arrow-up"></i>Activos en sistema
+                    <i class="ti ti-check"></i>Catálogo Activo
                 </span>
             </div>
             <div class="metric-card">
                 <div class="metric-label">
-                    <i class="ti ti-chart-pie" aria-hidden="true"></i>Asistencia
-                    Promedio
+                    <i class="ti ti-certificate" aria-hidden="true"></i>Plan de
+                    Estudios
                 </div>
-                <div class="metric-value">81%</div>
-                <span class="metric-badge badge-gray"
-                    >Ciclo lectivo actual</span
-                >
+                <div class="metric-value">General</div>
+                <span class="metric-badge badge-gray">Áreas académicas</span>
             </div>
         </div>
 
+        <!-- LISTADO DE MATERIAS -->
         <div
             v-if="vistaActiva === 'lista'"
             class="card animate-fade-in"
@@ -29,14 +29,14 @@
         >
             <div class="card-header">
                 <div class="card-title">
-                    <i class="ti ti-users" aria-hidden="true"></i>
-                    Gestión de Alumnos
+                    <i class="ti ti-book" aria-hidden="true"></i>
+                    Catálogo de Materias
                 </div>
                 <button
                     @click="cambiarVista('crear')"
                     class="tb-btn primary sm"
                 >
-                    <i class="ti ti-plus" aria-hidden="true"></i> Nuevo Alumno
+                    <i class="ti ti-plus" aria-hidden="true"></i> Nueva Materia
                 </button>
             </div>
 
@@ -46,7 +46,7 @@
                         class="ti ti-loader animate-spin"
                         style="font-size: 24px; color: #cd322c"
                     ></i>
-                    <p>Cargando legajos de alumnos...</p>
+                    <p>Cargando registros de materias...</p>
                 </div>
 
                 <div
@@ -57,7 +57,7 @@
                     <i class="ti ti-alert-circle"></i> {{ errorCarga }}
                     <button
                         class="tb-btn sm outline"
-                        @click="fetchAlumnos"
+                        @click="fetchMaterias"
                         style="margin-left: auto"
                     >
                         Reintentar
@@ -65,53 +65,58 @@
                 </div>
 
                 <table
-                    v-else-if="alumnos.length > 0"
+                    v-else-if="materias.length > 0"
                     class="mini"
-                    aria-label="Listado de alumnos"
+                    aria-label="Listado de materias"
                 >
                     <thead>
                         <tr>
-                            <th>Alumno</th>
-                            <th>DNI</th>
-                            <th>Curso asignado</th>
+                            <th>Nombre de la Materia</th>
+                            <th>???</th>
+                            <th>???</th>
                             <th class="action-cell">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr
-                            v-for="alumno in alumnos"
-                            :key="alumno.id_alumno"
+                            v-for="materia in materias"
+                            :key="materia.id_materia"
                             class="table-row"
                         >
                             <td>
-                                <strong>{{ alumno.apellido }}</strong
-                                >, {{ alumno.nombre }}
+                                <strong>{{ materia.nombre_materia }}</strong>
                             </td>
-                            <td class="mono">{{ alumno.dni }}</td>
                             <td>
-                                {{ alumno.curso.nombre_curso || "Sin asignar" }}
+                                {{ materia.departamento || "No clasificado" }}
+                            </td>
+                            <td>
+                                {{
+                                    materia.carga_horaria
+                                        ? `${materia.carga_horaria} hs/sem`
+                                        : "No definida"
+                                }}
                             </td>
 
                             <td class="action-cell">
                                 <div class="action-buttons">
                                     <button
                                         @click="
-                                            cambiarVista('detalles', alumno)
+                                            cambiarVista('detalles', materia)
                                         "
                                         class="icon-btn view"
-                                        title="Ver legajo completo"
+                                        title="Ver detalles"
                                     >
                                         <i class="ti ti-eye"></i>
                                     </button>
                                     <button
-                                        @click="cambiarVista('editar', alumno)"
+                                        @click="cambiarVista('editar', materia)"
                                         class="icon-btn edit"
                                         title="Editar"
                                     >
                                         <i class="ti ti-edit"></i>
                                     </button>
                                     <button
-                                        @click="pedirConfirmacion(alumno)"
+                                        @click="pedirConfirmacion(materia)"
                                         class="icon-btn delete"
                                         title="Eliminar"
                                     >
@@ -125,25 +130,24 @@
 
                 <div v-else class="empty-state">
                     <i
-                        class="ti ti-user-x"
+                        class="ti ti-file-x"
                         style="font-size: 28px; opacity: 0.4"
                     ></i>
-                    <p>
-                        No se encontraron alumnos registrados en la institución.
-                    </p>
+                    <p>No se encontraron materias en el sistema.</p>
                 </div>
             </div>
         </div>
 
+        <!-- VISTA DE DETALLES -->
         <div
-            v-if="vistaActiva === 'detalles' && alumnoSeleccionado"
+            v-if="vistaActiva === 'detalles' && materiaSeleccionada"
             class="card animate-fade-in"
         >
             <div class="card-header">
                 <div class="card-title">
-                    <i class="ti ti-id-badge"></i>
-                    Legajo Digital — {{ alumnoSeleccionado.apellido }},
-                    {{ alumnoSeleccionado.nombre }}
+                    <i class="ti ti-clipboard-list"></i>
+                    Detalle de Materia —
+                    {{ materiaSeleccionada.nombre_materia }}
                 </div>
                 <button
                     @click="cambiarVista('lista')"
@@ -157,62 +161,41 @@
             <div class="card-body details-view">
                 <div class="detail-grid">
                     <div class="detail-item">
-                        <span class="detail-label">Apellido y Nombre</span>
-                        <span class="detail-value"
-                            >{{ alumnoSeleccionado.apellido }},
-                            {{ alumnoSeleccionado.nombre }}</span
+                        <span class="detail-label">Nombre de la Materia</span>
+                        <span class="detail-value">
+                            {{ materiaSeleccionada.nombre_materia }}
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Área / Departamento</span>
+                        <span class="detail-value">{{
+                            materiaSeleccionada.departamento || "Sin asignar"
+                        }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Carga Horaria Semanal</span>
+                        <span class="detail-value mono"
+                            >{{
+                                materiaSeleccionada.carga_horaria || 0
+                            }}
+                            horas</span
                         >
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label"
-                            >Documento Nacional de Identidad (DNI)</span
+                        <span class="detail-label">ID Interno</span>
+                        <span class="detail-value mono"
+                            >#{{ materiaSeleccionada.id_materia }}</span
                         >
-                        <span class="detail-value mono">{{
-                            alumnoSeleccionado.dni
-                        }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label"
-                            >División / Curso Actual</span
-                        >
-                        <span class="detail-value">{{
-                            alumnoSeleccionado.curso.nombre_curso ||
-                            "No matriculado"
-                        }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Fecha de Nacimiento</span>
-                        <span class="detail-value">{{
-                            alumnoSeleccionado.fecha_nacimiento ||
-                            "No registrada"
-                        }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label"
-                            >Tutor / Responsable Legal</span
-                        >{{ alumnoSeleccionado.nombre_tutor || "N/A" }}
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Tutor Teléfono</span>
-                        <span class="detail-value">{{
-                            alumnoSeleccionado.telefono_tutor || "S/T"
-                        }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Domicilio</span>
-                        <span class="detail-value">{{
-                            alumnoSeleccionado.domicilio || "No registrado"
-                        }}</span>
                     </div>
                 </div>
 
                 <div class="info-box">
-                    <i class="ti ti-activity"></i>
+                    <i class="ti ti-info-circle"></i>
                     <p>
-                        Módulo de historial académico unificado: Próximamente se
-                        integrarán las inasistencias acumuladas y boletín de
-                        calificaciones de las materias correspondientes a
-                        {{ alumnoSeleccionado.curso }}.
+                        Las materias conforman la base del plan de estudios. Una
+                        vez registradas, pueden vincularse a profesores y cursos
+                        a través del panel de <strong>Asignaciones</strong> para
+                        la gestión del ciclo lectivo.
                     </p>
                 </div>
             </div>
@@ -222,14 +205,15 @@
                     Volver al listado
                 </button>
                 <button
-                    @click="cambiarVista('editar', alumnoSeleccionado)"
+                    @click="cambiarVista('editar', materiaSeleccionada)"
                     class="tb-btn primary"
                 >
-                    <i class="ti ti-edit"></i> Editar Ficha
+                    <i class="ti ti-edit"></i> Modificar Materia
                 </button>
             </div>
         </div>
 
+        <!-- FORMULARIO CREAR/EDITAR -->
         <div
             v-if="['crear', 'editar'].includes(vistaActiva)"
             class="card animate-fade-in"
@@ -239,14 +223,14 @@
                     <i
                         :class="
                             vistaActiva === 'crear'
-                                ? 'ti ti-user-plus'
+                                ? 'ti ti-book-upload'
                                 : 'ti ti-edit'
                         "
                     ></i>
                     {{
                         vistaActiva === "crear"
-                            ? "Inscribir Nuevo Alumno"
-                            : "Modificar Ficha de Alumno"
+                            ? "Registrar Nueva Materia"
+                            : "Modificar Materia Existente"
                     }}
                 </div>
                 <button
@@ -258,102 +242,16 @@
                 </button>
             </div>
 
-            <form @submit.prevent="guardarAlumno" class="form-body">
+            <form @submit.prevent="guardarMateria" class="form-body">
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="nombre">Nombre</label>
+                    <div class="form-group" style="grid-column: span 2">
+                        <label for="nombre_materia">Nombre de la Materia</label>
                         <input
-                            id="nombre"
-                            v-model="form.nombre"
                             type="text"
-                            placeholder="Ej: Valentina"
+                            id="nombre_materia"
+                            v-model="form.nombre_materia"
                             required
-                        />
-                    </div>
-                    <div class="form-group">
-                        <label for="apellido">Apellido</label>
-                        <input
-                            id="apellido"
-                            v-model="form.apellido"
-                            type="text"
-                            placeholder="Ej: Ríos"
-                            required
-                        />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="dni">Número de DNI</label>
-                        <input
-                            id="dni"
-                            v-model="form.dni"
-                            type="text"
-                            placeholder="Ej: 45321098"
-                            required
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_curso">Curso / División asignada</label>
-                        <select id="id_curso" v-model="form.id_curso" required>
-                            <option value="" disabled>
-                                Seleccione un curso...
-                            </option>
-                            <option
-                                v-for="curso in cursosDisponibles"
-                                :key="curso.id_curso"
-                                :value="curso.id_curso"
-                            >
-                                {{ curso.nombre_curso }}
-                            </option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="fecha_nacimiento"
-                            >Fecha de Nacimiento</label
-                        >
-                        <input
-                            id="fecha_nacimiento"
-                            v-model="form.fecha_nacimiento"
-                            type="date"
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="domicilio">Domicilio</label>
-                        <input
-                            id="domicilio"
-                            v-model="form.domicilio"
-                            type="text"
-                            placeholder="Ej: Av. Rivadavia 123"
-                        />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="nombre_tutor">Nombre del Tutor</label>
-                        <input
-                            id="nombre_tutor"
-                            v-model="form.nombre_tutor"
-                            type="text"
-                            placeholder="Ej: Roberto Ríos"
-                        />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="telefono_tutor">Teléfono del Tutor</label>
-                        <input
-                            id="telefono_tutor"
-                            v-model="form.telefono_tutor"
-                            type="tel"
-                            placeholder="Ej: 2364123456"
+                            placeholder="Ej: Matemática, Historia, Programación..."
                         />
                     </div>
                 </div>
@@ -370,8 +268,8 @@
                         <i class="ti ti-alert-circle"></i> {{ errorGuardar }}
                     </div>
                     <div v-if="exitoGuardar" class="exito-banner">
-                        <i class="ti ti-check"></i> Los cambios en el legajo se
-                        guardaron correctamente.
+                        <i class="ti ti-check"></i> La materia se guardó
+                        correctamente.
                     </div>
                     <button
                         type="button"
@@ -391,20 +289,21 @@
                         ></i>
                         {{
                             guardando
-                                ? "Guardando legajo..."
+                                ? "Guardando registro..."
                                 : vistaActiva === "crear"
-                                  ? "Confirmar Inscripción"
-                                  : "Actualizar Alumno"
+                                  ? "Confirmar Materia"
+                                  : "Actualizar Materia"
                         }}
                     </button>
                 </div>
             </form>
         </div>
 
+        <!-- MODAL ELIMINAR -->
         <div
-            v-if="alumnoAEliminar"
+            v-if="materiaAEliminar"
             class="modal-overlay"
-            @click.self="alumnoAEliminar = null"
+            @click.self="materiaAEliminar = null"
         >
             <div class="modal-card animate-fade-in">
                 <div class="modal-header">
@@ -412,17 +311,14 @@
                         class="ti ti-alert-triangle"
                         style="color: #cd322c; font-size: 20px"
                     ></i>
-                    <h3>Dar de baja legajo institucional</h3>
+                    <h3>Eliminar Materia</h3>
                 </div>
 
                 <p class="modal-body">
-                    ¿Estás seguro de que querés eliminar el registro de
-                    <strong
-                        >{{ alumnoAEliminar.nombre }}
-                        {{ alumnoAEliminar.apellido }}</strong
-                    >
-                    (DNI: {{ alumnoAEliminar.dni }})? Esta operación purgará los
-                    datos de las listas activas de divisiones.
+                    ¿Estás seguro de que querés eliminar la materia
+                    <strong>{{ materiaAEliminar.nombre_materia }}</strong
+                    >? Esta acción podría afectar a las asignaciones activas si
+                    ya está vinculada a cursos y profesores.
                 </p>
 
                 <div
@@ -440,7 +336,7 @@
                 <div class="modal-footer">
                     <button
                         class="tb-btn outline"
-                        @click="alumnoAEliminar = null"
+                        @click="materiaAEliminar = null"
                     >
                         Cancelar
                     </button>
@@ -453,11 +349,7 @@
                             class="ti ti-loader animate-spin"
                             v-if="eliminando"
                         ></i>
-                        {{
-                            eliminando
-                                ? "Eliminando..."
-                                : "Eliminar de forma definitiva"
-                        }}
+                        {{ eliminando ? "Eliminando..." : "Eliminar materia" }}
                     </button>
                 </div>
             </div>
@@ -467,120 +359,100 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+// IMPORTANTE: Ajustar esta ruta según la estructura de tus servicios
 import {
-    obtenerAlumnos,
-    crearAlumno,
-    modificarAlumno,
-    eliminarAlumno,
-    obtenerCursos,
-} from "../../../services/academico-service.js";
+    obtenerMaterias,
+    crearMateria,
+    modificarMateria,
+    eliminarMateria,
+} from "../../../services/academico-service";
 
 // ── Estado Reactivo ──────────────────────────────────────────────────────────
-const alumnos = ref([]);
-const cursosDisponibles = ref([]);
+const materias = ref([]);
+
 const cargando = ref(false);
 const guardando = ref(false);
 const eliminando = ref(false);
 
 const vistaActiva = ref("lista");
-const alumnoSeleccionado = ref(null);
-const alumnoAEliminar = ref(null);
+const materiaSeleccionada = ref(null);
+const materiaAEliminar = ref(null);
 
 const errorCarga = ref("");
 const errorGuardar = ref("");
 const errorEliminar = ref("");
 const exitoGuardar = ref(false);
 
-const etiquetaEstado = {
-    active: "Regular",
-    pending: "Pendiente",
-    inactive: "Baja / Inactivo",
-};
-
-// Modificamos el payload para que maneje las nuevas propiedades
+// Payload del formulario para la tabla Materias
 const formVacio = () => ({
-    id_alumno: null,
-    nombre: "",
-    apellido: "",
-    dni: "",
-    fecha_nacimiento: "",
-    nombre_tutor: "",
-    telefono_tutor: "",
-    domicilio: "",
-    id_curso: "",
+    id_materia: null,
+    nombre_materia: "",
 });
 const form = ref(formVacio());
 
 // ── Navegación de Flujos ─────────────────────────────────────────────────────
-const cambiarVista = (nuevaVista, alumno = null) => {
+const cambiarVista = (nuevaVista, materia = null) => {
     vistaActiva.value = nuevaVista;
     errorGuardar.value = "";
     exitoGuardar.value = false;
 
-    if (nuevaVista === "editar" && alumno) {
-        // Al editar, nos aseguramos de bindear todos los campos
+    if (nuevaVista === "editar" && materia) {
         form.value = {
-            ...alumno,
-            id_curso: alumno.id_curso || "",
-            fecha_nacimiento: alumno.fecha_nacimiento || "",
-            tutor: alumno.tutor || "",
+            id_materia: materia.id_materia,
+            nombre_materia: materia.nombre_materia || "",
         };
     } else if (nuevaVista === "crear") {
         form.value = formVacio();
-    } else if (nuevaVista === "detalles" && alumno) {
-        alumnoSeleccionado.value = alumno;
+    } else if (nuevaVista === "detalles" && materia) {
+        materiaSeleccionada.value = materia;
     }
 };
 
 // ── Controladores CRUD Async ──────────────────────────────────────────────────
-const fetchAlumnos = async () => {
+const fetchMaterias = async () => {
     cargando.value = true;
     errorCarga.value = "";
     try {
-        const res = await obtenerAlumnos();
-        alumnos.value = Array.isArray(res.data) ? res.data : [];
-    } catch {
+        const resMat = await obtenerMaterias();
+        materias.value = Array.isArray(resMat.data) ? resMat.data : [];
+    } catch (error) {
+        console.error("Error al obtener materias:", error);
         errorCarga.value =
-            "Error crítico de red al sincronizar el padrón de alumnos.";
+            "Error al cargar el listado de materias del servidor.";
     } finally {
         cargando.value = false;
     }
 };
 
-const fetchCursos = async () => {
-    try {
-        const res = await obtenerCursos();
-        cursosDisponibles.value = Array.isArray(res.data) ? res.data : [];
-    } catch (e) {
-        console.error("No se pudieron cargar los cursos disponibles:", e);
-    }
-};
-
-const guardarAlumno = async () => {
+const guardarMateria = async () => {
     errorGuardar.value = "";
     exitoGuardar.value = false;
     guardando.value = true;
 
     try {
         if (vistaActiva.value === "crear") {
-            await crearAlumno(form.value);
+            await crearMateria(form.value);
         } else {
-            await modificarAlumno(form.value);
+            await modificarMateria(form.value);
         }
         exitoGuardar.value = true;
-        await fetchAlumnos();
+
+        // Refrescamos la lista de materias para ver los cambios
+        const resMat = await obtenerMaterias();
+        materias.value = Array.isArray(resMat.data) ? resMat.data : [];
+
         setTimeout(() => cambiarVista("lista"), 800);
     } catch (e) {
         errorGuardar.value =
             e?.response?.data?.mensaje ||
-            "No se pudo actualizar la ficha del alumno.";
+            "No se pudo registrar ni actualizar la materia.";
     } finally {
         guardando.value = false;
     }
 };
 
-const pedirConfirmacion = (alumno) => {
-    alumnoAEliminar.value = alumno;
+const pedirConfirmacion = (materia) => {
+    materiaAEliminar.value = materia;
     errorEliminar.value = "";
 };
 
@@ -589,18 +461,22 @@ const confirmarEliminar = async () => {
     errorEliminar.value = "";
 
     try {
-        const respuesta = await eliminarAlumno(alumnoAEliminar.value.id_alumno);
-        if (respuesta.success) {
-            alumnos.value = alumnos.value.filter(
-                (a) => a.id_alumno !== alumnoAEliminar.value.id_alumno,
+        const respuesta = await eliminarMateria(
+            materiaAEliminar.value.id_materia,
+        );
+
+        if (respuesta.success || respuesta.status === 200) {
+            materias.value = materias.value.filter(
+                (m) => m.id_materia !== materiaAEliminar.value.id_materia,
             );
-            alumnoAEliminar.value = null;
+            materiaAEliminar.value = null;
         } else {
-            errorEliminar.value = respuesta.message;
+            errorEliminar.value = respuesta.message || respuesta.data?.mensaje;
         }
-    } catch {
+    } catch (e) {
         errorEliminar.value =
-            "Ocurrió un error inesperado al dar de baja el registro.";
+            e?.response?.data?.mensaje ||
+            "Ocurrió un error inesperado al eliminar la materia.";
     } finally {
         eliminando.value = false;
     }
@@ -608,8 +484,7 @@ const confirmarEliminar = async () => {
 
 // ── Hooks de entrada ─────────────────────────────────────────────────────────
 onMounted(() => {
-    fetchAlumnos();
-    fetchCursos();
+    fetchMaterias();
 });
 </script>
 

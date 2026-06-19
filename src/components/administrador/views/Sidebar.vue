@@ -40,6 +40,14 @@
             <i class="ti ti-book" aria-hidden="true"></i>Cursos
         </div>
 
+        <div
+            class="nav-item"
+            :class="{ active: vistaActual === 'materias' }"
+            @click="$emit('cambiar-vista', 'materias')"
+        >
+            <i class="ti ti-book" aria-hidden="true"></i>Materias
+        </div>
+
         <div class="sidebar-section">Servicios</div>
         <div
             class="nav-item"

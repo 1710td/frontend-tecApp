@@ -1,10 +1,10 @@
 <template>
     <div class="cursos-wrapper">
-        <!-- ── LISTA ──────────────────────────────────────────── -->
         <div v-if="vistaActiva === 'lista'" class="card animate-fade-in">
             <div class="card-header">
                 <div class="card-title">
-                    <i class="ti ti-book" aria-hidden="true"></i> Cursos activos
+                    <i class="ti ti-book" aria-hidden="true"></i> Cursos
+                    registrados
                 </div>
                 <button
                     @click="cambiarVista('crear')"
@@ -15,7 +15,6 @@
             </div>
 
             <div class="table-responsive">
-                <!-- Cargando -->
                 <div v-if="cargando" class="empty-state">
                     <i
                         class="ti ti-loader animate-spin"
@@ -24,7 +23,6 @@
                     <p>Cargando cursos...</p>
                 </div>
 
-                <!-- Error de carga -->
                 <div
                     v-else-if="errorCarga"
                     class="error-banner"
@@ -40,17 +38,18 @@
                     </button>
                 </div>
 
-                <!-- Tabla -->
                 <table
                     v-else-if="cursos.length > 0"
                     class="mini"
-                    aria-label="Cursos activos"
+                    aria-label="Cursos registrados"
                 >
                     <thead>
                         <tr>
                             <th>Nombre</th>
+                            <th>Nivel</th>
                             <th>Aula</th>
                             <th>Turno</th>
+                            <th>Estado</th>
                             <th class="action-cell">Acciones</th>
                         </tr>
                     </thead>
@@ -60,7 +59,10 @@
                             :key="curso.id_curso"
                             class="table-row"
                         >
-                            <td>{{ curso.nombre_curso }}</td>
+                            <td style="font-weight: 500">
+                                {{ curso.nombre_curso }}
+                            </td>
+                            <td>{{ curso.nivel }}</td>
                             <td>{{ curso.aula }}</td>
                             <td>
                                 <span
@@ -68,6 +70,12 @@
                                 >
                                     {{ curso.turno }}
                                 </span>
+                            </td>
+                            <td>
+                                <span
+                                    :class="['estado-dot', curso.estado]"
+                                ></span>
+                                {{ curso.estado }}
                             </td>
                             <td class="action-cell">
                                 <div class="action-buttons">
@@ -101,7 +109,6 @@
                     </tbody>
                 </table>
 
-                <!-- Sin datos -->
                 <div v-else class="empty-state">
                     <i
                         class="ti ti-inbox"
@@ -112,7 +119,6 @@
             </div>
         </div>
 
-        <!-- ── DETALLES ───────────────────────────────────────── -->
         <div
             v-if="vistaActiva === 'detalles' && cursoSeleccionado"
             class="card animate-fade-in"
@@ -120,7 +126,9 @@
             <div class="card-header">
                 <div class="card-title">
                     <i class="ti ti-info-circle"></i>
-                    {{ cursoSeleccionado.nombre_curso }}
+                    {{ cursoSeleccionado.nombre_curso }} ({{
+                        cursoSeleccionado.ciclo_lectivo
+                    }})
                 </div>
                 <button
                     @click="cambiarVista('lista')"
@@ -133,6 +141,28 @@
 
             <div class="card-body details-view">
                 <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Nivel</span>
+                        <span class="detail-value">{{
+                            cursoSeleccionado.nivel
+                        }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Estado</span>
+                        <span
+                            class="detail-value"
+                            style="text-transform: capitalize"
+                        >
+                            <span
+                                :class="[
+                                    'estado-dot',
+                                    cursoSeleccionado.estado,
+                                ]"
+                                style="margin-right: 4px"
+                            ></span>
+                            {{ cursoSeleccionado.estado }}
+                        </span>
+                    </div>
                     <div class="detail-item">
                         <span class="detail-label">Aula asignada</span>
                         <span class="detail-value">{{
@@ -150,12 +180,20 @@
                             {{ cursoSeleccionado.turno }}
                         </span>
                     </div>
+
                     <div class="detail-item">
-                        <span class="detail-label">Alumnos inscritos</span>
+                        <span class="detail-label">Capacidad Máxima</span>
                         <span class="detail-value">{{
-                            cursoSeleccionado.alumnos ?? "—"
+                            cursoSeleccionado.capacidad_maxima || "No definida"
                         }}</span>
                     </div>
+                    <div class="detail-item">
+                        <span class="detail-label">ID Profesor Titular</span>
+                        <span class="detail-value"
+                            >#{{ cursoSeleccionado.id_profesor_titular }}</span
+                        >
+                    </div>
+
                     <div class="detail-item">
                         <span class="detail-label">ID interno</span>
                         <span class="detail-value mono"
@@ -164,12 +202,110 @@
                     </div>
                 </div>
 
-                <div class="info-box">
-                    <i class="ti ti-info-circle"></i>
-                    <p>
-                        Próximamente: listado de alumnos y docentes vinculados a
-                        este curso.
-                    </p>
+                <div class="alumnos-section">
+                    <h4
+                        class="section-subtitle"
+                        style="
+                            margin-bottom: 12px;
+                            font-size: 14px;
+                            font-weight: 600;
+                            color: #374151;
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                        "
+                    >
+                        <i class="ti ti-users"></i> Alumnos inscritos
+                    </h4>
+
+                    <div
+                        v-if="cargandoAlumnos"
+                        class="empty-state"
+                        style="padding: 20px"
+                    >
+                        <i
+                            class="ti ti-loader animate-spin"
+                            style="font-size: 24px; color: #cd322c"
+                        ></i>
+                        <p>Cargando lista de alumnos...</p>
+                    </div>
+
+                    <div
+                        v-else-if="errorAlumnos"
+                        class="error-banner"
+                        style="margin-top: 10px"
+                    >
+                        <i class="ti ti-alert-circle"></i> {{ errorAlumnos }}
+                        <button
+                            class="tb-btn sm outline"
+                            @click="fetchAlumnos(cursoSeleccionado.id_curso)"
+                            style="margin-left: auto"
+                        >
+                            Reintentar
+                        </button>
+                    </div>
+
+                    <table
+                        v-else-if="alumnosCurso.length > 0"
+                        class="mini"
+                        style="margin-top: 10px"
+                    >
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Alumno</th>
+                                <th>Contacto / Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="alumno in alumnosCurso"
+                                :key="alumno.id_alumno"
+                                class="table-row"
+                            >
+                                <td class="mono" style="color: #6b7280">
+                                    #{{ alumno.id_alumno }}
+                                </td>
+                                <td>
+                                    <div
+                                        style="font-weight: 500; color: #111827"
+                                    >
+                                        {{ alumno.nombre }}
+                                        {{ alumno.apellido }}
+                                    </div>
+                                    <div
+                                        style="font-size: 11px; color: #6b7280"
+                                    >
+                                        Legajo: {{ alumno.legajo || "S/N" }}
+                                    </div>
+                                </td>
+                                <td>
+                                    {{
+                                        alumno.telefono_tutor || "Sin registro"
+                                    }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div
+                        v-else
+                        class="empty-state"
+                        style="
+                            padding: 20px;
+                            background: #f9fafb;
+                            border-radius: 8px;
+                            margin-top: 10px;
+                        "
+                    >
+                        <i
+                            class="ti ti-user-off"
+                            style="font-size: 24px; opacity: 0.4"
+                        ></i>
+                        <p>
+                            Este curso no tiene alumnos inscritos actualmente.
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -186,7 +322,6 @@
             </div>
         </div>
 
-        <!-- ── CREAR / EDITAR ─────────────────────────────────── -->
         <div
             v-if="['crear', 'editar'].includes(vistaActiva)"
             class="card animate-fade-in"
@@ -214,15 +349,48 @@
             </div>
 
             <form @submit.prevent="guardarCurso" class="form-body">
-                <div class="form-group">
-                    <label for="nombre_curso">Nombre del curso</label>
-                    <input
-                        id="nombre_curso"
-                        v-model="form.nombre_curso"
-                        type="text"
-                        placeholder="Ej: 1°A"
-                        required
-                    />
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nombre_curso">Nombre del curso</label>
+                        <input
+                            id="nombre_curso"
+                            v-model="form.nombre_curso"
+                            type="text"
+                            placeholder="Ej: 1°A"
+                            required
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="nivel">Nivel</label>
+                        <select id="nivel" v-model="form.nivel" required>
+                            <option value="" disabled>Seleccionar...</option>
+                            <option v-for="n in niveles" :key="n" :value="n">
+                                {{ n }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ciclo_lectivo">Ciclo Lectivo (Año)</label>
+                        <input
+                            id="ciclo_lectivo"
+                            v-model="form.ciclo_lectivo"
+                            type="number"
+                            min="2000"
+                            max="2100"
+                            required
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="estado">Estado</label>
+                        <select id="estado" v-model="form.estado" required>
+                            <option value="activo">Activo</option>
+                            <option value="finalizado">Finalizado</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-row">
@@ -247,7 +415,43 @@
                     </div>
                 </div>
 
-                <div class="card-footer">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="capacidad_maxima"
+                            >Capacidad Máxima (Alumnos)</label
+                        >
+                        <input
+                            id="capacidad_maxima"
+                            v-model="form.capacidad_maxima"
+                            type="number"
+                            min="1"
+                            placeholder="Opcional"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="id_profesor_titular"
+                            >ID Profesor Titular</label
+                        >
+                        <input
+                            id="id_profesor_titular"
+                            v-model="form.id_profesor_titular"
+                            type="number"
+                            min="1"
+                            placeholder="Ej: 5"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div
+                    class="card-footer"
+                    style="
+                        padding-left: 0;
+                        padding-right: 0;
+                        background: transparent;
+                        margin-top: 10px;
+                    "
+                >
                     <div v-if="errorGuardar" class="error-banner">
                         <i class="ti ti-alert-circle"></i> {{ errorGuardar }}
                     </div>
@@ -283,7 +487,6 @@
             </form>
         </div>
 
-        <!-- ── MODAL DE CONFIRMACIÓN DE BORRADO ───────────────── -->
         <div
             v-if="cursoAEliminar"
             class="modal-overlay"
@@ -299,7 +502,7 @@
                 </div>
 
                 <p class="modal-body">
-                    ¿Seguro que querés eliminar
+                    ¿Seguro que querés eliminar el curso
                     <strong>{{ cursoAEliminar.nombre_curso }}</strong
                     >? Esta acción no se puede deshacer.
                 </p>
@@ -344,12 +547,13 @@
 import { ref, onMounted } from "vue";
 import {
     obtenerCursos,
+    obtenerAlumnosCurso,
     crearCurso,
     modificarCurso,
     eliminarCurso,
 } from "../../../services/academico-service.js";
 
-// ── Turnos disponibles ─────────────────────────────────────────────────────
+// ── Opciones de Selects ────────────────────────────────────────────────────
 const turnos = [
     "8:00 a 15:25",
     "12:00 a 19:00",
@@ -358,37 +562,65 @@ const turnos = [
     "13:15 a 19:00",
 ];
 
+// Podés modificar esto según los niveles que maneje la escuela
+const niveles = ["Ciclo Basico", "Ciclo Superior"];
+
 // ── Estado ──────────────────────────────────────────────────────────────────
 const cursos = ref([]);
 const cargando = ref(false);
 const guardando = ref(false);
 const eliminando = ref(false);
-const vistaActiva = ref("lista"); // 'lista' | 'crear' | 'editar' | 'detalles'
+const vistaActiva = ref("lista");
 const cursoSeleccionado = ref(null);
-const cursoAEliminar = ref(null); // reemplaza el confirm() nativo
+const cursoAEliminar = ref(null);
 const errorEliminar = ref("");
 
 const errorCarga = ref("");
 const errorGuardar = ref("");
 const exitoGuardar = ref(false);
 
+const alumnosCurso = ref([]);
+const cargandoAlumnos = ref(false);
+const errorAlumnos = ref("");
+
+// ── Inicialización de Formulario ──────────────────────────────────────────
 const formVacio = () => ({
     id_curso: null,
     nombre_curso: "",
+    nivel: "",
+    ciclo_lectivo: new Date().getFullYear(), // Por defecto el año actual
+    capacidad_maxima: null,
     aula: "",
     turno: "",
+    id_profesor_titular: null,
+    estado: "activo", // Por defecto activo
 });
 const form = ref(formVacio());
 
+// ── Funciones de Alumnos ──────────────────────────────────────────────────
+const fetchAlumnos = async (idCurso) => {
+    cargandoAlumnos.value = true;
+    errorAlumnos.value = "";
+    alumnosCurso.value = [];
+
+    try {
+        const res = await obtenerAlumnosCurso(idCurso);
+        const data = res.data || res;
+        alumnosCurso.value = Array.isArray(data) ? data : [];
+    } catch (e) {
+        errorAlumnos.value =
+            "No se pudo cargar la lista de alumnos. Verificá la conexión.";
+    } finally {
+        cargandoAlumnos.value = false;
+    }
+};
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
-// Clasifica el badge según la hora de inicio del turno.
-// Valores reales del backend: "8:00 a 15:25", "12:00 a 3:25", "12:00 a 19:00",
-// "13:15 a 17:45", "13:15 a 19:00". Cualquier otro cae en 'noche' (gris).
 const badgeClass = (turno = "") => {
     const hora = parseInt(turno.trim().split(":")[0], 10);
     if (isNaN(hora)) return "noche";
-    if (hora < 12) return "manana"; // 8:xx → azul
-    return "tarde"; // 12:xx, 13:xx → amarillo
+    if (hora < 12) return "manana";
+    return "tarde";
 };
 
 // ── Navegación entre vistas ──────────────────────────────────────────────────
@@ -403,21 +635,17 @@ const cambiarVista = (nuevaVista, curso = null) => {
         form.value = formVacio();
     } else if (nuevaVista === "detalles" && curso) {
         cursoSeleccionado.value = curso;
+        fetchAlumnos(curso.id_curso);
     }
 };
 
 // ── CRUD ─────────────────────────────────────────────────────────────────────
-
-// GET
-// La API devuelve un array directo: [...] — no viene envuelto en { data: [...] }
 const fetchCursos = async () => {
     cargando.value = true;
     errorCarga.value = "";
     try {
         const res = await obtenerCursos();
-        // axios pone la respuesta en res.data
-        // si el backend devuelve [] directo, res.data ya es el array
-        const data = res.data;
+        const data = res.data || res;
         cursos.value = Array.isArray(data) ? data : [];
     } catch {
         errorCarga.value =
@@ -427,17 +655,24 @@ const fetchCursos = async () => {
     }
 };
 
-// POST / PATCH — separados y usando el service
 const guardarCurso = async () => {
     errorGuardar.value = "";
     exitoGuardar.value = false;
     guardando.value = true;
 
     try {
+        // Parseamos ints para evitar problemas de tipos de DB
+        form.value.ciclo_lectivo = parseInt(form.value.ciclo_lectivo);
+        form.value.id_profesor_titular = parseInt(
+            form.value.id_profesor_titular,
+        );
+        if (form.value.capacidad_maxima) {
+            form.value.capacidad_maxima = parseInt(form.value.capacidad_maxima);
+        }
+
         if (vistaActiva.value === "crear") {
             await crearCurso(form.value);
         } else {
-            // CORRECCIÓN: Usamos modificarCurso y le pasamos el form completo
             await modificarCurso(form.value);
         }
         exitoGuardar.value = true;
@@ -446,49 +681,65 @@ const guardarCurso = async () => {
     } catch (e) {
         errorGuardar.value =
             e?.response?.data?.mensaje ||
+            e?.response?.data ||
             "Error al guardar el curso. Intentá de nuevo.";
     } finally {
         guardando.value = false;
     }
 };
 
-// DELETE — modal reactivo
 const pedirConfirmacion = (curso) => {
     cursoAEliminar.value = curso;
-    errorEliminar.value = ""; // Limpiamos errores de intentos anteriores
+    errorEliminar.value = "";
 };
 
 const confirmarEliminar = async () => {
     eliminando.value = true;
-    errorEliminar.value = ""; // Limpiamos antes de la petición
+    errorEliminar.value = "";
 
     try {
         const respuesta = await eliminarCurso(cursoAEliminar.value.id_curso);
 
-        if (respuesta.success) {
-            // Si el borrado fue exitoso, actualizamos la tabla
+        // Si tu backend arroja catch directo en error, esto asume que success es false.
+        if (respuesta && respuesta.success === false) {
+            errorEliminar.value = respuesta.message;
+        } else {
             cursos.value = cursos.value.filter(
                 (c) => c.id_curso !== cursoAEliminar.value.id_curso,
             );
-            cursoAEliminar.value = null; // Cerramos el modal
-        } else {
-            // Si el backend rechazó el borrado (ej: error 1451), mostramos el mensaje
-            errorEliminar.value = respuesta.message;
+            cursoAEliminar.value = null;
         }
     } catch (e) {
-        // Fallback por si explota algo fuera del control de axios
         errorEliminar.value =
+            e?.response?.data?.mensaje ||
             "Ocurrió un error inesperado al eliminar el curso.";
     } finally {
         eliminando.value = false;
     }
 };
 
-// ── Lifecycle ────────────────────────────────────────────────────────────────
 onMounted(fetchCursos);
 </script>
 
 <style scoped>
+/* Agregamos una clase para un indicador visual de estado del curso */
+.estado-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+.estado-dot.activo {
+    background-color: #10b981;
+}
+.estado-dot.finalizado {
+    background-color: #6b7280;
+}
+.estado-dot.cancelado {
+    background-color: #ef4444;
+}
+
+/* El resto de tus estilos se mantienen intactos */
 .animate-fade-in {
     animation: fadeIn 0.25s ease-in-out;
 }
@@ -519,7 +770,6 @@ onMounted(fetchCursos);
     max-width: 900px;
 }
 
-/* Card */
 .card {
     background: var(--color-background-primary, #fff);
     border: 0.5px solid var(--color-border-tertiary, #e5e7eb);
@@ -560,7 +810,6 @@ onMounted(fetchCursos);
     color: #cd322c;
 }
 
-/* Tabla */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
@@ -589,7 +838,6 @@ onMounted(fetchCursos);
     background: var(--color-background-secondary, #f9fafb);
 }
 
-/* Badges de turno */
 .badge {
     padding: 3px 8px;
     border-radius: 4px;
@@ -610,7 +858,6 @@ onMounted(fetchCursos);
     color: #374151;
 }
 
-/* Acciones tabla */
 .action-cell {
     text-align: right;
     width: 110px;
@@ -637,15 +884,10 @@ onMounted(fetchCursos);
     transition: all 0.15s;
     color: #4b5563;
     font-size: 15px;
-    line-height: 1;
     padding: 0;
 }
 .icon-btn i {
     pointer-events: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
 }
 .icon-btn:hover {
     background: #f3f4f6;
@@ -663,7 +905,8 @@ onMounted(fetchCursos);
     background: #fef2f2;
     border-color: #fca5a5;
     color: #ef4444;
-} /* Botones */
+}
+
 .tb-btn {
     padding: 8px 16px;
     border-radius: 6px;
@@ -709,7 +952,6 @@ onMounted(fetchCursos);
     cursor: not-allowed;
 }
 
-/* Formulario */
 .form-body {
     display: flex;
     flex-direction: column;
@@ -748,7 +990,6 @@ onMounted(fetchCursos);
     box-shadow: 0 0 0 2px rgba(205, 50, 44, 0.1);
 }
 
-/* Detalles */
 .details-view {
     display: flex;
     flex-direction: column;
@@ -784,7 +1025,6 @@ onMounted(fetchCursos);
     color: #6b7280;
 }
 
-/* Info box */
 .info-box {
     display: flex;
     align-items: flex-start;
@@ -802,7 +1042,6 @@ onMounted(fetchCursos);
     margin-top: 1px;
 }
 
-/* Banners */
 .error-banner {
     display: flex;
     align-items: center;
@@ -827,8 +1066,6 @@ onMounted(fetchCursos);
     font-size: 12px;
     margin-right: auto;
 }
-
-/* Empty state */
 .empty-state {
     padding: 40px 20px;
     text-align: center;
@@ -840,7 +1077,6 @@ onMounted(fetchCursos);
     gap: 8px;
 }
 
-/* Modal */
 .modal-overlay {
     position: fixed;
     inset: 0;
