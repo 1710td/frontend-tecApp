@@ -173,7 +173,7 @@ onMounted(() => {
 
 function toggleMenu() {
   menuAbierto.value = !menuAbierto.value
-  
+
   // Cerrar al hacer clic fuera
   if (menuAbierto.value) {
     document.addEventListener('click', handleClickOutside)
@@ -185,7 +185,7 @@ function toggleMenu() {
 function handleClickOutside(e) {
   const profileMenu = document.querySelector('.profile-menu')
   const profileBtn = document.querySelector('.profile-trigger')
-  
+
   if (profileMenu && !profileMenu.contains(e.target) && !profileBtn.contains(e.target)) {
     menuAbierto.value = false
     document.removeEventListener('click', handleClickOutside)

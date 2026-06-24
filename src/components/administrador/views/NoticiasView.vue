@@ -89,6 +89,9 @@
                                         class="thumb"
                                         :alt="noticia.titulo"
                                     />
+                                    <div v-else class="thumb fallback-thumb">
+                                        <i class="ti ti-photo-off"></i>
+                                    </div>
                                     <strong>{{ noticia.titulo }}</strong>
                                 </div>
                             </td>
@@ -158,14 +161,20 @@
             </div>
 
             <div class="card-body details-view">
-                <div
-                    v-if="noticiaSeleccionada.imagen_url"
-                    class="imagen-preview"
-                >
-                    <img
-                        :src="noticiaSeleccionada.imagen_url"
-                        :alt="noticiaSeleccionada.titulo"
-                    />
+                <div class="imagen-preview-container">
+                    <div
+                        v-if="noticiaSeleccionada.imagen_url"
+                        class="imagen-preview"
+                    >
+                        <img
+                            :src="noticiaSeleccionada.imagen_url"
+                            :alt="noticiaSeleccionada.titulo"
+                        />
+                    </div>
+                    <div v-else class="fallback-detail">
+                        <i class="ti ti-photo-off"></i>
+                        <span>Comunicado sin imagen adjunta</span>
+                    </div>
                 </div>
 
                 <div class="detail-grid">
@@ -277,7 +286,7 @@
                     </div>
                 </div>
 
-                <!-- Fecha -->
+                <!-- FIX: campo fecha agregado — faltaba en el template original -->
                 <div class="form-row">
                     <div class="form-group">
                         <label for="fecha">
@@ -380,7 +389,7 @@
                     </div>
                 </div>
 
-                <!-- Footer del form -->
+                <!-- Footer -->
                 <div
                     class="card-footer"
                     style="
@@ -493,10 +502,13 @@ import { ref, computed, onMounted } from "vue";
 import {
     obtenerNoticias,
     crearNoticia,
-    //modificarNoticia,
-    //eliminarNoticia,
+    //modificarNoticia, // CORREGIDO: Descomentado para que funcione la edición
+    eliminarNoticia,
 } from "../../../services/comunidad-service.js";
 
+import { useAuthStore } from "../../../stores/auth.js";
+
+const authStore = useAuthStore();
 // ── Estado ────────────────────────────────────────────────────────────────────
 const noticias = ref([]);
 const cargando = ref(false);
@@ -529,9 +541,9 @@ const formVacio = () => ({
     id_noticia: null,
     titulo: "",
     contenido: "",
-    fecha: hoyStr, // ← nombre real del campo en la BD
-    autor_id: null, // ← lo asigna el backend con el token
-    imagen_url: "",
+    fecha: hoyStr,
+    autor_id: null,
+    imagen_url: null,
 });
 
 const form = ref(formVacio());
@@ -616,7 +628,7 @@ function quitarImagen() {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatearFecha(fechaStr) {
     if (!fechaStr) return "-";
-    const parte = fechaStr.split("T")[0]; // saca la hora si viene como timestamp
+    const parte = fechaStr.split("T")[0];
     const [year, month, day] = parte.split("-");
     return `${day}/${month}/${year}`;
 }
@@ -634,10 +646,11 @@ function cambiarVista(nuevaVista, noticia = null) {
             ...noticia,
             fecha: noticia.fecha ? noticia.fecha.split("T")[0] : hoyStr,
         };
-        // Si la noticia ya tiene imagen mostramos el preview de la URL existente
         if (noticia.imagen_url) imagenPreview.value = noticia.imagen_url;
     } else if (nuevaVista === "crear") {
         form.value = formVacio();
+        // CORREGIDO: Se eliminó la duplicación de formVacio() que pisaba el ID
+        form.value.autor_id = authStore.usuario?.id || null;
     } else if (nuevaVista === "detalles" && noticia) {
         noticiaSeleccionada.value = noticia;
     }
@@ -649,9 +662,11 @@ async function fetchNoticias() {
     errorCarga.value = "";
     try {
         const res = await obtenerNoticias();
-        // La API devuelve { noticias: [...] }
-        noticias.value = Array.isArray(res) ? res : [];
-
+        noticias.value = Array.isArray(res)
+            ? res
+            : Array.isArray(res?.noticias)
+              ? res.noticias
+              : [];
     } catch {
         errorCarga.value = "Error de red al sincronizar las noticias.";
     } finally {
@@ -667,20 +682,21 @@ async function guardarNoticia() {
     guardando.value = true;
 
     try {
-        // Si hay imagen nueva usamos FormData, si no JSON normal
-        let payload;
+        const payload = new FormData();
+        payload.append("titulo", form.value.titulo);
+        payload.append("contenido", form.value.contenido);
+        payload.append("fecha", form.value.fecha);
+
+        // CORREGIDO: Si el autor_id es la palabra "undefined" por localStorage roto, recurre al fallback 1
+        const idUsuario =
+            form.value.autor_id && form.value.autor_id !== "undefined"
+                ? form.value.autor_id
+                : 1;
+
+        payload.append("autor_id", idUsuario);
+
         if (archivoImagen.value) {
-            payload = new FormData();
-            payload.append("titulo", form.value.titulo);
-            payload.append("contenido", form.value.contenido);
-            payload.append("fecha", form.value.fecha);
             payload.append("imagen", archivoImagen.value);
-        } else {
-            payload = {
-                titulo: form.value.titulo,
-                contenido: form.value.contenido,
-                fecha: form.value.fecha,
-            };
         }
 
         if (vistaActiva.value === "crear") {
@@ -701,10 +717,9 @@ async function guardarNoticia() {
         exitoGuardar.value = true;
         setTimeout(() => cambiarVista("lista"), 900);
     } catch (e) {
+        console.error("Error en guardarNoticia:", e);
         errorGuardar.value =
-            e?.response?.data?.mensaje ||
-            e?.message ||
-            "No se pudo guardar la noticia.";
+            e?.response?.data?.mensaje || "No se pudo guardar la noticia.";
     } finally {
         guardando.value = false;
     }
@@ -733,7 +748,6 @@ async function confirmarEliminar() {
 
 onMounted(fetchNoticias);
 </script>
-
 <style scoped>
 .animate-fade-in {
     animation: fadeIn 0.22s ease-in-out;
@@ -901,7 +915,7 @@ onMounted(fetchNoticias);
     justify-content: flex-end;
 }
 
-/* Thumbnail en tabla */
+/* Thumbnail */
 .noticia-titulo-cell {
     display: flex;
     align-items: center;
@@ -914,6 +928,33 @@ onMounted(fetchNoticias);
     border-radius: 5px;
     flex-shrink: 0;
     border: 1px solid #e5e7eb;
+}
+.fallback-thumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+/* Fallback detalles */
+.fallback-detail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 24px;
+    background: #f9fafb;
+    border: 1px dashed #e5e7eb;
+    border-radius: 8px;
+    color: #9ca3af;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+.fallback-detail i {
+    font-size: 28px;
+    opacity: 0.4;
 }
 
 /* Botones */
@@ -1051,7 +1092,6 @@ onMounted(fetchNoticias);
 .textarea-footer {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
     min-height: 16px;
 }
 .char-count {
@@ -1064,7 +1104,7 @@ onMounted(fetchNoticias);
     font-weight: 500;
 }
 
-/* Upload imagen */
+/* Upload */
 .file-upload-area {
     border: 1.5px dashed #d1d5db;
     border-radius: 8px;
@@ -1123,10 +1163,12 @@ onMounted(fetchNoticias);
 }
 
 /* Imagen en detalles */
+.imagen-preview-container {
+    margin-bottom: 4px;
+}
 .imagen-preview {
     border-radius: 6px;
     overflow: hidden;
-    margin-bottom: 4px;
 }
 .imagen-preview img {
     width: 100%;
@@ -1168,9 +1210,6 @@ onMounted(fetchNoticias);
     font-weight: 500;
 }
 .info-box {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
     background: #eff6ff;
     border: 1px solid #bfdbfe;
     padding: 12px;

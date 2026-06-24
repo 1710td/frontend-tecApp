@@ -1,105 +1,244 @@
 <template>
-  <div>
-    <div class="main-container">
-      <div class="header-logo">
-        <img src="/logoEscuela.png" alt="logo" width="60" height="60" class="logo-chico" />
-        <div class="logo-titulo">
-          <h1>GESTIÓN ESCOLAR</h1>
-          <h3>Portal Educativo</h3>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo-dot">
+                    <img
+                        src="/logoEscuela.png"
+                        alt="logo"
+                        width="22"
+                        height="22"
+                        style="border-radius: 4px"
+                    />
+                </div>
+                <div class="brand-text">
+                    <h1>GESTIÓN ESCOLAR</h1>
+                    <p>Portal Educativo</p>
+                </div>
+            </div>
+
+            <div class="hero-section">
+                <img src="/escuelita.png" alt="escuela" class="hero-image" />
+                <div class="welcome-text">
+                    <h2>¡Bienvenido!</h2>
+                    <p>
+                        Selecciona tu perfil para iniciar sesión y continuar con
+                        tu experiencia.
+                    </p>
+                </div>
+            </div>
+
+            <div class="profile-options">
+                <RouterLink to="/login/administrador" class="profile-btn">
+                    <div class="profile-icon">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <div class="profile-info">
+                        <span class="profile-title">Administrador</span>
+                        <span class="profile-desc"
+                            >Gestión institucional y padrón.</span
+                        >
+                    </div>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                </RouterLink>
+
+                <RouterLink to="/login/profesor" class="profile-btn">
+                    <div class="profile-icon">
+                        <img src="/profesor.png" alt="Profesor" />
+                    </div>
+                    <div class="profile-info">
+                        <span class="profile-title">Profesor</span>
+                        <span class="profile-desc"
+                            >Tus cursos, contenidos y notas.</span
+                        >
+                    </div>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                </RouterLink>
+
+                <RouterLink to="/login/alumno" class="profile-btn">
+                    <div class="profile-icon">
+                        <img src="/gorro.png" alt="Alumno" />
+                    </div>
+                    <div class="profile-info">
+                        <span class="profile-title">Alumno</span>
+                        <span class="profile-desc"
+                            >Tus cursos y recursos académicos.</span
+                        >
+                    </div>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                </RouterLink>
+            </div>
         </div>
-      </div>
-
-      <img src="/escuelita.png" alt="escuela" width="350" height="150" />
-      <h2>¡Bienvenido!</h2>
-      <h3>Inicia sesión para acceder al sistema<br />y continuar con tu experiencia.</h3>
-      <p>Selecciona tu perfil para continuar:</p>
     </div>
-
-    <div class="card-container">
-      <RouterLink to="/login/profesor" class="login-card prof">
-        <img src="/profesor.png" alt="" width="130" height="130" />
-        <h3>Profesor</h3>
-        <p>Accede a tus cursos, gestiona contenidos y más.</p>
-        <button>Ingresar como Profesor ></button>
-      </RouterLink>
-
-      <RouterLink to="/login/alumno" class="login-card alum">
-        <img src="/gorro.png" alt="" width="130" height="130" />
-        <h3>Alumno</h3>
-        <p>Consulta tus cursos, noticias y recursos académicos.</p>
-        <button>Ingresar como Alumno ></button>
-      </RouterLink>
-    </div>
-  </div>
 </template>
 
 <script setup>
+// Lógica de enrutamiento manejada directamente por los RouterLinks
 </script>
 
 <style scoped>
-.main-container { 
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css");
+
+/* =========================================
+   ESTILOS BASE DE LA PLANTILLA VERTICAL
+========================================= */
+.auth-wrapper {
     display: flex;
-    flex-direction: column;   
-    align-items: center;      
-    text-align: center; 
-}
-.header-logo {
-    display: flex;
-    flex-direction: row; 
-    align-items: center;      
-    gap: 15px;                
-    margin-bottom: 20px;      
-}
-.logo-titulo {
-    display: flex;
-    flex-direction: column; 
-    align-items: flex-start;  
-    text-align: left;        
-}
-.logo-titulo h1 { margin: 0; font-size: 24px; line-height: 1.1; }
-.logo-titulo h3 { margin: 5px 0 0 0; font-size: 16px; }
-.main-container h2 { margin-top: 10px; margin-bottom: 5px; }
-.main-container h3 { margin-top: 0; margin-bottom: 10px; }
-.main-container p { margin-top: 0; }
-.card-container {
-    display: flex;
-    gap: 20px;
-    margin-top: 30px;
-    text-align: center;
+    align-items: center;
     justify-content: center;
+    min-height: 100vh;
+    background: #f4f5f7;
+    padding: 20px;
+    font-family: Arial, sans-serif;
 }
-.login-card {
-    background: white;
-    width: 200px;
-    padding: 30px;
-    text-decoration: none;
-    color: #333;
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
     border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
-.login-card.prof button {
-    border: 2px solid #ff4d4d;
-    background-color: rgba(255, 77, 77, 0.15);
-    color: #ff4d4d;
-    padding: 8px 14px;
+
+.auth-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.logo-dot {
+    width: 36px;
+    height: 36px;
     border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
+    background: #cd322c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
 }
-.login-card.prof button:hover { background-color: #ff4d4d; color: white; }
-.login-card.alum button {
-    border: 2px solid #007bff;
-    background-color: rgba(0, 123, 255, 0.15);
-    color: #007bff;
-    padding: 8px 14px;
+
+.brand-text h1 {
+    margin: 0;
+    font-size: 18px;
+    color: #111827;
+}
+
+.brand-text p {
+    margin: 2px 0 0 0;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* =========================================
+   NUEVOS ESTILOS ADAPTADOS AL FORMATO
+========================================= */
+
+.hero-section {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.hero-image {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
     border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
+    margin-bottom: 16px;
 }
-.login-card.alum button:hover { background-color: #007bff; color: white; }
-h3 { margin: 10px 0; color: #2c3e50; }
-p { font-size: 0.9rem; color: #666; }
+
+.welcome-text h2 {
+    font-size: 20px;
+    color: #111827;
+    margin: 0 0 6px 0;
+}
+
+.welcome-text p {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.profile-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Estilo de los botones de perfil emulando los "fields" */
+.profile-btn {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.profile-btn:hover {
+    border-color: #cd322c;
+    background-color: #fef2f2;
+    box-shadow: 0 0 0 3px rgba(205, 50, 44, 0.05);
+    transform: translateY(-2px);
+}
+
+.profile-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #f4f5f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    font-size: 18px;
+    color: #4b5563;
+    flex-shrink: 0;
+}
+
+.profile-icon img {
+    max-width: 24px;
+    max-height: 24px;
+}
+
+.profile-btn:hover .profile-icon {
+    background: #ffffff;
+    color: #cd322c;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.profile-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 2px;
+}
+
+.profile-desc {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.arrow-icon {
+    font-size: 12px;
+    color: #9ca3af;
+    transition: 0.2s;
+}
+
+.profile-btn:hover .arrow-icon {
+    color: #cd322c;
+    transform: translateX(3px);
+}
 </style>

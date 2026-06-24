@@ -5,16 +5,18 @@
             <div class="brand-divider"></div>
             <div class="brand-text">
                 <h1 class="brand-title">Gestión Escolar</h1>
-                <span class="brand-subtitle">{{ currentPage }}</span>
+                <span class="brand-subtitle">{{ currentPageName }}</span>
             </div>
         </div>
 
         <div class="user-section" ref="profileMenuRef">
+            <div class="user-meta-info" style="display: inline-flex; align-items: center; margin-right: 16px;">
+                <span class="curso-tag">{{ curso }}</span>
+            </div>
             <button
                 class="avatar-btn"
                 @click="toggleMenu"
                 :class="{ 'is-active': menuAbierto }"
-                aria-label="Menú de usuario"
             >
                 <img :src="avatarUrl" alt="Avatar del usuario" />
             </button>
@@ -28,27 +30,27 @@
                             alt="Avatar"
                         />
                         <div class="dropdown-user-info">
-                            <p class="user-name">{{ userName }}</p>
+                            <p class="user-name">{{ studentName }}</p>
                             <p class="user-email">DNI: {{ userDni }}</p>
                         </div>
                     </div>
 
                     <div class="dropdown-divider"></div>
 
-                    <div class="dropdown-body">
-                        <div class="user-badge">
-                            <span class="badge-label"
-                                >Perfil Institucional</span
-                            >
-                            <span class="badge-value">{{ userRole }}</span>
-                        </div>
+                    <div class="user-badge">
+                        <span class="badge-label">Curso Actual</span>
+                        <span class="badge-value">{{ curso }}</span>
+                    </div>
 
+                    <div class="dropdown-divider"></div>
+
+                    <div class="dropdown-body">
                         <RouterLink
-                            to="/perfil/administrador"
+                            to="/inicio"
                             class="dropdown-item"
                             @click="menuAbierto = false"
                         >
-                            <i class="fas fa-user-circle"></i> Mi Perfil
+                            <i class="fas fa-home"></i> Volver al Inicio
                         </RouterLink>
                     </div>
 
@@ -69,35 +71,45 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
-import { useAuthStore } from "../../../stores/auth";
 
-defineProps({
-    currentPage: { type: String, default: "Inicio" },
+const props = defineProps({
+    vistaActual: { type: String, default: "overview" },
+    studentName: { type: String, default: "Alumno" },
+    userDni: { type: String, default: "Sin documento" },
+    curso: { type: String, default: "Sin curso" },
+});
+
+const currentPageName = computed(() => {
+    switch (props.vistaActual) {
+        case "overview":
+            return "Inicio";
+        case "materias":
+            return "Mis Materias";
+        case "profesores":
+            return "Mis Profesores";
+        case "calificaciones":
+            return "Boletín Digital";
+        case "noticias":
+            return "Noticias";
+        default:
+            return "Portal Alumno";
+    }
 });
 
 const router = useRouter();
-const authStore = useAuthStore();
-
-// Referencias del DOM y estado
 const menuAbierto = ref(false);
 const profileMenuRef = ref(null);
 
-// Datos del usuario con fallbacks seguros
-const userName = ref(authStore.usuario?.nombre || "Usuario Invitado");
-const userDni = ref(authStore.usuario?.dni || "No registrado");
-const userRole = ref(authStore.usuario?.nombre_rol || "Alumno"); // Puede ser Alumno, Profesor, Admin
-
-// Avatar dinámico usando el color rojo institucional (cd322c)
 const avatarUrl = computed(() => {
-    const name = userName.value.split(" ").join("+");
-    return `https://ui-avatars.com/api/?name=${name}&background=cd322c&color=fff&rounded=true&bold=true`;
+    const name = props.studentName.split(" ").join("+");
+    return `https://ui-avatars.com/api/?name=${name}&background=0284c7&color=fff&rounded=true&bold=true`;
 });
 
-// Manejo del menú
 const toggleMenu = () => {
     menuAbierto.value = !menuAbierto.value;
 };
 
+// Cierra el menú si se hace clic fuera de él
 const handleClickOutside = (event) => {
     if (profileMenuRef.value && !profileMenuRef.value.contains(event.target)) {
         menuAbierto.value = false;
@@ -112,7 +124,6 @@ onUnmounted(() => {
     document.removeEventListener("click", handleClickOutside);
 });
 
-// Acción de logout
 const cerrarSesion = () => {
     localStorage.clear();
     router.push("/");
@@ -130,11 +141,11 @@ const cerrarSesion = () => {
     height: 64px;
     padding: 0 24px;
     background-color: #ffffff;
-    border-bottom: 1px solid #e5e7eb; /* Gris más acorde a tu auth */
+    border-bottom: 1px solid #e2e8f0;
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 /* --- Marca y Logo --- */
@@ -145,43 +156,52 @@ const cerrarSesion = () => {
 }
 
 .brand-logo {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     object-fit: contain;
-    border-radius: 6px;
 }
 
 .brand-divider {
     width: 1px;
     height: 24px;
-    background-color: #d1d5db;
+    background-color: #cbd5e1;
 }
 
 .brand-text {
     display: flex;
     align-items: baseline;
-    gap: 10px;
+    gap: 12px;
 }
 
 .brand-title {
     font-size: 16px;
     font-weight: 600;
-    color: #111827;
+    color: #0f172a;
     margin: 0;
     letter-spacing: -0.01em;
 }
 
 .brand-subtitle {
-    font-size: 13px;
-    color: #6b7280;
-    font-weight: 500;
-    padding-left: 4px;
-    border-left: 2px solid #cd322c; /* Toque visual de la página actual */
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 400;
 }
 
 /* --- Sección de Usuario --- */
 .user-section {
+    display: flex;
+    align-items: center;
     position: relative;
+}
+
+.curso-tag {
+    background: #e0f2fe;
+    color: #0369a1;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    border: 1px solid #bae6fd;
 }
 
 .avatar-btn {
@@ -194,7 +214,6 @@ const cerrarSesion = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    outline: none;
 }
 
 .avatar-btn img {
@@ -204,24 +223,22 @@ const cerrarSesion = () => {
 }
 
 .avatar-btn:hover,
-.avatar-btn.is-active,
-.avatar-btn:focus-visible {
-    border-color: #cd322c; /* Hover institucional */
-    box-shadow: 0 0 0 2px rgba(205, 50, 44, 0.1);
+.avatar-btn.is-active {
+    border-color: #cbd5e1;
 }
 
 /* --- Menú Desplegable --- */
 .dropdown-menu {
     position: absolute;
-    top: calc(100% + 12px);
+    top: calc(100% + 8px);
     right: 0;
-    width: 260px;
+    width: 280px;
     background: #ffffff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
     box-shadow:
-        0 10px 25px -5px rgba(0, 0, 0, 0.1),
-        0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -4px rgba(0, 0, 0, 0.1);
     padding: 8px 0;
     overflow: hidden;
 }
@@ -234,8 +251,8 @@ const cerrarSesion = () => {
 }
 
 .dropdown-avatar {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
 }
 
@@ -247,19 +264,19 @@ const cerrarSesion = () => {
 .user-name {
     font-size: 14px;
     font-weight: 600;
-    color: #111827;
+    color: #0f172a;
     margin: 0;
 }
 
 .user-email {
     font-size: 12px;
-    color: #6b7280;
-    margin: 2px 0 0 0;
+    color: #64748b;
+    margin: 0;
 }
 
 .dropdown-divider {
     height: 1px;
-    background-color: #f3f4f6;
+    background-color: #f1f5f9;
     margin: 4px 0;
 }
 
@@ -267,29 +284,26 @@ const cerrarSesion = () => {
     padding: 4px 0;
 }
 
-/* Ahora el badge sí se renderiza */
 .user-badge {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
-    margin: 4px 12px 12px 12px;
-    background-color: #f9fafb;
+    padding: 8px 16px;
+    margin: 0 8px 8px 8px;
+    background-color: #f8fafc;
     border-radius: 6px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #e2e8f0;
 }
 
 .badge-label {
-    font-size: 11px;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 12px;
+    color: #64748b;
 }
 
 .badge-value {
     font-size: 12px;
     font-weight: 600;
-    color: #cd322c; /* Destacado del rol */
+    color: #007bff;
 }
 
 .dropdown-item {
@@ -298,37 +312,34 @@ const cerrarSesion = () => {
     gap: 12px;
     width: 100%;
     padding: 10px 16px;
-    font-size: 13px;
-    color: #4b5563;
+    font-size: 14px;
+    color: #334155;
     text-decoration: none;
     background: none;
     border: none;
     cursor: pointer;
-    transition:
-        background-color 0.2s ease,
-        color 0.2s ease;
+    transition: background-color 0.15s ease;
     text-align: left;
 }
 
 .dropdown-item i {
-    font-size: 15px;
-    color: #9ca3af;
+    font-size: 16px;
+    color: #94a3b8;
     width: 20px;
     text-align: center;
-    transition: 0.2s;
 }
 
 .dropdown-item:hover {
-    background-color: #f3f4f6;
-    color: #111827;
+    background-color: #f1f5f9;
+    color: #0f172a;
 }
 
 .dropdown-item:hover i {
-    color: #4b5563;
+    color: #64748b;
 }
 
 .dropdown-item.text-danger {
-    color: #b91c1c;
+    color: #ef4444;
 }
 
 .dropdown-item.text-danger i {
@@ -336,8 +347,7 @@ const cerrarSesion = () => {
 }
 
 .dropdown-item.text-danger:hover {
-    background-color: #fef2f2; /* Hover rojo claro */
-    color: #991b1b;
+    background-color: #fef2f2;
 }
 
 /* --- Animación de Transición --- */
@@ -351,18 +361,6 @@ const cerrarSesion = () => {
 .fade-slide-enter-from,
 .fade-slide-leave-to {
     opacity: 0;
-    transform: translateY(-8px);
-}
-
-/* --- Responsive --- */
-@media (max-width: 600px) {
-    .brand-subtitle,
-    .brand-divider {
-        display: none; /* Oculta el subtítulo y divisor en móviles para que no rompa el header */
-    }
-
-    .topbar {
-        padding: 0 16px;
-    }
+    transform: translateY(-10px);
 }
 </style>

@@ -1,40 +1,16 @@
 <template>
-    <div class="alumnos-wrapper">
-        <div v-if="vistaActiva === 'lista'" class="metrics animate-fade-in">
-            <div class="metric-card">
-                <div class="metric-label">
-                    <i class="ti ti-books" aria-hidden="true"></i>Total Materias
-                </div>
-                <div class="metric-value">{{ materias.length }}</div>
-                <span class="metric-badge badge-green">
-                    <i class="ti ti-check"></i>Catálogo Activo
-                </span>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">
-                    <i class="ti ti-certificate" aria-hidden="true"></i>Plan de
-                    Estudios
-                </div>
-                <div class="metric-value">General</div>
-                <span class="metric-badge badge-gray">Áreas académicas</span>
-            </div>
-        </div>
-
-        <div
-            v-if="vistaActiva === 'lista'"
-            class="card animate-fade-in"
-            style="margin-top: 12px"
-        >
+    <div class="usuarios-wrapper">
+        <div v-if="vistaActiva === 'lista'" class="card animate-fade-in">
             <div class="card-header">
                 <div class="card-title">
-                    <i class="ti ti-book" aria-hidden="true"></i>
-                    Listado de Materias
+                    <i class="ti ti-users" aria-hidden="true"></i>
+                    Gestión de usuarios
                 </div>
                 <button
                     @click="cambiarVista('crear')"
                     class="tb-btn primary sm"
                 >
-                    <i class="ti ti-plus" aria-hidden="true"></i> Nueva Materia
+                    <i class="ti ti-plus" aria-hidden="true"></i> Nuevo
                 </button>
             </div>
 
@@ -44,7 +20,7 @@
                         class="ti ti-loader animate-spin"
                         style="font-size: 24px; color: #cd322c"
                     ></i>
-                    <p>Cargando registros de materias...</p>
+                    <p>Cargando usuarios...</p>
                 </div>
 
                 <div
@@ -55,7 +31,7 @@
                     <i class="ti ti-alert-circle"></i> {{ errorCarga }}
                     <button
                         class="tb-btn sm outline"
-                        @click="fetchMaterias"
+                        @click="fetchUsuarios"
                         style="margin-left: auto"
                     >
                         Reintentar
@@ -63,60 +39,60 @@
                 </div>
 
                 <table
-                    v-else-if="materias.length > 0"
+                    v-else-if="usuarios.length > 0"
                     class="mini"
-                    aria-label="Listado de materias"
+                    aria-label="Listado de usuarios"
                 >
                     <thead>
                         <tr>
-                            <th>Nombre de la Materia</th>
-                            <th>Descripción</th>
-                            <th>Carga Horaria</th>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Rol</th>
                             <th class="action-cell">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr
-                            v-for="materia in materias"
-                            :key="materia.id_materia"
+                            v-for="usuario in usuarios"
+                            :key="usuario.id_usuario"
                             class="table-row"
                         >
                             <td>
-                                <strong>{{ materia.nombre_materia }}</strong>
+                                <strong>{{ usuario.apellido }}</strong
+                                >, {{ usuario.nombre }}
                             </td>
+                            <td class="email-cell">{{ usuario.email }}</td>
                             <td>
-                                {{ materia.descripcion || "Sin descripción" }}
-                            </td>
-                            <td>
-                                {{
-                                    materia.carga_horaria
-                                        ? `${materia.carga_horaria} hs/sem`
-                                        : "No definida"
-                                }}
+                                <span class="status-pill sp-cargo">
+                                    {{ usuario.rol?.nombre_rol || "Sin rol" }}
+                                </span>
                             </td>
 
                             <td class="action-cell">
                                 <div class="action-buttons">
                                     <button
                                         @click="
-                                            cambiarVista('detalles', materia)
+                                            cambiarVista('detalles', usuario)
                                         "
                                         class="icon-btn view"
                                         title="Ver detalles"
+                                        aria-label="Ver detalles"
                                     >
                                         <i class="ti ti-eye"></i>
                                     </button>
                                     <button
-                                        @click="cambiarVista('editar', materia)"
+                                        @click="cambiarVista('editar', usuario)"
                                         class="icon-btn edit"
                                         title="Editar"
+                                        aria-label="Editar"
                                     >
                                         <i class="ti ti-edit"></i>
                                     </button>
                                     <button
-                                        @click="pedirConfirmacion(materia)"
+                                        @click="pedirConfirmacion(usuario)"
                                         class="icon-btn delete"
                                         title="Eliminar"
+                                        aria-label="Eliminar"
                                     >
                                         <i class="ti ti-trash"></i>
                                     </button>
@@ -128,23 +104,23 @@
 
                 <div v-else class="empty-state">
                     <i
-                        class="ti ti-file-x"
+                        class="ti ti-users"
                         style="font-size: 28px; opacity: 0.4"
                     ></i>
-                    <p>No se encontraron materias en el sistema.</p>
+                    <p>No hay usuarios registrados todavía.</p>
                 </div>
             </div>
         </div>
 
         <div
-            v-if="vistaActiva === 'detalles' && materiaSeleccionada"
+            v-if="vistaActiva === 'detalles' && usuarioSeleccionado"
             class="card animate-fade-in"
         >
             <div class="card-header">
                 <div class="card-title">
-                    <i class="ti ti-clipboard-list"></i>
-                    Detalle de Materia —
-                    {{ materiaSeleccionada.nombre_materia }}
+                    <i class="ti ti-info-circle"></i>
+                    {{ usuarioSeleccionado.nombre }}
+                    {{ usuarioSeleccionado.apellido }}
                 </div>
                 <button
                     @click="cambiarVista('lista')"
@@ -158,61 +134,55 @@
             <div class="card-body details-view">
                 <div class="detail-grid">
                     <div class="detail-item">
-                        <span class="detail-label">Nombre de la Materia</span>
+                        <span class="detail-label">Nombre completo</span>
                         <span class="detail-value">
-                            {{ materiaSeleccionada.nombre_materia }}
+                            {{ usuarioSeleccionado.nombre }}
+                            {{ usuarioSeleccionado.apellido }}
+                        </span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Email</span>
+                        <span class="detail-value">{{
+                            usuarioSeleccionado.email
+                        }}</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Rol</span>
+                        <span class="detail-value">
+                            {{
+                                usuarioSeleccionado.rol?.nombre_rol || "Sin rol"
+                            }}
                         </span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">ID Interno</span>
-                        <span class="detail-value mono"
-                            >#{{ materiaSeleccionada.id_materia }}</span
-                        >
-                    </div>
-                    <div class="detail-item" style="grid-column: span 2">
-                        <span class="detail-label">Descripción</span>
-                        <span class="detail-value">{{
-                            materiaSeleccionada.descripcion ||
-                            "Sin descripción registrada"
-                        }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Área / Departamento</span>
-                        <span class="detail-value">{{
-                            materiaSeleccionada.departamento || "Sin asignar"
-                        }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Carga Horaria Semanal</span>
-                        <span class="detail-value mono"
-                            >{{
-                                materiaSeleccionada.carga_horaria || 0
+                        <span class="detail-label">Contraseña</span>
+                        <span class="detail-value">
+                            {{
+                                usuarioSeleccionado.contrasena ||
+                                "Sin contraseña"
                             }}
-                            horas</span
-                        >
+                        </span>
                     </div>
-                </div>
-
-                <div class="info-box">
-                    <i class="ti ti-info-circle"></i>
-                    <p>
-                        Las materias conforman la base del plan de estudios. Una
-                        vez registradas, pueden vincularse a profesores y cursos
-                        a través del panel de <strong>Asignaciones</strong> para
-                        la gestión del ciclo lectivo.
-                    </p>
+                    <div class="detail-item">
+                        <span class="detail-label">ID Usuario</span>
+                        <span class="detail-value">{{
+                            usuarioSeleccionado.id_usuario || "No asignado"
+                        }}</span>
+                    </div>
                 </div>
             </div>
 
             <div class="card-footer">
                 <button @click="cambiarVista('lista')" class="tb-btn outline">
-                    Volver al listado
+                    Cerrar
                 </button>
                 <button
-                    @click="cambiarVista('editar', materiaSeleccionada)"
+                    @click="cambiarVista('editar', usuarioSeleccionado)"
                     class="tb-btn primary"
                 >
-                    <i class="ti ti-edit"></i> Modificar Materia
+                    <i class="ti ti-edit"></i> Editar
                 </button>
             </div>
         </div>
@@ -226,14 +196,14 @@
                     <i
                         :class="
                             vistaActiva === 'crear'
-                                ? 'ti ti-book-upload'
+                                ? 'ti ti-plus'
                                 : 'ti ti-edit'
                         "
                     ></i>
                     {{
                         vistaActiva === "crear"
-                            ? "Registrar Nueva Materia"
-                            : "Modificar Materia Existente"
+                            ? "Nuevo usuario"
+                            : "Editar usuario"
                     }}
                 </div>
                 <button
@@ -245,42 +215,48 @@
                 </button>
             </div>
 
-            <form @submit.prevent="guardarMateria" class="form-body">
+            <form @submit.prevent="guardarUsuario" class="form-body">
                 <div class="form-row">
-                    <div class="form-group" style="grid-column: span 1">
-                        <label for="nombre_materia">Nombre de la Materia</label>
-                        <input
-                            type="text"
-                            id="nombre_materia"
-                            v-model="form.nombre_materia"
-                            required
-                            placeholder="Ej: Matemática, Historia..."
-                        />
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input v-model="form.nombre" required />
                     </div>
-                    <div class="form-group" style="grid-column: span 1">
-                        <label for="carga_horaria"
-                            >Carga Horaria (hs/sem)</label
-                        >
+                    <div class="form-group">
+                        <label>Apellido</label>
+                        <input v-model="form.apellido" required />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input v-model="form.email" type="email" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
                         <input
-                            type="number"
-                            id="carga_horaria"
-                            v-model="form.carga_horaria"
-                            min="0"
-                            placeholder="Ej: 4"
+                            v-model="form.contrasena"
+                            type="password"
+                            required
                         />
                     </div>
                 </div>
+
                 <div class="form-row">
-                    <div class="form-group" style="grid-column: span 2">
-                        <label for="descripcion_materia"
-                            >Descripción de la Materia (opcional)</label
-                        >
-                        <textarea
-                            id="descripcion_materia"
-                            v-model="form.descripcion_materia"
-                            rows="3"
-                            placeholder="Breve detalle sobre el enfoque o contenido de la materia..."
-                        ></textarea>
+                    <div class="form-group">
+                        <label>Rol</label>
+                        <select v-model="form.id_rol" required>
+                            <option :value="null" disabled>
+                                Seleccione un rol...
+                            </option>
+                            <option
+                                v-for="rol in listaRoles"
+                                :key="rol.id_rol || 'Rol'"
+                                :value="rol.id_rol || 'Rol'"
+                            >
+                                {{ rol.nombre_rol || "Rol" }}
+                            </option>
+                        </select>
                     </div>
                 </div>
 
@@ -296,7 +272,7 @@
                         <i class="ti ti-alert-circle"></i> {{ errorGuardar }}
                     </div>
                     <div v-if="exitoGuardar" class="exito-banner">
-                        <i class="ti ti-check"></i> La materia se guardó
+                        <i class="ti ti-check"></i> Usuario guardado
                         correctamente.
                     </div>
                     <button
@@ -317,10 +293,10 @@
                         ></i>
                         {{
                             guardando
-                                ? "Guardando registro..."
+                                ? "Guardando..."
                                 : vistaActiva === "crear"
-                                  ? "Confirmar Materia"
-                                  : "Actualizar Materia"
+                                  ? "Registrar usuario"
+                                  : "Actualizar usuario"
                         }}
                     </button>
                 </div>
@@ -328,9 +304,9 @@
         </div>
 
         <div
-            v-if="materiaAEliminar"
+            v-if="usuarioAEliminar"
             class="modal-overlay"
-            @click.self="materiaAEliminar = null"
+            @click.self="usuarioAEliminar = null"
         >
             <div class="modal-card animate-fade-in">
                 <div class="modal-header">
@@ -338,14 +314,15 @@
                         class="ti ti-alert-triangle"
                         style="color: #cd322c; font-size: 20px"
                     ></i>
-                    <h3>Eliminar Materia</h3>
+                    <h3>Eliminar usuario</h3>
                 </div>
 
                 <p class="modal-body">
-                    ¿Estás seguro de que querés eliminar la materia
-                    <strong>{{ materiaAEliminar.nombre_materia }}</strong
-                    >? Esta acción podría afectar a las asignaciones activas si
-                    ya está vinculada a cursos y profesores.
+                    ¿Seguro que querés eliminar a
+                    <strong>
+                        {{ usuarioAEliminar.nombre }}
+                        {{ usuarioAEliminar.apellido }} </strong
+                    >? Esta acción no se puede deshacer.
                 </p>
 
                 <div
@@ -363,7 +340,7 @@
                 <div class="modal-footer">
                     <button
                         class="tb-btn outline"
-                        @click="materiaAEliminar = null"
+                        @click="usuarioAEliminar = null"
                     >
                         Cancelar
                     </button>
@@ -376,7 +353,7 @@
                             class="ti ti-loader animate-spin"
                             v-if="eliminando"
                         ></i>
-                        {{ eliminando ? "Eliminando..." : "Eliminar materia" }}
+                        {{ eliminando ? "Eliminando..." : "Sí, eliminar" }}
                     </button>
                 </div>
             </div>
@@ -386,104 +363,117 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-// IMPORTANTE: Ajustar esta ruta según la estructura de tus servicios
+
 import {
-    obtenerMaterias,
-    crearMateria,
-    modificarMateria,
-    eliminarMateria,
-} from "../../../services/academico-service.js";
+    obtenerUsuarios,
+    crearUsuario,
+    modificarUsuario,
+    eliminarUsuario,
+    obtenerRoles,
+} from "../../../services/usuarios-services.js";
 
-// ── Estado Reactivo ──────────────────────────────────────────────────────────
-const materias = ref([]);
-
+const usuarios = ref([]);
 const cargando = ref(false);
 const guardando = ref(false);
 const eliminando = ref(false);
-
-const vistaActiva = ref("lista");
-const materiaSeleccionada = ref(null);
-const materiaAEliminar = ref(null);
+const vistaActiva = ref("lista"); // 'lista' | 'crear' | 'editar' | 'detalles'
+const usuarioSeleccionado = ref(null);
+const usuarioAEliminar = ref(null);
+const errorEliminar = ref("");
 
 const errorCarga = ref("");
 const errorGuardar = ref("");
-const errorEliminar = ref("");
 const exitoGuardar = ref(false);
 
-// Payload del formulario para la tabla Materias
+const listaRoles = ref([]);
+
 const formVacio = () => ({
-    id_materia: null,
-    nombre_materia: "",
-    carga_horaria: 0,
-    descripcion_materia: "",
+    id_usuario: null,
+    nombre: "",
+    apellido: "",
+    email: "",
+    contrasena: "",
+    id_rol: null,
 });
+
 const form = ref(formVacio());
 
-// ── Navegación de Flujos ─────────────────────────────────────────────────────
-const cambiarVista = (nuevaVista, materia = null) => {
+// ── Navegación entre vistas ──────────────────────────────────────────────────
+const cambiarVista = (nuevaVista, usuario = null) => {
     vistaActiva.value = nuevaVista;
     errorGuardar.value = "";
     exitoGuardar.value = false;
 
-    if (nuevaVista === "editar" && materia) {
-        form.value = {
-            id_materia: materia.id_materia,
-            nombre_materia: materia.nombre_materia || "",
-            carga_horaria: materia.carga_horaria || 0, // <-- Ahora se recupera correctamente al editar
-            descripcion_materia: materia.descripcion || "",
-        };
+    if (nuevaVista === "editar" && usuario) {
+        form.value = { ...usuario };
     } else if (nuevaVista === "crear") {
         form.value = formVacio();
-    } else if (nuevaVista === "detalles" && materia) {
-        materiaSeleccionada.value = materia;
+    } else if (nuevaVista === "detalles" && usuario) {
+        usuarioSeleccionado.value = usuario;
     }
 };
 
-// ── Controladores CRUD Async ──────────────────────────────────────────────────
-const fetchMaterias = async () => {
+// ── CRUD ─────────────────────────────────────────────────────────────────────
+const fetchUsuarios = async () => {
     cargando.value = true;
     errorCarga.value = "";
     try {
-        const resMat = await obtenerMaterias();
-        materias.value = Array.isArray(resMat.data) ? resMat.data : [];
-    } catch (error) {
-        console.error("Error al obtener materias:", error);
+        const res = await obtenerUsuarios();
+        if (!res) throw new Error("No se obtuvo respuesta del servidor");
+
+        const data = res.data;
+        usuarios.value = Array.isArray(data) ? data : data?.data || [];
+    } catch (e) {
         errorCarga.value =
-            "Error al cargar el listado de materias del servidor.";
+            "No se pudo cargar la lista de usuarios. Verificá la conexión con el servidor.";
     } finally {
         cargando.value = false;
     }
 };
 
-const guardarMateria = async () => {
+const fetchRoles = async () => {
+    cargando.value = true;
+    errorCarga.value = "";
+    try {
+        const res = await obtenerRoles();
+        const data = res.data;
+        listaRoles.value = Array.isArray(data) ? data : [];
+    } catch {
+        errorCarga.value =
+            "No se pudieron cargar los roles. Verificá la conexión con el servidor.";
+    } finally {
+        cargando.value = false;
+    }
+};
+
+const guardarUsuario = async () => {
     errorGuardar.value = "";
     exitoGuardar.value = false;
     guardando.value = true;
 
     try {
+        const payload = { ...form.value };
+
         if (vistaActiva.value === "crear") {
-            await crearMateria(form.value);
+            await crearUsuario(payload);
         } else {
-            await modificarMateria(form.value);
+            await modificarUsuario(payload);
         }
+
         exitoGuardar.value = true;
-
-        // Refrescamos la lista de materias para ver los cambios
-        const resMat = await obtenerMaterias();
-        materias.value = Array.isArray(resMat.data) ? resMat.data : [];
-
+        await fetchUsuarios();
         setTimeout(() => cambiarVista("lista"), 800);
     } catch (e) {
         errorGuardar.value =
             e?.response?.data?.mensaje ||
-            "No se pudo registrar ni actualizar la materia.";
+            "Error al guardar los datos del usuario. Intentá de nuevo.";
     } finally {
         guardando.value = false;
     }
 };
 
-const pedirConfirmacion = (materia) => {
-    materiaAEliminar.value = materia;
+const pedirConfirmacion = (usuario) => {
+    usuarioAEliminar.value = usuario;
     errorEliminar.value = "";
 };
 
@@ -492,42 +482,43 @@ const confirmarEliminar = async () => {
     errorEliminar.value = "";
 
     try {
-        const respuesta = await eliminarMateria(
-            materiaAEliminar.value.id_materia,
+        const respuesta = await eliminarUsuario(
+            usuarioAEliminar.value.id_usuario,
         );
 
-        if (respuesta.success || respuesta.status === 200) {
-            materias.value = materias.value.filter(
-                (m) => m.id_materia !== materiaAEliminar.value.id_materia,
+        // Ajustá esta validación según cómo devuelva los datos tu API
+        if (respuesta && !respuesta.error) {
+            usuarios.value = usuarios.value.filter(
+                (u) => u.id_usuario !== usuarioAEliminar.value.id_usuario,
             );
-            materiaAEliminar.value = null;
+            usuarioAEliminar.value = null;
         } else {
-            errorEliminar.value = respuesta.message || respuesta.data?.mensaje;
+            errorEliminar.value = respuesta?.message || "Error al eliminar";
         }
     } catch (e) {
         errorEliminar.value =
-            e?.response?.data?.mensaje ||
-            "Ocurrió un error inesperado al eliminar la materia.";
+            "Ocurrió un error inesperado al eliminar al usuario.";
     } finally {
         eliminando.value = false;
     }
 };
 
-// ── Hooks de entrada ─────────────────────────────────────────────────────────
+// ── Lifecycle ────────────────────────────────────────────────────────────────
 onMounted(() => {
-    fetchMaterias();
+    fetchUsuarios();
+    fetchRoles();
 });
 </script>
 
 <style scoped>
-/* (Los estilos se mantienen exactamente igual a tu versión original) */
+/* Los estilos se mantienen exactamente igual */
 .animate-fade-in {
-    animation: fadeIn 0.22s ease-in-out;
+    animation: fadeIn 0.25s ease-in-out;
 }
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(3px);
+        transform: translateY(4px);
     }
     to {
         opacity: 1;
@@ -540,75 +531,23 @@ onMounted(() => {
     }
 }
 .animate-spin {
-    animation: spin 0.85s linear infinite;
+    animation: spin 0.8s linear infinite;
     display: inline-block;
 }
 
-.alumnos-wrapper {
+.usuarios-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    max-width: 950px;
-    width: 100%;
+    gap: 16px;
+    max-width: 900px;
 }
 
-.metrics {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-}
-.metric-card {
-    background: var(--color-background-secondary, #ffffff);
-    border-radius: 8px;
-    padding: 14px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    border: 0.5px solid var(--color-border-tertiary, #e5e7eb);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-}
-.metric-label {
-    font-size: 11px;
-    color: var(--color-text-tertiary, #6b7280);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 500;
-}
-.metric-label i {
-    color: #cd322c;
-    font-size: 13px;
-}
-.metric-value {
-    font-size: 24px;
-    font-weight: 600;
-    color: var(--color-text-primary, #111827);
-    line-height: 1.1;
-}
-.metric-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-top: 2px;
-    width: fit-content;
-}
-.badge-green {
-    background: #eaf3de;
-    color: #3b6d11;
-}
-.badge-gray {
-    background: #f3f4f6;
-    color: #4b5563;
-}
-
+/* Card */
 .card {
     background: var(--color-background-primary, #fff);
     border: 0.5px solid var(--color-border-tertiary, #e5e7eb);
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     overflow: hidden;
 }
 .card-header {
@@ -632,7 +571,7 @@ onMounted(() => {
     background: #f9fafb;
 }
 .card-title {
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--color-text-primary, #111827);
     display: flex;
@@ -644,26 +583,27 @@ onMounted(() => {
     color: #cd322c;
 }
 
+/* Tabla */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
-    padding: 12px;
+    padding: 16px;
 }
 .mini {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12.5px;
+    font-size: 13px;
 }
 .mini th {
     text-align: left;
     padding: 8px 10px;
     color: var(--color-text-tertiary, #6b7280);
     font-weight: 500;
-    font-size: 11.5px;
+    font-size: 12px;
     border-bottom: 1px solid #e5e7eb;
 }
 .mini td {
-    padding: 9px 10px;
+    padding: 10px;
     border-bottom: 0.5px solid #e5e7eb;
     color: var(--color-text-primary, #111827);
     vertical-align: middle;
@@ -671,59 +611,72 @@ onMounted(() => {
 .table-row:hover {
     background: var(--color-background-secondary, #f9fafb);
 }
-.mono {
-    font-family: monospace;
-    font-size: 11.5px;
-    color: #4b5563;
+.email-cell {
+    color: var(--color-text-tertiary, #6b7280);
 }
 
+/* Badges / Pills */
 .status-pill {
-    font-size: 10.5px;
-    padding: 2px 7px;
+    font-size: 11px;
+    padding: 3px 8px;
     border-radius: 4px;
     font-weight: 600;
     display: inline-block;
+    text-transform: capitalize;
 }
-.sp-active {
+.sp-cargo {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+.sp-activo {
     background: #eaf3de;
     color: #3b6d11;
 }
-.sp-pending {
-    background: #fef08a;
-    color: #a16207;
-}
-.sp-inactive {
-    background: #fef2f2;
+.sp-baja {
+    background: #fee2e2;
     color: #991b1b;
 }
+.sp-licencia {
+    background: #fef08a;
+    color: #854d0e;
+}
 
+/* Acciones tabla */
 .action-cell {
     text-align: right;
     width: 110px;
+    vertical-align: middle;
 }
 .action-buttons {
     display: flex;
+    flex-direction: row;
     gap: 4px;
     justify-content: flex-end;
     align-items: center;
 }
 .icon-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 5px;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    border-radius: 6px;
     border: 1px solid #e5e7eb;
     background: white;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.12s;
+    transition: all 0.15s;
     color: #4b5563;
-    font-size: 14px;
+    font-size: 15px;
+    line-height: 1;
     padding: 0;
 }
 .icon-btn i {
     pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 .icon-btn:hover {
     background: #f3f4f6;
@@ -743,17 +696,18 @@ onMounted(() => {
     color: #ef4444;
 }
 
+/* Botones Generales */
 .tb-btn {
-    padding: 7px 14px;
+    padding: 8px 16px;
     border-radius: 6px;
     border: 1px solid transparent;
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    transition: all 0.12s;
+    transition: all 0.15s;
 }
 .tb-btn.primary {
     background: #cd322c;
@@ -780,68 +734,67 @@ onMounted(() => {
     background: #a52420;
 }
 .tb-btn.sm {
-    padding: 5px 10px;
-    font-size: 11.5px;
+    padding: 6px 12px;
+    font-size: 12px;
 }
 .tb-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
+/* Formulario */
 .form-body {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
     padding: 20px;
 }
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: 16px;
+}
+.form-row.triple {
+    grid-template-columns: 1fr 1fr 1fr;
 }
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;
 }
 .form-group label {
-    font-size: 11.5px;
+    font-size: 12px;
     font-weight: 600;
     color: #4b5563;
 }
 .form-group input,
-.form-group select,
-.form-group textarea {
-    padding: 8px 12px;
+.form-group select {
+    padding: 9px 12px;
     border: 1px solid #d1d5db;
     border-radius: 6px;
-    font-size: 12.5px;
+    font-size: 13px;
     outline: none;
+    background: white;
     transition:
-        border-color 0.15s,
-        box-shadow 0.15s;
-    background: #fff;
-    font-family: inherit;
-}
-.form-group textarea {
-    resize: vertical;
+        border-color 0.2s,
+        box-shadow 0.2s;
 }
 .form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.form-group select:focus {
     border-color: #cd322c;
-    box-shadow: 0 0 0 2px rgba(205, 50, 44, 0.08);
+    box-shadow: 0 0 0 2px rgba(205, 50, 44, 0.1);
 }
 
+/* Detalles */
 .details-view {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
 }
 .detail-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 12px;
 }
 .detail-item {
     display: flex;
@@ -849,42 +802,24 @@ onMounted(() => {
     gap: 4px;
     background: #f9fafb;
     padding: 12px;
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid #f3f4f6;
 }
 .detail-label {
-    font-size: 10.5px;
+    font-size: 11px;
     text-transform: uppercase;
     color: #6b7280;
     font-weight: 600;
-    letter-spacing: 0.3px;
 }
 .detail-value {
-    font-size: 13.5px;
+    font-size: 14px;
     color: #111827;
     font-weight: 500;
 }
 
-.info-box {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    padding: 12px;
-    border-radius: 6px;
-    color: #1e3a8a;
-    font-size: 12px;
-    line-height: 1.5;
-}
-.info-box i {
-    font-size: 15px;
-    color: #3b82f6;
-    margin-top: 1px;
-}
-
+/* Banners */
 .error-banner {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 8px;
     background: #fef2f2;
@@ -896,7 +831,7 @@ onMounted(() => {
     margin-right: auto;
 }
 .exito-banner {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 8px;
     background: #eaf3de;
@@ -907,21 +842,24 @@ onMounted(() => {
     font-size: 12px;
     margin-right: auto;
 }
+
+/* Empty state */
 .empty-state {
-    padding: 36px 16px;
+    padding: 40px 20px;
     text-align: center;
     color: #9ca3af;
-    font-size: 12.5px;
+    font-size: 13px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
+/* Modal */
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -929,32 +867,32 @@ onMounted(() => {
 }
 .modal-card {
     background: #fff;
-    border-radius: 8px;
-    padding: 22px;
+    border-radius: 10px;
+    padding: 24px;
     width: 100%;
-    max-width: 420px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    max-width: 400px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 .modal-header {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 .modal-header h3 {
-    font-size: 14.5px;
+    font-size: 15px;
     font-weight: 600;
     color: #111827;
 }
 .modal-body {
-    font-size: 12.5px;
+    font-size: 13px;
     color: #4b5563;
-    margin-bottom: 18px;
-    line-height: 1.5;
+    margin-bottom: 20px;
+    line-height: 1.6;
 }
 .modal-footer {
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
+    gap: 10px;
 }
 </style>

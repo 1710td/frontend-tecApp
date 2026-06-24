@@ -2,18 +2,22 @@
   <div class="login-box">
     <h2>Acceso Alumno</h2>
 
-    <form @submit.prevent="handleSubmit">
+    <div v-if="errorMessage" class="error-banner">
+      {{ errorMessage }}
+    </div>
+
+    <form @submit.prevent="handleLogin">
       <label for="inputNombre">Nombre/s:</label>
-      <input type="text" id="inputNombre" v-model="form.nombre" placeholder="Ej: Juan" required />
+      <input type="text" id="inputNombre" v-model="loginData.nombre" placeholder="Ej: Juan" required />
 
       <label for="inputApellido">Apellido/s:</label>
-      <input type="text" id="inputApellido" v-model="form.apellido" placeholder="Ej: Pérez" required />
+      <input type="text" id="inputApellido" v-model="loginData.apellido" placeholder="Ej: Pérez" required />
 
       <label for="inputDni">Documento (DNI):</label>
-      <input type="number" id="inputDni" v-model="form.dni" placeholder="Solo números" required />
+      <input type="number" id="inputDni" v-model="loginData.dni" placeholder="Solo números" required />
 
       <label for="selectCurso">Curso:</label>
-      <select id="selectCurso" v-model="form.curso" required>
+      <select id="selectCurso" v-model="loginData.id_curso" required>
         <option value="">Selecciona tu curso:</option>
         <option value="1Pri">1° Primera</option>
         <option value="1Seg">1° Segunda</option>
@@ -31,7 +35,9 @@
         <option value="7Inf">7° Informática</option>
       </select>
 
-      <button type="submit" class="btn-submit">Registrarse / Ingresar</button>
+      <button type="submit" class="btn-submit" :disabled="isLoading">
+        {{ isLoading ? "Cargando..." : "Registrarse / Ingresar" }}
+      </button>
     </form>
 
     <RouterLink to="/" class="back-link">← Volver al inicio</RouterLink>
@@ -39,29 +45,41 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive } from "vue";
+import { login } from "../../services/auth-service.js";
+import { useRouter } from "vue-router"; // Importante para redirigir tras loguear
 
-const router = useRouter()
+const router = useRouter();
+const isLoading = ref(false);
+const errorMessage = ref("");
 
-const form = reactive({
-  nombre: '',
-  apellido: '',
-  dni: '',
-  curso: ''
-})
+// Se unificó el objeto para mapear los v-model del template
+const loginData = reactive({
+    nombre: "",
+    apellido: "",
+    dni: "",
+    id_curso: "" // Asegúrate de que coincida con lo que espera tu endpoint
+});
 
-function handleSubmit() {
-  if (form.nombre && form.apellido && form.dni && form.curso) {
-    localStorage.setItem('sesionActiva', 'true')
-    localStorage.setItem('userName', `${form.nombre} ${form.apellido}`)
-    localStorage.setItem('userDni', form.dni)
-    localStorage.setItem('userCurso', form.curso)
-    router.push('/inicio')  // ← CAMBIÁ ESTO (era '/panel/alumno')
-  } else {
-    alert('Por favor, completa todos los campos')
-  }
-}
+const handleLogin = async () => {
+    errorMessage.value = "";
+    isLoading.value = true;
+    
+    try {
+        const result = await login(loginData);
+        if (result && result.success) {
+            // Si el backend responde exitosamente, redirigís al panel del alumno
+            router.push("/alumno/dashboard"); 
+        } else {
+            errorMessage.value = result?.message || "Credenciales inválidas.";
+        }
+    } catch (error) {
+        console.error("Error en login de alumno:", error);
+        errorMessage.value = "Error de conexión con el servidor.";
+    } finally {
+        isLoading.value = false;
+    }
+};
 </script>
 
 <style scoped>
@@ -110,8 +128,22 @@ function handleSubmit() {
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
-.btn-submit:hover {
+.btn-submit:hover:not(:disabled) {
     background-color: #606160;
+}
+.btn-submit:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+.error-banner {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    text-align: center;
+    border: 1px solid #f5c6cb;
 }
 .back-link {
     display: block;

@@ -1,79 +1,48 @@
 <template>
-    <aside class="sidebar" aria-label="Navegación">
+    <aside class="sidebar" aria-label="Navegación Alumno">
         <div class="sidebar-header">
             <div class="sidebar-logo">
                 <div class="logo-dot">SGE</div>
                 <div>
                     <div class="logo-title">Gestión Escolar</div>
-                    <div class="logo-sub">Panel administrativo</div>
+                    <div class="logo-sub">Portal Alumno</div>
                 </div>
             </div>
         </div>
 
         <div class="sidebar-section">General</div>
-
         <div
             class="nav-item"
-            :class="{ active: vistaActual === 'alumnos' }"
-            @click="$emit('cambiar-vista', 'alumnos')"
+            :class="{ active: vistaActual === 'overview' }"
+            @click="$emit('cambiar-vista', 'overview')"
         >
-            <i class="ti ti-school" aria-hidden="true"></i>Alumnos
+            <i class="ti ti-layout-dashboard" aria-hidden="true"></i>Inicio
+        </div>
+
+        <div class="sidebar-section">Académico</div>
+        <div
+            class="nav-item"
+            :class="{ active: vistaActual === 'materias' }"
+            @click="$emit('cambiar-vista', 'materias')"
+        >
+            <i class="ti ti-book" aria-hidden="true"></i>Mis Materias
         </div>
         <div
             class="nav-item"
             :class="{ active: vistaActual === 'profesores' }"
             @click="$emit('cambiar-vista', 'profesores')"
         >
-            <i class="ti ti-chalkboard" aria-hidden="true"></i>Profesores
+            <i class="ti ti-chalkboard" aria-hidden="true"></i>Mis Profesores
         </div>
         <div
             class="nav-item"
-            :class="{ active: vistaActual === 'cursos' }"
-            @click="$emit('cambiar-vista', 'cursos')"
+            :class="{ active: vistaActual === 'calificaciones' }"
+            @click="$emit('cambiar-vista', 'calificaciones')"
         >
-            <i class="ti ti-book" aria-hidden="true"></i>Cursos
+            <i class="ti ti-report-analytics" aria-hidden="true"></i>Boletín Digital
         </div>
 
-        <div
-            class="nav-item"
-            :class="{ active: vistaActual === 'asistencias' }"
-            @click="$emit('cambiar-vista', 'asistencias')"
-        >
-            <i class="ti ti-school" aria-hidden="true"></i>Asistencias
-        </div>
-
-        <div
-            class="nav-item"
-            :class="{ active: vistaActual === 'materias' }"
-            @click="$emit('cambiar-vista', 'materias')"
-        >
-            <i class="ti ti-book" aria-hidden="true"></i>Materias
-        </div>
-
-        <div
-            class="nav-item"
-            :class="{ active: vistaActual === 'asignaciones' }"
-            @click="$emit('cambiar-vista', 'asignaciones')"
-        >
-            <i class="ti ti-git-branch" aria-hidden="true"></i>Asignaciones de
-            materias
-        </div>
-
-        <div class="sidebar-section">Servicios</div>
-        <div
-            class="nav-item"
-            :class="{ active: vistaActual === 'biblioteca' }"
-            @click="$emit('cambiar-vista', 'biblioteca')"
-        >
-            <i class="ti ti-books" aria-hidden="true"></i>Biblioteca
-        </div>
-        <div
-            class="nav-item"
-            :class="{ active: vistaActual === 'objetos' }"
-            @click="$emit('cambiar-vista', 'objetos')"
-        >
-            <i class="ti ti-search" aria-hidden="true"></i>Objetos perdidos
-        </div>
+        <div class="sidebar-section">Comunidad</div>
         <div
             class="nav-item"
             :class="{ active: vistaActual === 'noticias' }"
@@ -82,34 +51,51 @@
             <i class="ti ti-speakerphone" aria-hidden="true"></i>Noticias
         </div>
 
-        <div class="sidebar-section">Sistema</div>
-        <div
-            class="nav-item"
-            :class="{ active: vistaActual === 'personal' }"
-            @click="$emit('cambiar-vista', 'personal')"
-        >
-            <i class="ti ti-users" aria-hidden="true"></i>Personal
-        </div>
-
-        <div
-            class="nav-item"
-            :class="{ active: vistaActual === 'usuarios' }"
-            @click="$emit('cambiar-vista', 'usuarios')"
-        >
-            <i class="ti ti-git-branch" aria-hidden="true"></i>Usuarios
+        <div class="sidebar-footer">
+            <div class="user-pill">
+                <div class="user-avatar">
+                    {{ initial }}
+                </div>
+                <div class="user-info">
+                    <p>{{ shortName }}</p>
+                    <span>{{ curso }}</span>
+                </div>
+            </div>
         </div>
     </aside>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from "vue";
+
+const props = defineProps({
     vistaActual: {
         type: String,
         required: true,
     },
+    studentName: {
+        type: String,
+        default: "Alumno",
+    },
+    curso: {
+        type: String,
+        default: "Sin curso",
+    },
 });
 
 defineEmits(["cambiar-vista"]);
+
+const initial = computed(() => {
+    return props.studentName.charAt(0).toUpperCase();
+});
+
+const shortName = computed(() => {
+    const parts = props.studentName.split(" ");
+    if (parts.length > 2) {
+        return `${parts[0]} ${parts[1]}`;
+    }
+    return props.studentName;
+});
 </script>
 
 <style scoped>
@@ -135,7 +121,7 @@ defineEmits(["cambiar-vista"]);
     width: 28px;
     height: 28px;
     border-radius: 6px;
-    background: #cd322c;
+    background: #007bff; /* Student Blue instead of Admin Red */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -184,8 +170,8 @@ defineEmits(["cambiar-vista"]);
 }
 
 .nav-item.active {
-    background: #fbf0f0;
-    color: #a52420;
+    background: #e6f0ff;
+    color: #0056b3;
 }
 
 .nav-item i {
@@ -209,7 +195,7 @@ defineEmits(["cambiar-vista"]);
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: #cd322c;
+    background: #007bff;
     color: #fff;
     font-size: 11px;
     font-weight: 500;

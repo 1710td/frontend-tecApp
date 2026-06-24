@@ -18,22 +18,38 @@ export const obtenerNoticias = async () => {
 
 export const crearNoticia = async (noticiaData) => {
   try {
-    const response = axios.post(
+    // 1. Crear el objeto FormData
+    const formData = new FormData();
+
+    // 2. Agregar los campos de texto
+    formData.append("titulo", noticiaData.titulo);
+    formData.append("contenido", noticiaData.contenido);
+    formData.append("autor_id", noticiaData.autor_id);
+
+    // 3. Agregar el archivo
+    // IMPORTANTE: 'imagen' debe ser exactamente igual al nombre que usas
+    // en tu backend en el middleware 'upload.single("imagen")'
+    if (noticiaData.file) {
+      formData.append("imagen", noticiaData.file);
+    }
+
+    // 4. Enviar el FormData.
+    // Nota: NO se pasan los headers, Axios los gestiona solo.
+    console.log(Object.fromEntries(formData));
+    const response = await axios.post(
       "http://localhost:9000/api/comunidad/noticias",
-      noticiaData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data", // Opcional, pero a veces necesario si falla
-        },
-      },
+      formData,
     );
 
-    const data = response.data;
-    console.log("Respuesta:", data);
-
+    console.log("Respuesta:", response.data);
     return response;
   } catch (error) {
-    console.error("Error al subir:", error);
+    // Es mejor imprimir el error completo para debuguear en consola
+    console.error(
+      "Error al subir noticia:",
+      error.response?.data || error.message,
+    );
+    throw error; // Lanza el error para que el componente que llama a esta función pueda manejarlo
   }
 };
 

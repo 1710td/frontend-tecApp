@@ -166,6 +166,58 @@ export const obtenerProfesores = async () => {
   }
 };
 
+export const obtenerProfesor = async (id) => {
+  const authStore = useAuthStore();
+
+  console.log("Token actual:", authStore.token);
+
+  try {
+    const response = await axios.get(
+      `http://localhost:9000/api/academico/profesores/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    const data = response.data;
+    console.log("Profesor obtenido:", data);
+
+    return response;
+  } catch (error) {
+    //alert(`No se encontro el profesor: ${error.message}`);
+    console.error("Detalle del error:", error);
+  }
+};
+
+export const obtenerAsignacionesProfesor = async (id) => {
+  const authStore = useAuthStore();
+
+  console.log("Token actual:", authStore.token);
+
+  try {
+    const response = await axios.get(
+      `http://localhost:9000/api/academico/asignaciones/profesor/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    const data = response.data;
+    console.log("Asignaciones obtenidas del profesor :", data);
+
+    return response;
+  } catch (error) {
+    //alert(`No se encontraron asignaciones del profesores: ${error.message}`);
+    console.error("Detalle del error:", error);
+  }
+};
+
 export const crearProfesor = async (profesorData) => {
   const authStore = useAuthStore();
   try {
@@ -439,6 +491,42 @@ export const modificarAlumno = async (alumnoData) => {
   }
 };
 
+//  =========== ASISTENCIAS ===========
+export async function guardarAsistenciasLote(payload) {
+  /* El payload viaja con esta estructura exacta que armamos en la vista:
+      {
+        id_curso: 1,
+        fecha: '2026-06-23',
+        registros: [
+            { id_alumno: 1, estado: 'presente', observaciones: '' },
+            { id_alumno: 2, estado: 'ausente', observaciones: '' }
+        ]
+      }
+    */
+  const authStore = useAuthStore();
+
+  try {
+    const response = await axios.post(
+      "http://localhost:9000/api/academico/asistencias/lote",
+      {
+        payload,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    console.log(response.data);
+    return {
+      success: true,
+    };
+  } catch (error) {
+    alert(error);
+  }
+}
+
 //  =========== ASIGNACIONES DE MATERIAS   ===========
 
 export const obtenerAsignaciones = async () => {
@@ -608,6 +696,8 @@ export const crearMateria = async (materiaData) => {
       "http://localhost:9000/api/academico/materias",
       {
         nombre_materia: materiaData.nombre_materia,
+        carga_horaria: materiaData.carga_horaria,
+        descripcion: materiaData.descripcion_materia,
       },
       {
         headers: {
@@ -673,6 +763,335 @@ export const modificarMateria = async (materiaData) => {
       {
         id_materia: materiaData.id_materia,
         nombre_materia: materiaData.nombre_materia,
+        carga_horaria: materiaData.carga_horaria,
+        descripcion: materiaData.descripcion_materia,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    const data = response.data;
+
+    console.log(data);
+    return {
+      success: true,
+    };
+  } catch (error) {
+    //alert(error);
+  }
+};
+
+//  =========== PERSONAL   ===========
+
+export const obtenerTodoPersonal = async () => {
+  // 1. Ejecutamos el hook para instanciar el store
+  const authStore = useAuthStore();
+
+  // Opcional: Podés loguearlo para confirmar que el token existe antes de la petición
+  console.log("Token actual:", authStore.token);
+
+  try {
+    const response = await axios.get(
+      "http://localhost:9000/api/academico/personal",
+      {
+        headers: {
+          // 2. Usamos la instancia (authStore) y no la definición
+          Authorization: `Bearer ${authStore.token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    // 3. Axios ya te entrega el objeto parseado directamente en response.data
+    const data = response.data;
+    console.log("personal obtenidas:", data);
+
+    return response;
+  } catch (error) {
+    // 4. Usamos comillas invertidas para concatenar el string correctamente
+    //alert(`No se encontro personal: ${error.message}`);
+    console.error("Detalle del error:", error);
+  }
+};
+
+export const obtenerPersonal = async (id) => {
+  // 1. Ejecutamos el hook para instanciar el store
+  const authStore = useAuthStore();
+
+  // Opcional: Podés loguearlo para confirmar que el token existe antes de la petición
+  console.log("Token actual:", authStore.token);
+
+  try {
+    const response = await axios.get(
+      `http://localhost:9000/api/academico/personal/${id}`,
+      {
+        headers: {
+          // 2. Usamos la instancia (authStore) y no la definición
+          Authorization: `Bearer ${authStore.token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    // 3. Axios ya te entrega el objeto parseado directamente en response.data
+    const data = response.data;
+    console.log("personal obtenido:", data);
+
+    return response;
+  } catch (error) {
+    // 4. Usamos comillas invertidas para concatenar el string correctamente
+    //alert(`No se encontro personal: ${error.message}`);
+    console.error("Detalle del error:", error);
+  }
+};
+
+export const crearPersonal = async (personalData) => {
+  const authStore = useAuthStore();
+  try {
+    const response = await axios.post(
+      "http://localhost:9000/api/academico/personal",
+      {
+        nombre: personalData.nombre,
+        apellido: personalData.apellido,
+        dni: personalData.dni,
+        fecha_nacimiento: personalData.fecha_nacimiento,
+        fecha_ingreso: personalData.fecha_ingreso,
+        domicilio: personalData.domicilio,
+        telefono: personalData.telefono,
+        email: personalData.email,
+        estado: personalData.estado,
+        id_usuario: personalData.id_usuario,
+        id_cargo: personalData.id_cargo,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    const data = response.data;
+
+    console.log(data);
+    return {
+      success: true,
+    };
+  } catch (error) {
+    //alert(error);
+  }
+};
+
+export const eliminarPersonal = async (id) => {
+  const authStore = useAuthStore();
+
+  try {
+    const response = await axios.delete(
+      `http://localhost:9000/api/academico/personal/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    if (error.response) {
+      console.error("ERROR RESPONSE->", error.response);
+
+      return {
+        success: false,
+        status: error.response.status,
+        message:
+          error.response.data?.message || "No se puede eliminar el personal.",
+      };
+    }
+
+    return {
+      success: false,
+      message: "No se pudo conectar con el servidor.",
+    };
+  }
+};
+
+export const modificarPersonal = async (personalData) => {
+  const authStore = useAuthStore();
+  try {
+    const response = await axios.patch(
+      "http://localhost:9000/api/academico/personal",
+      {
+        id_personal: personalData.id_personal,
+        nombre: personalData.nombre,
+        apellido: personalData.apellido,
+        dni: personalData.dni,
+        fecha_nacimiento: personalData.fecha_nacimiento,
+        fecha_ingreso: personalData.fecha_ingreso,
+        domicilio: personalData.domicilio,
+        telefono: personalData.telefono,
+        email: personalData.email,
+        estado: personalData.estado,
+        id_usuario: personalData.id_usuario,
+        id_cargo: personalData.id_cargo,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    const data = response.data;
+
+    console.log(data);
+    return {
+      success: true,
+    };
+  } catch (error) {
+    alert(error);
+    throw error;
+  }
+};
+
+//  =========== CARGOS  ===========
+
+export const obtenerCargos = async () => {
+  // 1. Ejecutamos el hook para instanciar el store
+  const authStore = useAuthStore();
+
+  // Opcional: Podés loguearlo para confirmar que el token existe antes de la petición
+  console.log("Token actual:", authStore.token);
+
+  try {
+    const response = await axios.get(
+      "http://localhost:9000/api/academico/cargos",
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    const data = response.data;
+    console.log("cargos obtenidos:", data);
+
+    return response;
+  } catch (error) {
+    //alert(`No se encontraron cargos: ${error.message}`);
+    console.error("Detalle del error:", error);
+  }
+};
+
+export const obtenerCargo = async (id) => {
+  const authStore = useAuthStore();
+
+  console.log("Token actual:", authStore.token);
+
+  try {
+    const response = await axios.get(
+      `http://localhost:9000/api/academico/cargo/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    const data = response.data;
+    console.log("cargo obtenido:", data);
+
+    return response;
+  } catch (error) {
+    //alert(`No se encontro el cargo: ${error.message}`);
+    console.error("Detalle del error:", error);
+  }
+};
+
+export const crearCargo = async (cargoData) => {
+  const authStore = useAuthStore();
+  try {
+    const response = await axios.post(
+      "http://localhost:9000/api/academico/cargos",
+      {
+        nombre_cargo: cargoData.nombre_cargo,
+        descripcion: cargoData.descripcion,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    const data = response.data;
+
+    console.log(data);
+    return {
+      success: true,
+    };
+  } catch (error) {
+    //alert(error);
+  }
+};
+
+export const eliminarCargo = async (id) => {
+  const authStore = useAuthStore();
+
+  try {
+    const response = await axios.delete(
+      `http://localhost:9000/api/academico/cargos/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    if (error.response) {
+      console.error("ERROR RESPONSE->", error.response);
+
+      return {
+        success: false,
+        status: error.response.status,
+        message:
+          error.response.data?.message || "No se puede eliminar el cargo.",
+      };
+    }
+
+    return {
+      success: false,
+      message: "No se pudo conectar con el servidor.",
+    };
+  }
+};
+
+export const modificarCargo = async (cargoData) => {
+  const authStore = useAuthStore();
+  try {
+    const response = await axios.patch(
+      "http://localhost:9000/api/academico/cargos",
+      {
+        id_cargo: cargoData.id_cargo,
+        nombre_cargo: cargoData.nombre_cargo,
+        descripcion: cargoData.descripcion,
       },
       {
         headers: {

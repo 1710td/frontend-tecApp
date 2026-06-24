@@ -3,11 +3,35 @@ import App from "./app.vue";
 import router from "./router/router";
 import { createPinia } from "pinia";
 import { useAuthStore } from "./stores/auth";
+import axios from "axios";
 
 const app = createApp(App);
 const pinia = createPinia();
 
 app.use(pinia);
+
+// Configuración global de Axios para inyectar Token y reescribir URLs locales dinámicamente
+axios.interceptors.request.use(
+  (config) => {
+    const authStore = useAuthStore();
+
+    // 1. Inyectar Bearer token automáticamente si el usuario está autenticado y no se definió manualmente
+    if (authStore.token && !config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${authStore.token}`;
+    }
+
+    // 2. Reescribir URL del servidor en base a las variables de entorno para producción/despliegue
+    const apiURL = import.meta.env.VITE_API_URL || "http://localhost:9000/api";
+    if (config.url && config.url.startsWith("http://localhost:9000/api")) {
+      config.url = config.url.replace("http://localhost:9000/api", apiURL);
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
 
 // Eliminamos 'next' de los parámetros
 router.beforeEach((to, from) => {
@@ -15,8 +39,9 @@ router.beforeEach((to, from) => {
 
   if (to.meta.requiresAuth) {
     if (!authStore.estaAutenticado) {
-      // Retornamos directamente el string de la ruta o el objeto
-      return { path: "/login" };
+      return {
+        path: "/inicio",
+      };
     }
 
     console.log("PERMISO DASHBOARD:", to.meta.role);

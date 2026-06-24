@@ -10,6 +10,9 @@ import Unavailable from "../components/administrador/Unavailable.vue";
 import LoginAdministrador from "../components/auth/LoginAdministrador.vue";
 import RegistroAdministrador from "../components/auth/RegistroAdministrador.vue";
 import DashboardAdministrador from "../components/administrador/Dashboard-administrador.vue";
+import DashboardAlumno from "../components/alumno/Dashboard-alumno.vue";
+import RegistroAlumno from "../components/auth/RegistroAlumno.vue";
+import UsuarioPerfil from "../components/administrador/views/UsuarioPerfil.vue";
 
 const routes = [
   {
@@ -47,18 +50,38 @@ const routes = [
       role: "root",
     },
   },
+  {
+    path: "/dashboard-alumno",
+    component: DashboardAlumno,
+    meta: {
+      requiresAuth: true,
+      role: "alumno",
+    },
+  },
 
   {
     path: "/login/administrador",
     component: LoginAdministrador,
   },
   {
-    path: "/registro",
+    path: "/registro/administrador",
     component: RegistroAdministrador,
+  },
+  {
+    path: "/registro/alumno",
+    component: RegistroAlumno,
+  },
+  {
+    path: "/perfil/administrador",
+    component: UsuarioPerfil,
   },
   {
     path: "/unauthorized",
     component: Unauthorized,
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/",
   },
 ];
 

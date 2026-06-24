@@ -86,13 +86,24 @@
                             class="table-row"
                         >
                             <td>
-                                <strong>{{ asignacion.id_profesor }}</strong>
+                                <strong
+                                    >{{
+                                        asignacion.profesorAsignacion.apellido
+                                    }}
+                                    {{ asignacion.profesorAsignacion.nombre }}
+                                </strong>
                             </td>
                             <td>
-                                {{ asignacion.id_materia || "N/A" }}
+                                {{
+                                    asignacion.materiaAsignacion
+                                        .nombre_materia || "N/A"
+                                }}
                             </td>
                             <td>
-                                {{ asignacion.id_curso || "Sin asignar" }}
+                                {{
+                                    asignacion.cursoAsignacion.nombre_curso ||
+                                    "Sin asignar"
+                                }}
                             </td>
 
                             <td class="action-cell">
@@ -164,32 +175,40 @@
                     <div class="detail-item">
                         <span class="detail-label">Profesor Titular</span>
                         <span class="detail-value">
-                            {{ asignacionSeleccionada.id_profesor }}
+                            {{
+                                asignacionSeleccionada.profesorAsignacion
+                                    .apellido
+                            }}
+                            {{
+                                asignacionSeleccionada.profesorAsignacion.nombre
+                            }}
                         </span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Materia Dictada</span>
                         <span class="detail-value">{{
-                            asignacionSeleccionada.id_materia
+                            asignacionSeleccionada.materiaAsignacion
+                                .nombre_materia
                         }}</span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Curso Asignado</span>
                         <span class="detail-value">{{
-                            asignacionSeleccionada.id_curso
+                            asignacionSeleccionada.cursoAsignacion.nombre_curso
                         }}</span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Nivel / Turno</span>
                         <span class="detail-value">
-                            {{ asignacionSeleccionada.curso?.nivel }} -
-                            {{ asignacionSeleccionada.curso?.turno }}
+                            {{ asignacionSeleccionada.cursoAsignacion.nivel }}
+                            {{ asignacionSeleccionada.cursoAsignacion.turno }}
                         </span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Aula</span>
                         <span class="detail-value mono">{{
-                            asignacionSeleccionada.curso?.aula || "No definida"
+                            asignacionSeleccionada.cursoAsignacion.aula ||
+                            "No definida"
                         }}</span>
                     </div>
                     <div class="detail-item">
@@ -272,7 +291,7 @@
                                 :key="profesor.id_profesor"
                                 :value="profesor.id_profesor"
                             >
-                                {{ profesor.apellido }}, {{ profesor.nombre }}
+                                {{ profesor.nombre }}, {{ profesor.apellido }}
                             </option>
                         </select>
                     </div>

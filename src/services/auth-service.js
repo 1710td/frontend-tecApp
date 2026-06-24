@@ -19,13 +19,35 @@ export const login = async (loginData) => {
     authStore.login(token, usuario);
 
     // FIX 3: Redirección dinámica basada en el rol para evitar bloqueos del Router
+    //alert(authStore.rol);
     if (authStore.rol === "root") {
       router.push("/dashboard-administrador");
+      return {
+        success: true,
+      };
     } else {
-      router.push("/inicio"); // Alumnos, preceptores, etc.
+      router.push("/login/administrador"); // Alumnos, preceptores, etc.
+      return {
+        success: false,
+      };
     }
 
-    return { success: true };
+    if (authStore.rol === "alumno") {
+      router.push("/dashboard-alumno");
+      return {
+        success: false,
+        message: "No tienes permisos para acceder a esta sección.",
+      };
+    } else {
+      router.push("/inicio");
+      return {
+        success: true,
+      };
+    }
+
+    return {
+      success: true,
+    };
   } catch (error) {
     let errorMessage =
       "Ocurrió un error inesperado al conectar con el servidor.";
@@ -74,7 +96,15 @@ export const registro = async (registroData) => {
       router.push("/inicio");
     }
 
-    return { success: true };
+    if (authStore.rol === "alumno") {
+      router.push("/dashboard-alumno");
+    } else {
+      router.push("/inicio");
+    }
+
+    return {
+      success: true,
+    };
   } catch (error) {
     let errorMessage =
       "Ocurrió un error inesperado al conectar con el servidor.";
@@ -97,6 +127,9 @@ export const registro = async (registroData) => {
     }
 
     console.error("Error de registro:", error);
-    return { success: false, message: errorMessage };
+    return {
+      success: false,
+      message: errorMessage,
+    };
   }
 };

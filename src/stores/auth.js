@@ -2,10 +2,27 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 
 export const useAuthStore = defineStore("auth", () => {
-  // 1. Estado inicial leyendo de localStorage
+  // 1. Estado inicial leyendo de localStorage de manera segura con try-catch
   const token = ref(localStorage.getItem("token") || null);
-  // Leemos el usuario, recordando convertir el string JSON de vuelta a un objeto
-  const usuario = ref(JSON.parse(localStorage.getItem("usuario")) || null);
+
+  let usuarioInicial = null;
+  try {
+    const storedUser = localStorage.getItem("usuario");
+    if (storedUser) {
+      usuarioInicial = JSON.parse(storedUser);
+    }
+  } catch (e) {
+    console.error(
+      "Error parseando los datos de usuario guardados en localStorage:",
+      e,
+    );
+    // Limpiamos datos rotos o inválidos para prevenir colapsos en cascada
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("token");
+    token.value = null;
+  }
+
+  const usuario = ref(usuarioInicial);
 
   // 2. Getters (computed)
   const estaAutenticado = computed(() => !!token.value);

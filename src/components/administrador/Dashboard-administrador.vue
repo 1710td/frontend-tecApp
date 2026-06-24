@@ -10,16 +10,15 @@
             <Topbar :vista-actual="currentView" />
 
             <div class="content">
-                <OverviewView
-                    v-if="currentView === 'overview'"
-                    @cambiar-vista="setView"
-                />
                 <AlumnosView v-if="currentView === 'alumnos'" />
                 <ProfesoresView v-if="currentView === 'profesores'" />
                 <CursosView v-if="currentView === 'cursos'" />
                 <NoticiasView v-if="currentView === 'noticias'" />
                 <AsignacionesView v-if="currentView === 'asignaciones'" />
                 <MateriasView v-if="currentView === 'materias'" />
+                <PersonalView v-if="currentView === 'personal'" />
+                <UsuariosView v-if="currentView === 'usuarios'" />
+                <AsistenciasView v-if="currentView === 'asistencias'" />
             </div>
         </div>
     </div>
@@ -30,15 +29,17 @@ import { ref } from "vue";
 
 import Sidebar from "./views/Sidebar.vue";
 import Topbar from "./views/Topbar.vue";
-import OverviewView from "./views/Overview.vue";
 import AlumnosView from "./views/AlumnosView.vue";
 import ProfesoresView from "./views/ProfesoresView.vue";
 import CursosView from "./views/CursosView.vue";
 import NoticiasView from "./views/NoticiasView.vue";
 import AsignacionesView from "./views/AsignacionesView.vue";
 import MateriasView from "./views/MateriasView.vue";
+import PersonalView from "./views/PersonalView.vue";
+import UsuariosView from "./views/UsuariosView.vue";
+import AsistenciasView from "./views/AsistenciasView.vue";
 
-const currentView = ref("overview");
+const currentView = ref("alumnos");
 
 const setView = (vista) => {
     currentView.value = vista;

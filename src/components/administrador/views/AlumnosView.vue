@@ -89,7 +89,9 @@
                             </td>
                             <td class="mono">{{ alumno.dni }}</td>
                             <td>
-                                {{ alumno.curso.nombre_curso || "Sin asignar" }}
+                                {{
+                                    alumno.curso?.nombre_curso || "Sin asignar"
+                                }}
                             </td>
 
                             <td class="action-cell">
@@ -176,7 +178,7 @@
                             >División / Curso Actual</span
                         >
                         <span class="detail-value">{{
-                            alumnoSeleccionado.curso.nombre_curso ||
+                            alumnoSeleccionado.curso?.nombre_curso ||
                             "No matriculado"
                         }}</span>
                     </div>
@@ -212,7 +214,10 @@
                         Módulo de historial académico unificado: Próximamente se
                         integrarán las inasistencias acumuladas y boletín de
                         calificaciones de las materias correspondientes a
-                        {{ alumnoSeleccionado.curso }}.
+                        {{
+                            alumnoSeleccionado.curso?.nombre_curso ||
+                            "su curso asignado"
+                        }}.
                     </p>
                 </div>
             </div>
@@ -296,10 +301,8 @@
 
                     <div class="form-group">
                         <label for="id_curso">Curso / División asignada</label>
-                        <select id="id_curso" v-model="form.id_curso" required>
-                            <option value="" disabled>
-                                Seleccione un curso...
-                            </option>
+                        <select id="id_curso" v-model="form.id_curso">
+                            <option value="">Sin asignar (Opcional)</option>
                             <option
                                 v-for="curso in cursosDisponibles"
                                 :key="curso.id_curso"
@@ -497,7 +500,7 @@ const etiquetaEstado = {
     inactive: "Baja / Inactivo",
 };
 
-// Modificamos el payload para que maneje las nuevas propiedades
+// Se mantiene id_curso como "" por defecto para que coincida con la opción "Sin asignar"
 const formVacio = () => ({
     id_alumno: null,
     nombre: "",
@@ -562,10 +565,17 @@ const guardarAlumno = async () => {
     guardando.value = true;
 
     try {
+        // Si el valor es "", lo parseamos a null si el backend lo requiere,
+        // de lo contrario lo enviamos como viene en el objeto
+        const payload = { ...form.value };
+        if (payload.id_curso === "") {
+            payload.id_curso = null;
+        }
+
         if (vistaActiva.value === "crear") {
-            await crearAlumno(form.value);
+            await crearAlumno(payload);
         } else {
-            await modificarAlumno(form.value);
+            await modificarAlumno(payload);
         }
         exitoGuardar.value = true;
         await fetchAlumnos();
@@ -612,7 +622,6 @@ onMounted(() => {
     fetchCursos();
 });
 </script>
-
 <style scoped>
 /* Transiciones y Microanimaciones */
 .animate-fade-in {

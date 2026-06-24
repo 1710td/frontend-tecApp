@@ -1,10 +1,10 @@
 <template>
-    <div class="cursos-wrapper">
+    <div class="personal-wrapper">
         <div v-if="vistaActiva === 'lista'" class="card animate-fade-in">
             <div class="card-header">
                 <div class="card-title">
-                    <i class="ti ti-book" aria-hidden="true"></i> Cursos
-                    registrados
+                    <i class="ti ti-users" aria-hidden="true"></i>
+                    Gestión de personal
                 </div>
                 <button
                     @click="cambiarVista('crear')"
@@ -20,7 +20,7 @@
                         class="ti ti-loader animate-spin"
                         style="font-size: 24px; color: #cd322c"
                     ></i>
-                    <p>Cargando cursos...</p>
+                    <p>Cargando personal...</p>
                 </div>
 
                 <div
@@ -31,7 +31,7 @@
                     <i class="ti ti-alert-circle"></i> {{ errorCarga }}
                     <button
                         class="tb-btn sm outline"
-                        @click="fetchCursos"
+                        @click="fetchPersonal"
                         style="margin-left: auto"
                     >
                         Reintentar
@@ -39,48 +39,54 @@
                 </div>
 
                 <table
-                    v-else-if="cursos.length > 0"
+                    v-else-if="personal.length > 0"
                     class="mini"
-                    aria-label="Cursos registrados"
+                    aria-label="Listado de personal"
                 >
                     <thead>
                         <tr>
-                            <th>Nombre</th>
-                            <th>Nivel</th>
-                            <th>Aula</th>
-                            <th>Turno</th>
+                            <th>Personal</th>
+                            <th>Email</th>
+                            <th>Cargo</th>
                             <th>Estado</th>
                             <th class="action-cell">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr
-                            v-for="curso in cursos"
-                            :key="curso.id_curso"
+                            v-for="empleado in personal"
+                            :key="empleado.id_personal"
                             class="table-row"
                         >
-                            <td style="font-weight: 500">
-                                {{ curso.nombre_curso }}
-                            </td>
-                            <td>{{ curso.nivel }}</td>
-                            <td>{{ curso.aula }}</td>
                             <td>
-                                <span
-                                    :class="['badge', badgeClass(curso.turno)]"
-                                >
-                                    {{ curso.turno }}
+                                <strong>{{ empleado.apellido }}</strong
+                                >, {{ empleado.nombre }}
+                            </td>
+                            <td class="email-cell">{{ empleado.email }}</td>
+                            <td>
+                                <span class="status-pill sp-cargo">
+                                    {{
+                                        empleado.cargoPersonal?.nombre_cargo ||
+                                        "Sin cargo"
+                                    }}
                                 </span>
                             </td>
                             <td>
                                 <span
-                                    :class="['estado-dot', curso.estado]"
-                                ></span>
-                                {{ curso.estado }}
+                                    :class="[
+                                        'status-pill',
+                                        claseEstado(empleado.estado),
+                                    ]"
+                                >
+                                    {{ empleado.estado }}
+                                </span>
                             </td>
                             <td class="action-cell">
                                 <div class="action-buttons">
                                     <button
-                                        @click="cambiarVista('detalles', curso)"
+                                        @click="
+                                            cambiarVista('detalles', empleado)
+                                        "
                                         class="icon-btn view"
                                         title="Ver detalles"
                                         aria-label="Ver detalles"
@@ -88,7 +94,9 @@
                                         <i class="ti ti-eye"></i>
                                     </button>
                                     <button
-                                        @click="cambiarVista('editar', curso)"
+                                        @click="
+                                            cambiarVista('editar', empleado)
+                                        "
                                         class="icon-btn edit"
                                         title="Editar"
                                         aria-label="Editar"
@@ -96,7 +104,7 @@
                                         <i class="ti ti-edit"></i>
                                     </button>
                                     <button
-                                        @click="pedirConfirmacion(curso)"
+                                        @click="pedirConfirmacion(empleado)"
                                         class="icon-btn delete"
                                         title="Eliminar"
                                         aria-label="Eliminar"
@@ -111,24 +119,23 @@
 
                 <div v-else class="empty-state">
                     <i
-                        class="ti ti-inbox"
+                        class="ti ti-users"
                         style="font-size: 28px; opacity: 0.4"
                     ></i>
-                    <p>No hay cursos registrados todavía.</p>
+                    <p>No hay personal registrado todavía.</p>
                 </div>
             </div>
         </div>
 
         <div
-            v-if="vistaActiva === 'detalles' && cursoSeleccionado"
+            v-if="vistaActiva === 'detalles' && empleadoSeleccionado"
             class="card animate-fade-in"
         >
             <div class="card-header">
                 <div class="card-title">
                     <i class="ti ti-info-circle"></i>
-                    {{ cursoSeleccionado.nombre_curso }} ({{
-                        cursoSeleccionado.ciclo_lectivo
-                    }})
+                    {{ empleadoSeleccionado.nombre }}
+                    {{ empleadoSeleccionado.apellido }}
                 </div>
                 <button
                     @click="cambiarVista('lista')"
@@ -142,9 +149,34 @@
             <div class="card-body details-view">
                 <div class="detail-grid">
                     <div class="detail-item">
-                        <span class="detail-label">Nivel</span>
+                        <span class="detail-label">Nombre completo</span>
+                        <span class="detail-value">
+                            {{ empleadoSeleccionado.nombre }}
+                            {{ empleadoSeleccionado.apellido }}
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">DNI</span>
                         <span class="detail-value">{{
-                            cursoSeleccionado.nivel
+                            empleadoSeleccionado.dni
+                        }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email</span>
+                        <span class="detail-value">{{
+                            empleadoSeleccionado.email
+                        }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Teléfono</span>
+                        <span class="detail-value">{{
+                            empleadoSeleccionado.telefono
+                        }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Domicilio</span>
+                        <span class="detail-value">{{
+                            empleadoSeleccionado.domicilio
                         }}</span>
                     </div>
                     <div class="detail-item">
@@ -152,160 +184,29 @@
                         <span
                             class="detail-value"
                             style="text-transform: capitalize"
+                            >{{ empleadoSeleccionado.estado }}</span
                         >
-                            <span
-                                :class="[
-                                    'estado-dot',
-                                    cursoSeleccionado.estado,
-                                ]"
-                                style="margin-right: 4px"
-                            ></span>
-                            {{ cursoSeleccionado.estado }}
-                        </span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Aula asignada</span>
+                        <span class="detail-label">Fecha de Ingreso</span>
                         <span class="detail-value">{{
-                            cursoSeleccionado.aula
+                            empleadoSeleccionado.fecha_ingreso
                         }}</span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Turno</span>
-                        <span
-                            :class="[
-                                'badge',
-                                badgeClass(cursoSeleccionado.turno),
-                            ]"
-                        >
-                            {{ cursoSeleccionado.turno }}
-                        </span>
-                    </div>
-
-                    <div class="detail-item">
-                        <span class="detail-label">Capacidad Máxima</span>
-                        <span class="detail-value">{{
-                            cursoSeleccionado.capacidad_maxima || "No definida"
-                        }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">ID Profesor Titular</span>
+                        <span class="detail-label">Cargo</span>
                         <span class="detail-value"
-                            >{{ cursoSeleccionado.profesorTitular?.apellido }}
-                            {{ cursoSeleccionado.profesorTitular?.nombre }}
+                            >{{
+                                empleadoSeleccionado.cargoPersonal.nombre_cargo
+                            }},
+                            {{ empleadoSeleccionado.cargoPersonal.descripcion }}
                         </span>
                     </div>
-
                     <div class="detail-item">
-                        <span class="detail-label">ID interno</span>
-                        <span class="detail-value mono"
-                            >#{{ cursoSeleccionado.id_curso }}</span
-                        >
-                    </div>
-                </div>
-
-                <div class="alumnos-section">
-                    <h4
-                        class="section-subtitle"
-                        style="
-                            margin-bottom: 12px;
-                            font-size: 14px;
-                            font-weight: 600;
-                            color: #374151;
-                            display: flex;
-                            align-items: center;
-                            gap: 6px;
-                        "
-                    >
-                        <i class="ti ti-users"></i> Alumnos inscritos
-                    </h4>
-
-                    <div
-                        v-if="cargandoAlumnos"
-                        class="empty-state"
-                        style="padding: 20px"
-                    >
-                        <i
-                            class="ti ti-loader animate-spin"
-                            style="font-size: 24px; color: #cd322c"
-                        ></i>
-                        <p>Cargando lista de alumnos...</p>
-                    </div>
-
-                    <div
-                        v-else-if="errorAlumnos"
-                        class="error-banner"
-                        style="margin-top: 10px"
-                    >
-                        <i class="ti ti-alert-circle"></i> {{ errorAlumnos }}
-                        <button
-                            class="tb-btn sm outline"
-                            @click="fetchAlumnos(cursoSeleccionado.id_curso)"
-                            style="margin-left: auto"
-                        >
-                            Reintentar
-                        </button>
-                    </div>
-
-                    <table
-                        v-else-if="alumnosCurso.length > 0"
-                        class="mini"
-                        style="margin-top: 10px"
-                    >
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Alumno</th>
-                                <th>Contacto / Email</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr
-                                v-for="alumno in alumnosCurso"
-                                :key="alumno.id_alumno"
-                                class="table-row"
-                            >
-                                <td class="mono" style="color: #6b7280">
-                                    #{{ alumno.id_alumno }}
-                                </td>
-                                <td>
-                                    <div
-                                        style="font-weight: 500; color: #111827"
-                                    >
-                                        {{ alumno.nombre }}
-                                        {{ alumno.apellido }}
-                                    </div>
-                                    <div
-                                        style="font-size: 11px; color: #6b7280"
-                                    >
-                                        Legajo: {{ alumno.legajo || "S/N" }}
-                                    </div>
-                                </td>
-                                <td>
-                                    {{
-                                        alumno.telefono_tutor || "Sin registro"
-                                    }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <div
-                        v-else
-                        class="empty-state"
-                        style="
-                            padding: 20px;
-                            background: #f9fafb;
-                            border-radius: 8px;
-                            margin-top: 10px;
-                        "
-                    >
-                        <i
-                            class="ti ti-user-off"
-                            style="font-size: 24px; opacity: 0.4"
-                        ></i>
-                        <p>
-                            Este curso no tiene alumnos inscritos actualmente.
-                        </p>
+                        <span class="detail-label">ID Usuario (Auth)</span>
+                        <span class="detail-value">{{
+                            empleadoSeleccionado.id_usuario || "No asignado"
+                        }}</span>
                     </div>
                 </div>
             </div>
@@ -315,7 +216,7 @@
                     Cerrar
                 </button>
                 <button
-                    @click="cambiarVista('editar', cursoSeleccionado)"
+                    @click="cambiarVista('editar', empleadoSeleccionado)"
                     class="tb-btn primary"
                 >
                     <i class="ti ti-edit"></i> Editar
@@ -337,7 +238,9 @@
                         "
                     ></i>
                     {{
-                        vistaActiva === "crear" ? "Nuevo curso" : "Editar curso"
+                        vistaActiva === "crear"
+                            ? "Nuevo empleado"
+                            : "Editar empleado"
                     }}
                 </div>
                 <button
@@ -349,100 +252,77 @@
                 </button>
             </div>
 
-            <form @submit.prevent="guardarCurso" class="form-body">
-                <div class="form-row">
+            <form @submit.prevent="guardarEmpleado" class="form-body">
+                <div class="form-row triple">
                     <div class="form-group">
-                        <label for="nombre_curso">Nombre del curso</label>
-                        <input
-                            id="nombre_curso"
-                            v-model="form.nombre_curso"
-                            type="text"
-                            placeholder="Ej: 1°A"
-                            required
-                        />
+                        <label>Nombre</label>
+                        <input v-model="form.nombre" required />
                     </div>
                     <div class="form-group">
-                        <label for="nivel">Nivel</label>
-                        <select id="nivel" v-model="form.nivel" required>
-                            <option value="" disabled>Seleccionar...</option>
-                            <option v-for="n in niveles" :key="n" :value="n">
-                                {{ n }}
-                            </option>
-                        </select>
+                        <label>Apellido</label>
+                        <input v-model="form.apellido" required />
+                    </div>
+                    <div class="form-group">
+                        <label>DNI</label>
+                        <input v-model="form.dni" required />
                     </div>
                 </div>
 
-                <div class="form-row">
+                <div class="form-row triple">
                     <div class="form-group">
-                        <label for="ciclo_lectivo">Ciclo Lectivo (Año)</label>
+                        <label>Email</label>
+                        <input v-model="form.email" type="email" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input v-model="form.telefono" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Domicilio</label>
+                        <input v-model="form.domicilio" type="text" required />
+                    </div>
+                </div>
+
+                <div class="form-row triple">
+                    <div class="form-group">
+                        <label>Fecha de Nacimiento</label>
                         <input
-                            id="ciclo_lectivo"
-                            v-model="form.ciclo_lectivo"
-                            type="number"
-                            min="2000"
-                            max="2100"
+                            v-model="form.fecha_nacimiento"
+                            type="date"
                             required
                         />
                     </div>
                     <div class="form-group">
-                        <label for="estado">Estado</label>
-                        <select id="estado" v-model="form.estado" required>
+                        <label>Fecha de Ingreso</label>
+                        <input
+                            v-model="form.fecha_ingreso"
+                            type="date"
+                            required
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select v-model="form.estado" required>
                             <option value="activo">Activo</option>
-                            <option value="finalizado">Finalizado</option>
-                            <option value="cancelado">Cancelado</option>
+                            <option value="baja">Baja</option>
+                            <option value="licencia">Licencia</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="aula">Aula</label>
-                        <input
-                            id="aula"
-                            v-model="form.aula"
-                            type="text"
-                            placeholder="Ej: 101"
-                            required
-                        />
-                    </div>
-                    <div class="form-group">
-                        <label for="turno">Turno</label>
-                        <select id="turno" v-model="form.turno" required>
-                            <option value="" disabled>Seleccionar...</option>
-                            <option v-for="t in turnos" :key="t" :value="t">
-                                {{ t }}
+                        <label>Cargo</label>
+                        <select v-model="form.id_cargo" required>
+                            <option :value="null" disabled>
+                                Seleccione un cargo...
                             </option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="capacidad_maxima"
-                            >Capacidad Máxima (Alumnos)</label
-                        >
-                        <input
-                            id="capacidad_maxima"
-                            v-model="form.capacidad_maxima"
-                            type="number"
-                            min="1"
-                            placeholder="Opcional"
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_profesor">Profesor Titular</label>
-                        <select
-                            id="id_profesor"
-                            v-model="form.id_profesor_titular"
-                        >
-                            <option :value="null">Sin asignar</option>
                             <option
-                                v-for="profesor in profesoresDisponibles"
-                                :key="profesor.id_profesor"
-                                :value="profesor.id_profesor"
+                                v-for="cargo in listaCargos"
+                                :key="cargo.id_cargo || cargo.id"
+                                :value="cargo.id_cargo || cargo.id"
                             >
-                                {{ profesor.nombre }}, {{ profesor.apellido }}
+                                {{ cargo.nombre_cargo || cargo.nombre }}
                             </option>
                         </select>
                     </div>
@@ -451,17 +331,16 @@
                 <div
                     class="card-footer"
                     style="
-                        padding-left: 0;
-                        padding-right: 0;
+                        padding: 14px 0 0 0;
+                        border: none;
                         background: transparent;
-                        margin-top: 10px;
                     "
                 >
                     <div v-if="errorGuardar" class="error-banner">
                         <i class="ti ti-alert-circle"></i> {{ errorGuardar }}
                     </div>
                     <div v-if="exitoGuardar" class="exito-banner">
-                        <i class="ti ti-check"></i> Curso guardado
+                        <i class="ti ti-check"></i> Personal guardado
                         correctamente.
                     </div>
                     <button
@@ -484,8 +363,8 @@
                             guardando
                                 ? "Guardando..."
                                 : vistaActiva === "crear"
-                                  ? "Guardar curso"
-                                  : "Actualizar curso"
+                                  ? "Registrar personal"
+                                  : "Actualizar personal"
                         }}
                     </button>
                 </div>
@@ -493,9 +372,9 @@
         </div>
 
         <div
-            v-if="cursoAEliminar"
+            v-if="empleadoAEliminar"
             class="modal-overlay"
-            @click.self="cursoAEliminar = null"
+            @click.self="empleadoAEliminar = null"
         >
             <div class="modal-card animate-fade-in">
                 <div class="modal-header">
@@ -503,12 +382,14 @@
                         class="ti ti-alert-triangle"
                         style="color: #cd322c; font-size: 20px"
                     ></i>
-                    <h3>Eliminar curso</h3>
+                    <h3>Eliminar empleado</h3>
                 </div>
 
                 <p class="modal-body">
-                    ¿Seguro que querés eliminar el curso
-                    <strong>{{ cursoAEliminar.nombre_curso }}</strong
+                    ¿Seguro que querés eliminar a
+                    <strong>
+                        {{ empleadoAEliminar.nombre }}
+                        {{ empleadoAEliminar.apellido }} </strong
                     >? Esta acción no se puede deshacer.
                 </p>
 
@@ -527,7 +408,7 @@
                 <div class="modal-footer">
                     <button
                         class="tb-btn outline"
-                        @click="cursoAEliminar = null"
+                        @click="empleadoAEliminar = null"
                     >
                         Cancelar
                     </button>
@@ -550,170 +431,148 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+
 import {
-    obtenerCursos,
-    obtenerAlumnosCurso,
-    crearCurso,
-    modificarCurso,
-    eliminarCurso,
-    obtenerProfesores,
+    obtenerTodoPersonal,
+    obtenerPersonal,
+    crearPersonal,
+    modificarPersonal,
+    eliminarPersonal,
+    obtenerCargos,
 } from "../../../services/academico-service.js";
 
-// ── Opciones de Selects ────────────────────────────────────────────────────
-const turnos = [
-    "8:00 a 15:25",
-    "12:00 a 19:00",
-    "8:00 a 12:00",
-    "13:15 a 17:45",
-    "13:15 a 19:00",
-];
-
-// Podés modificar esto según los niveles que maneje la escuela
-const niveles = ["Ciclo basico", "Ciclo superior"];
-
 // ── Estado ──────────────────────────────────────────────────────────────────
-const cursos = ref([]);
-const profesoresDisponibles = ref([]);
+const personal = ref([]);
 const cargando = ref(false);
 const guardando = ref(false);
 const eliminando = ref(false);
-const vistaActiva = ref("lista");
-const cursoSeleccionado = ref(null);
-const cursoAEliminar = ref(null);
+const vistaActiva = ref("lista"); // 'lista' | 'crear' | 'editar' | 'detalles'
+const empleadoSeleccionado = ref(null);
+const empleadoAEliminar = ref(null);
 const errorEliminar = ref("");
 
 const errorCarga = ref("");
 const errorGuardar = ref("");
 const exitoGuardar = ref(false);
 
-const alumnosCurso = ref([]);
-const cargandoAlumnos = ref(false);
-const errorAlumnos = ref("");
+// Lista temporal de cargos. Idealmente deberías fetchear esto de tu API
+// ej: const res = await obtenerTodosLosCargos() en el onMounted
+const listaCargos = ref([]);
 
-// ── Inicialización de Formulario ──────────────────────────────────────────
 const formVacio = () => ({
-    id_curso: null,
-    nombre_curso: "",
-    nivel: "",
-    ciclo_lectivo: new Date().getFullYear(), // Por defecto el año actual
-    capacidad_maxima: null,
-    aula: "",
-    turno: "",
-    id_profesor_titular: null,
-    estado: "activo", // Por defecto activo
+    id_personal: null,
+    nombre: "",
+    apellido: "",
+    dni: "",
+    fecha_nacimiento: "",
+    fecha_ingreso: "",
+    domicilio: "",
+    telefono: "",
+    email: "",
+    estado: "activo",
+    id_usuario: null,
+    id_cargo: null,
 });
+
 const form = ref(formVacio());
 
-// ── Funciones de Alumnos ──────────────────────────────────────────────────
-const fetchAlumnos = async (idCurso) => {
-    cargandoAlumnos.value = true;
-    errorAlumnos.value = "";
-    alumnosCurso.value = [];
-
-    try {
-        const res = await obtenerAlumnosCurso(idCurso);
-        const data = res.data || res;
-        alumnosCurso.value = Array.isArray(data) ? data : [];
-    } catch (e) {
-        errorAlumnos.value =
-            "No se pudo cargar la lista de alumnos. Verificá la conexión.";
-    } finally {
-        cargandoAlumnos.value = false;
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const claseEstado = (estado) => {
+    switch (estado) {
+        case "activo":
+            return "sp-activo";
+        case "baja":
+            return "sp-baja";
+        case "licencia":
+            return "sp-licencia";
+        default:
+            return "";
     }
-};
-
-const fetchProfesores = async () => {
-    cargando.value = true;
-    errorCarga.value = "";
-    try {
-        const res = await obtenerProfesores();
-        profesoresDisponibles.value = Array.isArray(res.data) ? res.data : [];
-    } catch {
-        errorCarga.value =
-            "Error crítico de red al sincronizar el padrón de profesores.";
-    } finally {
-        cargando.value = false;
-    }
-};
-
-// ── Helpers ─────────────────────────────────────────────────────────────────
-const badgeClass = (turno = "") => {
-    const hora = parseInt(turno.trim().split(":")[0], 10);
-    if (isNaN(hora)) return "noche";
-    if (hora < 12) return "manana";
-    return "tarde";
 };
 
 // ── Navegación entre vistas ──────────────────────────────────────────────────
-const cambiarVista = (nuevaVista, curso = null) => {
+const cambiarVista = (nuevaVista, empleado = null) => {
     vistaActiva.value = nuevaVista;
     errorGuardar.value = "";
     exitoGuardar.value = false;
 
-    if (nuevaVista === "editar" && curso) {
-        form.value = { ...curso };
+    if (nuevaVista === "editar" && empleado) {
+        // Copiamos el empleado al formulario.
+        form.value = { ...empleado };
     } else if (nuevaVista === "crear") {
         form.value = formVacio();
-    } else if (nuevaVista === "detalles" && curso) {
-        cursoSeleccionado.value = curso;
-        fetchAlumnos(curso.id_curso);
+    } else if (nuevaVista === "detalles" && empleado) {
+        empleadoSeleccionado.value = empleado;
     }
 };
 
 // ── CRUD ─────────────────────────────────────────────────────────────────────
-const fetchCursos = async () => {
+const fetchPersonal = async () => {
     cargando.value = true;
     errorCarga.value = "";
     try {
-        const res = await obtenerCursos();
-        const data = res.data || res;
-        cursos.value = Array.isArray(data) ? data : [];
-    } catch {
+        const res = await obtenerTodoPersonal();
+        if (!res) throw new Error("No se obtuvo respuesta del servidor");
+
+        // Manejamos el caso donde la data viene directa o anidada en data.data
+        const data = res.data;
+        personal.value = Array.isArray(data) ? data : data?.data || [];
+    } catch (e) {
         errorCarga.value =
-            "No se pudo cargar la lista de cursos. Verificá la conexión con el servidor.";
+            "No se pudo cargar la lista del personal. Verificá la conexión con el servidor.";
     } finally {
         cargando.value = false;
     }
 };
 
-const guardarCurso = async () => {
+const fetchCargos = async () => {
+    cargando.value = true;
+    errorCarga.value = "";
+    try {
+        const res = await obtenerCargos();
+        const data = res.data;
+        listaCargos.value = Array.isArray(data) ? data : [];
+    } catch {
+        errorCarga.value =
+            "No se pudieron cargar los cargos. Verificá la conexión con el servidor.";
+    } finally {
+        cargando.value = false;
+    }
+};
+
+const guardarEmpleado = async () => {
     errorGuardar.value = "";
     exitoGuardar.value = false;
     guardando.value = true;
 
     try {
-        // Parseamos ints
-        form.value.ciclo_lectivo = parseInt(form.value.ciclo_lectivo);
+        const payload = { ...form.value };
 
-        // Solo intentamos parsear si existe un valor, de lo contrario enviamos null
-        form.value.id_profesor_titular = form.value.id_profesor_titular
-            ? parseInt(form.value.id_profesor_titular)
-            : null;
-
-        if (form.value.capacidad_maxima) {
-            form.value.capacidad_maxima = parseInt(form.value.capacidad_maxima);
+        // Si mandan el id_usuario vacío en el form, lo convertimos a null
+        if (!payload.id_usuario) {
+            payload.id_usuario = null;
         }
 
         if (vistaActiva.value === "crear") {
-            await crearCurso(form.value);
+            await crearPersonal(payload);
         } else {
-            await modificarCurso(form.value);
+            await modificarPersonal(payload);
         }
+
         exitoGuardar.value = true;
-        await fetchCursos();
+        await fetchPersonal();
         setTimeout(() => cambiarVista("lista"), 800);
     } catch (e) {
         errorGuardar.value =
             e?.response?.data?.mensaje ||
-            e?.response?.data ||
-            "Error al guardar el curso. Intentá de nuevo.";
+            "Error al guardar los datos del empleado. Intentá de nuevo.";
     } finally {
         guardando.value = false;
     }
 };
 
-const pedirConfirmacion = (curso) => {
-    cursoAEliminar.value = curso;
+const pedirConfirmacion = (empleado) => {
+    empleadoAEliminar.value = empleado;
     errorEliminar.value = "";
 };
 
@@ -722,52 +581,35 @@ const confirmarEliminar = async () => {
     errorEliminar.value = "";
 
     try {
-        const respuesta = await eliminarCurso(cursoAEliminar.value.id_curso);
+        const respuesta = await eliminarPersonal(
+            empleadoAEliminar.value.id_personal,
+        );
 
-        // Si tu backend arroja catch directo en error, esto asume que success es false.
-        if (respuesta && respuesta.success === false) {
-            errorEliminar.value = respuesta.message;
-        } else {
-            cursos.value = cursos.value.filter(
-                (c) => c.id_curso !== cursoAEliminar.value.id_curso,
+        if (respuesta.success) {
+            personal.value = personal.value.filter(
+                (e) => e.id_personal !== empleadoAEliminar.value.id_personal,
             );
-            cursoAEliminar.value = null;
+            empleadoAEliminar.value = null;
+        } else {
+            errorEliminar.value = respuesta.message;
         }
     } catch (e) {
         errorEliminar.value =
-            e?.response?.data?.mensaje ||
-            "Ocurrió un error inesperado al eliminar el curso.";
+            "Ocurrió un error inesperado al eliminar al empleado.";
     } finally {
         eliminando.value = false;
     }
 };
 
-//onMounted(fetchCursos);
+// ── Lifecycle ────────────────────────────────────────────────────────────────
 onMounted(() => {
-    fetchCursos();
-    fetchProfesores();
+    fetchPersonal();
+    fetchCargos();
 });
 </script>
 
 <style scoped>
-/* Agregamos una clase para un indicador visual de estado del curso */
-.estado-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-.estado-dot.activo {
-    background-color: #10b981;
-}
-.estado-dot.finalizado {
-    background-color: #6b7280;
-}
-.estado-dot.cancelado {
-    background-color: #ef4444;
-}
-
-/* El resto de tus estilos se mantienen intactos */
+/* Los estilos se mantienen exactamente igual para preservar tu UI */
 .animate-fade-in {
     animation: fadeIn 0.25s ease-in-out;
 }
@@ -791,13 +633,14 @@ onMounted(() => {
     display: inline-block;
 }
 
-.cursos-wrapper {
+.personal-wrapper {
     display: flex;
     flex-direction: column;
     gap: 16px;
     max-width: 900px;
 }
 
+/* Card */
 .card {
     background: var(--color-background-primary, #fff);
     border: 0.5px solid var(--color-border-tertiary, #e5e7eb);
@@ -838,6 +681,7 @@ onMounted(() => {
     color: #cd322c;
 }
 
+/* Tabla */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
@@ -865,27 +709,37 @@ onMounted(() => {
 .table-row:hover {
     background: var(--color-background-secondary, #f9fafb);
 }
+.email-cell {
+    color: var(--color-text-tertiary, #6b7280);
+}
 
-.badge {
+/* Badges / Pills */
+.status-pill {
+    font-size: 11px;
     padding: 3px 8px;
     border-radius: 4px;
-    font-size: 11px;
     font-weight: 600;
     display: inline-block;
+    text-transform: capitalize;
 }
-.badge.manana {
+.sp-cargo {
     background: #e0f2fe;
     color: #0369a1;
 }
-.badge.tarde {
-    background: #fef08a;
-    color: #a16207;
+.sp-activo {
+    background: #eaf3de;
+    color: #3b6d11;
 }
-.badge.noche {
-    background: #e5e7eb;
-    color: #374151;
+.sp-baja {
+    background: #fee2e2;
+    color: #991b1b;
+}
+.sp-licencia {
+    background: #fef08a;
+    color: #854d0e;
 }
 
+/* Acciones tabla */
 .action-cell {
     text-align: right;
     width: 110px;
@@ -912,10 +766,15 @@ onMounted(() => {
     transition: all 0.15s;
     color: #4b5563;
     font-size: 15px;
+    line-height: 1;
     padding: 0;
 }
 .icon-btn i {
     pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 .icon-btn:hover {
     background: #f3f4f6;
@@ -935,6 +794,7 @@ onMounted(() => {
     color: #ef4444;
 }
 
+/* Botones Generales */
 .tb-btn {
     padding: 8px 16px;
     border-radius: 6px;
@@ -980,6 +840,7 @@ onMounted(() => {
     cursor: not-allowed;
 }
 
+/* Formulario */
 .form-body {
     display: flex;
     flex-direction: column;
@@ -990,6 +851,9 @@ onMounted(() => {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
+}
+.form-row.triple {
+    grid-template-columns: 1fr 1fr 1fr;
 }
 .form-group {
     display: flex;
@@ -1008,6 +872,7 @@ onMounted(() => {
     border-radius: 6px;
     font-size: 13px;
     outline: none;
+    background: white;
     transition:
         border-color 0.2s,
         box-shadow 0.2s;
@@ -1018,6 +883,7 @@ onMounted(() => {
     box-shadow: 0 0 0 2px rgba(205, 50, 44, 0.1);
 }
 
+/* Detalles */
 .details-view {
     display: flex;
     flex-direction: column;
@@ -1048,28 +914,8 @@ onMounted(() => {
     color: #111827;
     font-weight: 500;
 }
-.detail-value.mono {
-    font-family: monospace;
-    color: #6b7280;
-}
 
-.info-box {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    padding: 12px;
-    border-radius: 8px;
-    color: #1e3a8a;
-    font-size: 12px;
-}
-.info-box i {
-    font-size: 16px;
-    color: #3b82f6;
-    margin-top: 1px;
-}
-
+/* Banners */
 .error-banner {
     display: flex;
     align-items: center;
@@ -1094,6 +940,8 @@ onMounted(() => {
     font-size: 12px;
     margin-right: auto;
 }
+
+/* Empty state */
 .empty-state {
     padding: 40px 20px;
     text-align: center;
@@ -1105,6 +953,7 @@ onMounted(() => {
     gap: 8px;
 }
 
+/* Modal */
 .modal-overlay {
     position: fixed;
     inset: 0;
