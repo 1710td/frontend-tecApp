@@ -4,14 +4,7 @@
             <div class="auth-header">
                 <div class="logo-dot">SGE</div>
                 <div class="brand-text">
-                    <h1>Activar Cuenta de Alumno</h1>
-                    <p>
-                        {{
-                            step === 1
-                                ? "Paso 1: Identificación"
-                                : "Paso 2: Verificación y Contraseña"
-                        }}
-                    </p>
+                    <h1>Ingresa como alumno</h1>
                 </div>
             </div>
 
@@ -29,26 +22,86 @@
                 class="auth-form"
             >
                 <div class="field-group">
-                    <label class="field-label">Documento (DNI)</label>
+                    <label class="field-label">Nombre</label>
+                    <input
+                        v-model="registroData.nombre"
+                        type="text"
+                        class="field-input"
+                        placeholder="Ej: Juan"
+                        required
+                    />
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Apellido</label>
+                    <input
+                        v-model="registroData.apellido"
+                        type="text"
+                        class="field-input"
+                        placeholder="Ej: Pérez"
+                        required
+                    />
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Fecha de nacimiento</label>
+                    <input
+                        v-model="registroData.fecha_nacimiento"
+                        type="date"
+                        class="field-input"
+                        required
+                    />
+
+                    <label class="field-label">Documento / DNI</label>
                     <input
                         v-model="registroData.dni"
                         type="text"
                         class="field-input"
-                        placeholder="Ej: 48000000 (sin puntos)"
+                        placeholder="Ej: 48000000"
                         required
                     />
-                    <small class="field-help"
-                        >Buscaremos tu registro institucional para enviarte el
-                        código de acceso.</small
-                    >
+
+                    <label class="field-label">Correo electrónico</label>
+                    <input
+                        v-model="registroData.email"
+                        type="email"
+                        class="field-input"
+                        placeholder="Ej: usuario@gmail.com"
+                        required
+                    />
+
+                    <label class="field-label">Contraseña</label>
+                    <input
+                        v-model="registroData.contrasena"
+                        type="password"
+                        class="field-input"
+                        placeholder="••••••••"
+                        minlength="8"
+                        required
+                    />
+
+                    <label class="field-label">Confirmar contraseña</label>
+                    <input
+                        v-model="confirmarContrasena"
+                        type="password"
+                        class="field-input"
+                        placeholder="••••••••"
+                        minlength="8"
+                        required
+                    />
+
+                    <small class="field-help">
+                        Verificaremos tu identidad y enviaremos un código de
+                        confirmación al correo indicado.
+                    </small>
                 </div>
 
                 <button type="submit" class="btn-submit" :disabled="isLoading">
-                    {{ isLoading ? "Buscando..." : "Enviar código al Email" }}
+                    {{ isLoading ? "Enviando código..." : "Continuar" }}
                 </button>
             </form>
 
-            <form v-else @submit.prevent="handleRegister" class="auth-form">
+            <form v-else @submit.prevent="verificar" class="auth-form">
                 <div class="field-group">
                     <label class="field-label">Código de Verificación</label>
                     <input
@@ -65,30 +118,6 @@
                     >
                 </div>
 
-                <div class="field-group">
-                    <label class="field-label">Nueva Contraseña</label>
-                    <input
-                        v-model="registroData.contrasena"
-                        type="password"
-                        class="field-input"
-                        placeholder="••••••••"
-                        required
-                        minlength="8"
-                    />
-                </div>
-
-                <div class="field-group">
-                    <label class="field-label">Confirmar Contraseña</label>
-                    <input
-                        v-model="confirmarContrasena"
-                        type="password"
-                        class="field-input"
-                        placeholder="••••••••"
-                        required
-                        minlength="8"
-                    />
-                </div>
-
                 <button type="submit" class="btn-submit" :disabled="isLoading">
                     {{ isLoading ? "Verificando..." : "Activar mi cuenta" }}
                 </button>
@@ -97,59 +126,46 @@
                     ← Volver a ingresar DNI
                 </button>
             </form>
+            <div class="links-container">
+                <RouterLink to="/login/alumno" class="back-link">
+                    ¿Tenes cuenta? inicia sesión
+                </RouterLink>
+
+                <RouterLink to="/" class="back-link">
+                    ← Volver al inicio
+                </RouterLink>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
 import { ref, reactive } from "vue";
-import axios from "axios"; // Recomiendo usar axios directo aquí o mapearlo en tu auth-service
+import { registro, verificarCodigo } from "../../services/auth-service.js";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+
 const step = ref(1);
 const isLoading = ref(false);
+
 const errorMessage = ref("");
 const successMessage = ref("");
+
 const confirmarContrasena = ref("");
 
 const registroData = reactive({
+    nombre: "",
+    apellido: "",
+    fecha_nacimiento: "",
     dni: "",
+    email: "",
     codigo: "",
     contrasena: "",
-    id_rol: 3, // Alumno
+    id_rol: 3,
 });
 
-// PASO 1: Enviar DNI para disparar el Mail desde el backend
 const solicitarCodigo = async () => {
-    errorMessage.value = "";
-    successMessage.value = "";
-    isLoading.value = true;
-
-    try {
-        // Apunta al endpoint de tu backend que genera códigos
-        const response = await axios.post(
-            "http://localhost:3000/api/auth/solicitar-codigo",
-            {
-                dni: registroData.dni,
-            },
-        );
-
-        if (response.data.success) {
-            successMessage.value = `Código enviado con éxito a: ${response.data.emailEnmascarado}`;
-            step.value = 2; // Avanzamos al paso 2
-        }
-    } catch (error) {
-        errorMessage.value =
-            error.response?.data?.message ||
-            "El DNI no figura en el padrón o ya tiene usuario.";
-    } finally {
-        isLoading.value = false;
-    }
-};
-
-// PASO 2: Confirmar código y registrar
-const handleRegister = async () => {
     errorMessage.value = "";
     successMessage.value = "";
 
@@ -161,18 +177,47 @@ const handleRegister = async () => {
     isLoading.value = true;
 
     try {
-        const response = await axios.post(
-            "http://localhost:3000/api/auth/confirmar-registro",
-            registroData,
-        );
-        if (response.data.success) {
-            alert("Cuenta activada de forma exitosa. Ya podés iniciar sesión.");
-            router.push("/login");
+        const response = await registro(registroData);
+
+        if (!response.success) {
+            errorMessage.value = response.message;
+            return;
         }
-    } catch (error) {
-        errorMessage.value =
-            error.response?.data?.message ||
-            "El código ingresado es inválido o expiró.";
+
+        successMessage.value = response.message;
+        step.value = 2;
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+const verificar = async () => {
+    errorMessage.value = "";
+    successMessage.value = "";
+
+    isLoading.value = true;
+
+    try {
+        const info = {
+            nombre: registroData.nombre,
+            apellido: registroData.apellido,
+            email: registroData.email,
+            codigo: registroData.codigo,
+            contrasena: registroData.contrasena,
+            id_rol: registroData.id_rol,
+        };
+        const response = await verificarCodigo(info);
+
+        if (!response.success) {
+            errorMessage.value = response.message;
+            return;
+        }
+
+        successMessage.value = response.message;
+
+        router.push("/");
+
+        console.log("TOKEN:", response.token);
     } finally {
         isLoading.value = false;
     }
@@ -180,41 +225,3 @@ const handleRegister = async () => {
 </script>
 
 <style src="../../assets/auth.css" scoped></style>
-<style scoped>
-.field-help {
-    display: block;
-    margin-top: 4px;
-    font-size: 0.75rem;
-    color: #64748b;
-}
-.verification-code {
-    text-align: center;
-    font-size: 1.5rem;
-    letter-spacing: 4px;
-    font-weight: bold;
-}
-.success-banner {
-    background-color: #d1e7dd;
-    color: #0f5132;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-size: 0.9rem;
-    text-align: center;
-    border: 1px solid #badbcc;
-}
-.btn-link {
-    background: none;
-    border: none;
-    color: #64748b;
-    margin-top: 15px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    width: 100%;
-    text-align: center;
-}
-.btn-link:hover {
-    text-decoration: underline;
-    color: #334155;
-}
-</style>

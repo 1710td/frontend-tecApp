@@ -13,74 +13,88 @@ export const login = async (loginData) => {
       contrasena: loginData.contrasena,
     });
 
-    // FIX 1: Guardamos en Pinia el TOKEN y el USUARIO REAL que devuelve el backend
-    // (con su id, nombre_rol y array de permisos)
     const { token, usuario } = response.data;
+
+    // Guardar sesión
     authStore.login(token, usuario);
 
-    // FIX 3: Redirección dinámica basada en el rol para evitar bloqueos del Router
-    //alert(authStore.rol);
-    if (authStore.rol === "root") {
-      router.push("/dashboard-administrador");
-      return {
-        success: true,
-      };
-    } else {
-      router.push("/login/administrador"); // Alumnos, preceptores, etc.
-      return {
-        success: false,
-      };
-    }
+    // Redireccionar según el rol
+    switch (usuario.nombre_rol?.toLowerCase()) {
+      case "root":
+        router.push("/dashboard-administrador");
+        break;
 
-    if (authStore.rol === "alumno") {
-      router.push("/dashboard-alumno");
-      return {
-        success: false,
-        message: "No tienes permisos para acceder a esta sección.",
-      };
-    } else {
-      router.push("/inicio");
-      return {
-        success: true,
-      };
+      case "preceptor":
+        router.push("/dashboard-preceptor");
+        break;
+
+      case "profesor":
+        router.push("/dashboard-administrador");
+        break;
+
+      case "alumno":
+        router.push("/dashboard-alumno");
+        break;
+
+      default:
+        router.push("/");
+        break;
     }
 
     return {
       success: true,
+      token,
+      usuario,
     };
   } catch (error) {
-    let errorMessage =
-      "Ocurrió un error inesperado al conectar con el servidor.";
+    let errorMessage = "Ocurrió un error inesperado.";
 
     if (error.response) {
-      const status = error.response.status;
-      const data = error.response.data;
+      switch (error.response.status) {
+        case 400:
+          errorMessage = "Faltan datos.";
+          break;
 
-      errorMessage = data?.message || `Error del servidor (${status})`;
+        case 401:
+          errorMessage = "Correo o contraseña incorrectos.";
+          break;
 
-      if (status === 401) errorMessage = "Credenciales incorrectas.";
-      if (status === 404) errorMessage = "El usuario no existe.";
-      if (status === 429)
-        errorMessage = "Demasiados intentos. Intenta más tarde.";
+        case 404:
+          errorMessage = "El usuario no existe.";
+          break;
+
+        case 429:
+          errorMessage = "Demasiados intentos.";
+          break;
+
+        default:
+          errorMessage =
+            error.response.data?.error ||
+            error.response.data?.message ||
+            "Error del servidor.";
+      }
     } else if (error.request) {
-      errorMessage =
-        "No se pudo conectar con el servidor. Verifica tu internet.";
+      errorMessage = "No fue posible conectar con el servidor.";
     }
 
-    console.error("Error de login:", error);
-    return { success: false, message: errorMessage };
+    console.error(error);
+
+    return {
+      success: false,
+      message: errorMessage,
+    };
   }
 };
 
+/*
 export const registro = async (registroData) => {
   const authStore = useAuthStore();
 
   try {
     const response = await axios.post(`${API_URL}/registro`, {
-      nombre: registroData.nombre,
-      apellido: registroData.apellido,
+      dni: registroData.dni,
       email: registroData.email,
-      contrasena: registroData.contrasena,
+      fecha_nacimiento: registro.fecha_nacimiento,
       id_rol: registroData.id_rol,
     });
 
@@ -127,6 +141,71 @@ export const registro = async (registroData) => {
     }
 
     console.error("Error de registro:", error);
+    return {
+      success: false,
+      message: errorMessage,
+    };
+  }
+};
+*/
+
+export const registro = async (registroData) => {
+  try {
+    const response = await axios.post(`${API_URL}/iniciar-registro`, {
+      dni: registroData.dni,
+      nacimiento: registroData.fecha_nacimiento,
+      email: registroData.email,
+    });
+
+    return {
+      success: true,
+      message: response.data.message,
+    };
+  } catch (error) {
+    let errorMessage = "Ocurrió un error inesperado.";
+
+    if (error.response) {
+      const status = error.response.status;
+
+      errorMessage = error.response.data?.message || errorMessage;
+
+      if (status === 400) errorMessage = "Los datos ingresados son inválidos.";
+
+      if (status === 401) errorMessage = "No fue posible validar tu identidad.";
+
+      if (status === 409) errorMessage = "Ese correo ya está registrado.";
+
+      if (status === 429)
+        errorMessage = "Demasiados intentos. Intentá nuevamente más tarde.";
+    }
+
+    return {
+      success: false,
+      message: errorMessage,
+    };
+  }
+};
+
+export const verificarCodigo = async (info) => {
+  try {
+    const response = await axios.post(`${API_URL}/verificar-codigo`, info);
+
+    return {
+      success: true,
+      token: response.data.token,
+      usuario: response.data.usuario,
+      message: response.data.mensaje,
+    };
+  } catch (error) {
+    let errorMessage = "No fue posible verificar el código.";
+
+    if (error.response) {
+      errorMessage =
+        error.response.data?.message ||
+        error.response.data?.error ||
+        errorMessage;
+    }
+
     return {
       success: false,
       message: errorMessage,
