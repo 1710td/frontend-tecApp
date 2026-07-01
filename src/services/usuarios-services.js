@@ -1,39 +1,38 @@
 import axios from "axios";
 import { useAuthStore } from "../stores/auth.js";
 
-export const obtenerUsuarios = async () => {
+const API_URL = "http://localhost:9000/api/usuarios";
+
+const getConfig = () => {
   const authStore = useAuthStore();
 
-  console.log("Token actual:", authStore.token);
+  return {
+    headers: {
+      Authorization: `Bearer ${authStore.token}`,
+      "Content-Type": "application/json",
+    },
+  };
+};
 
+// =========== USUARIOS ===========
+
+export const obtenerUsuarios = async () => {
   try {
-    const response = await axios.get(
-      "http://localhost:9000/api/usuarios/usuarios",
-      {
-        headers: {
-          // 2. Usamos la instancia (authStore) y no la definición
-          Authorization: `Bearer ${authStore.token}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    const response = await axios.get(`${API_URL}/usuarios`, getConfig());
 
-    // 3. Axios ya te entrega el objeto parseado directamente en response.data
-    const data = response.data;
-    console.log("Usuarios obtenidos:", data);
+    console.log("Usuarios obtenidos:", response.data);
 
     return response;
   } catch (error) {
-    console.error("Detalle del error:", error);
+    console.error("Error al obtener usuarios:", error);
     throw error;
   }
 };
 
 export const crearUsuario = async (usuarioData) => {
-  const authStore = useAuthStore();
   try {
     const response = await axios.post(
-      "http://localhost:9000/api/usuarios/usuarios",
+      `${API_URL}/usuarios/registro`,
       {
         nombre: usuarioData.nombre,
         apellido: usuarioData.apellido,
@@ -41,38 +40,26 @@ export const crearUsuario = async (usuarioData) => {
         contrasena: usuarioData.contrasena,
         id_rol: usuarioData.id_rol,
       },
-      {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`,
-          "Content-Type": "application/json",
-        },
-      },
+      getConfig(),
     );
 
-    const data = response.data;
+    console.log("Usuario creado:", response.data);
 
-    console.log(data);
     return {
       success: true,
+      data: response.data,
     };
   } catch (error) {
-    //alert(error);
+    console.error("Error al crear usuario:", error);
     throw error;
   }
 };
 
 export const eliminarUsuario = async (id) => {
-  const authStore = useAuthStore();
-
   try {
     const response = await axios.delete(
-      `http://localhost:9000/api/usuarios/usuarios/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`,
-          "Content-Type": "application/json",
-        },
-      },
+      `${API_URL}/usuarios/${id}`,
+      getConfig(),
     );
 
     return {
@@ -81,14 +68,13 @@ export const eliminarUsuario = async (id) => {
     };
   } catch (error) {
     if (error.response) {
-      console.error("ERROR RESPONSE->", error.response);
+      console.error("ERROR RESPONSE ->", error.response);
 
       return {
         success: false,
         status: error.response.status,
         message:
-          error.response.data?.message ||
-          "No se puede eliminar el curso. Verificá que no tenga alumnos asignados e intentá de nuevo.",
+          error.response.data?.message || "No se pudo eliminar el usuario.",
       };
     }
 
@@ -100,10 +86,9 @@ export const eliminarUsuario = async (id) => {
 };
 
 export const modificarUsuario = async (usuarioData) => {
-  const authStore = useAuthStore();
   try {
     const response = await axios.patch(
-      "http://localhost:9000/api/usuarios/usuarios",
+      `${API_URL}/usuarios`,
       {
         id_usuario: usuarioData.id_usuario,
         nombre: usuarioData.nombre,
@@ -112,52 +97,32 @@ export const modificarUsuario = async (usuarioData) => {
         contrasena: usuarioData.contrasena,
         id_rol: usuarioData.id_rol,
       },
-      {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`,
-          "Content-Type": "application/json",
-        },
-      },
+      getConfig(),
     );
 
-    const data = response.data;
+    console.log("Usuario modificado:", response.data);
 
-    console.log(data);
     return {
       success: true,
+      data: response.data,
     };
   } catch (error) {
-    //alert(error);
+    console.error("Error al modificar usuario:", error);
     throw error;
   }
 };
 
-//  =========== ROLES  ===========
+// =========== ROLES ===========
 
 export const obtenerRoles = async () => {
-  // 1. Ejecutamos el hook para instanciar el store
-  const authStore = useAuthStore();
-
-  // Opcional: Podés loguearlo para confirmar que el token existe antes de la petición
-  console.log("Token actual:", authStore.token);
-
   try {
-    const response = await axios.get(
-      "http://localhost:9000/api/usuarios/roles",
-      {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    const response = await axios.get(`${API_URL}/roles`, getConfig());
 
-    const data = response.data;
-    console.log("roles obtenidos:", data);
+    console.log("Roles obtenidos:", response.data);
 
     return response;
   } catch (error) {
-    //alert(`No se encontraron roles: ${error.message}`);
-    console.error("Detalle del error:", error);
+    console.error("Error al obtener roles:", error);
+    throw error;
   }
 };

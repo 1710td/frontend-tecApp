@@ -13,10 +13,10 @@
         <div class="sidebar-section">General</div>
         <div
             class="nav-item"
-            :class="{ active: vistaActual === 'overview' }"
-            @click="$emit('cambiar-vista', 'overview')"
+            :class="{ active: vistaActual === 'curso' }"
+            @click="$emit('cambiar-vista', 'curso')"
         >
-            <i class="ti ti-layout-dashboard" aria-hidden="true"></i>Inicio
+            <i class="ti ti-layout-dashboard" aria-hidden="true"></i>Mi curso
         </div>
 
         <div class="sidebar-section">Académico</div>
@@ -39,7 +39,8 @@
             :class="{ active: vistaActual === 'calificaciones' }"
             @click="$emit('cambiar-vista', 'calificaciones')"
         >
-            <i class="ti ti-report-analytics" aria-hidden="true"></i>Boletín Digital
+            <i class="ti ti-report-analytics" aria-hidden="true"></i>Boletín
+            Digital
         </div>
 
         <div class="sidebar-section">Comunidad</div>
@@ -121,7 +122,7 @@ const shortName = computed(() => {
     width: 28px;
     height: 28px;
     border-radius: 6px;
-    background: #007bff; /* Student Blue instead of Admin Red */
+    background: #cd322c;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -170,8 +171,8 @@ const shortName = computed(() => {
 }
 
 .nav-item.active {
-    background: #e6f0ff;
-    color: #0056b3;
+    background: #fbf0f0;
+    color: #a52420;
 }
 
 .nav-item i {
@@ -195,7 +196,7 @@ const shortName = computed(() => {
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: #007bff;
+    background: #cd322c;
     color: #fff;
     font-size: 11px;
     font-weight: 500;

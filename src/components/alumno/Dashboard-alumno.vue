@@ -4,16 +4,16 @@
         role="main"
         aria-label="Panel de alumno del sistema de gestión escolar"
     >
-        <Sidebar 
-            :vista-actual="currentView" 
+        <Sidebar
+            :vista-actual="currentView"
             :student-name="studentName"
             :curso="studentCurso"
-            @cambiar-vista="setView" 
+            @cambiar-vista="setView"
         />
 
         <div class="main">
-            <Topbar 
-                :vista-actual="currentView" 
+            <Topbar
+                :vista-actual="currentView"
                 :student-name="studentName"
                 :user-dni="studentDni"
                 :curso="studentCurso"
@@ -28,6 +28,7 @@
                 <ProfesoresView v-if="currentView === 'profesores'" />
                 <CalificacionesView v-if="currentView === 'calificaciones'" />
                 <NoticiasView v-if="currentView === 'noticias'" />
+                <CursosView v-if="currentView === 'curso'" />
             </div>
         </div>
     </div>
@@ -41,11 +42,12 @@ import Sidebar from "./views/Sidebar.vue";
 import Topbar from "./views/Topbar.vue";
 import OverviewView from "./views/Overview.vue";
 import MateriasView from "./views/MateriasView.vue";
+import CursosView from "./views/CursosView.vue";
 import ProfesoresView from "./views/ProfesoresView.vue";
 import CalificacionesView from "./views/CalificacionesView.vue";
 import NoticiasView from "./views/NoticiasView.vue";
 
-const currentView = ref("overview");
+const currentView = ref("materias");
 const authStore = useAuthStore();
 
 const studentName = ref("Alumno");

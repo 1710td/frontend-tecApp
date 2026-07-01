@@ -13,7 +13,8 @@
             </div>
             <div class="metric-card">
                 <div class="metric-label">
-                    <i class="ti ti-clock" aria-hidden="true"></i>Carga Horaria Semanal
+                    <i class="ti ti-clock" aria-hidden="true"></i>Carga Horaria
+                    Semanal
                 </div>
                 <div class="metric-value">32 hs</div>
                 <span class="metric-badge badge-gray">Plan Técnico 2026</span>
@@ -80,7 +81,10 @@
                                 <strong>{{ materia.nombre_materia }}</strong>
                             </td>
                             <td>
-                                {{ materia.departamento || "Tecnología / Ciencias" }}
+                                {{
+                                    materia.departamento ||
+                                    "Tecnología / Ciencias"
+                                }}
                             </td>
                             <td>
                                 {{
@@ -148,7 +152,8 @@
                     <div class="detail-item">
                         <span class="detail-label">Departamento Académico</span>
                         <span class="detail-value">{{
-                            materiaSeleccionada.departamento || "Tecnología / Informática"
+                            materiaSeleccionada.departamento ||
+                            "Tecnología / Informática"
                         }}</span>
                     </div>
                     <div class="detail-item">
@@ -159,19 +164,55 @@
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Correlatividad</span>
-                        <span class="detail-value">Ninguna (Materia regular)</span>
+                        <span class="detail-value"
+                            >Ninguna (Materia regular)</span
+                        >
                     </div>
                 </div>
 
-                <div class="program-content" style="margin-top: 24px;">
-                    <h3 style="font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 12px;">
+                <div class="program-content" style="margin-top: 24px">
+                    <h3
+                        style="
+                            font-size: 14px;
+                            font-weight: 600;
+                            color: #1e293b;
+                            margin-bottom: 12px;
+                        "
+                    >
                         Contenidos Generales del Programa
                     </h3>
-                    <div class="program-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
-                        <ul style="list-style: disc; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #475569;">
-                            <li>Eje Temático 1: Introducción a los conceptos fundamentales de la materia.</li>
-                            <li>Eje Temático 2: Aplicación práctica y resolución de problemas metodológicos.</li>
-                            <li>Eje Temático 3: Integración de contenidos y desarrollo del proyecto final.</li>
+                    <div
+                        class="program-box"
+                        style="
+                            background: #f8fafc;
+                            border: 1px solid #e2e8f0;
+                            border-radius: 8px;
+                            padding: 16px;
+                        "
+                    >
+                        <ul
+                            style="
+                                list-style: disc;
+                                padding-left: 20px;
+                                display: flex;
+                                flex-direction: column;
+                                gap: 8px;
+                                font-size: 13px;
+                                color: #475569;
+                            "
+                        >
+                            <li>
+                                Eje Temático 1: Introducción a los conceptos
+                                fundamentales de la materia.
+                            </li>
+                            <li>
+                                Eje Temático 2: Aplicación práctica y resolución
+                                de problemas metodológicos.
+                            </li>
+                            <li>
+                                Eje Temático 3: Integración de contenidos y
+                                desarrollo del proyecto final.
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -208,12 +249,42 @@ const fetchMaterias = async () => {
         } else {
             // Fallback mock data if server is down or empty
             materias.value = [
-                { id_materia: 1, nombre_materia: "Programación Web", departamento: "Informática", carga_horaria: "6" },
-                { id_materia: 2, nombre_materia: "Análisis Matemático", departamento: "Exactas", carga_horaria: "4" },
-                { id_materia: 3, nombre_materia: "Física Aplicada", departamento: "Exactas", carga_horaria: "4" },
-                { id_materia: 4, nombre_materia: "Sistemas Operativos", departamento: "Informática", carga_horaria: "4" },
-                { id_materia: 5, nombre_materia: "Química General", departamento: "Ciencias Naturales", carga_horaria: "4" },
-                { id_materia: 6, nombre_materia: "Base de Datos", departamento: "Informática", carga_horaria: "4" },
+                {
+                    id_materia: 1,
+                    nombre_materia: "Programación Web",
+                    departamento: "Informática",
+                    carga_horaria: "6",
+                },
+                {
+                    id_materia: 2,
+                    nombre_materia: "Análisis Matemático",
+                    departamento: "Exactas",
+                    carga_horaria: "4",
+                },
+                {
+                    id_materia: 3,
+                    nombre_materia: "Física Aplicada",
+                    departamento: "Exactas",
+                    carga_horaria: "4",
+                },
+                {
+                    id_materia: 4,
+                    nombre_materia: "Sistemas Operativos",
+                    departamento: "Informática",
+                    carga_horaria: "4",
+                },
+                {
+                    id_materia: 5,
+                    nombre_materia: "Química General",
+                    departamento: "Ciencias Naturales",
+                    carga_horaria: "4",
+                },
+                {
+                    id_materia: 6,
+                    nombre_materia: "Base de Datos",
+                    departamento: "Informática",
+                    carga_horaria: "4",
+                },
             ];
         }
     } catch (err) {
@@ -251,7 +322,7 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .metric-label {
@@ -305,7 +376,7 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .card-header {
@@ -459,7 +530,9 @@ table.mini td {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .animate-fade-in {

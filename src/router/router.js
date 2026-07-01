@@ -10,9 +10,12 @@ import Unavailable from "../components/administrador/Unavailable.vue";
 import LoginAdministrador from "../components/auth/LoginAdministrador.vue";
 import RegistroAdministrador from "../components/auth/RegistroAdministrador.vue";
 import DashboardAdministrador from "../components/administrador/Dashboard-administrador.vue";
+
 import DashboardAlumno from "../components/alumno/Dashboard-alumno.vue";
 import RegistroAlumno from "../components/auth/RegistroAlumno.vue";
 import UsuarioPerfil from "../components/administrador/views/UsuarioPerfil.vue";
+
+import CursosMaestros from "../components/profesores/CursosMaestros.vue";
 
 const routes = [
   {
@@ -74,6 +77,10 @@ const routes = [
   {
     path: "/perfil/administrador",
     component: UsuarioPerfil,
+  },
+  {
+    path: "/cursos-maestros",
+    component: CursosMaestros,
   },
   {
     path: "/unauthorized",

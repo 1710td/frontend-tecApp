@@ -608,32 +608,28 @@ const form = ref(formVacio());
 const fetchAlumnos = async (idCurso) => {
     cargandoAlumnos.value = true;
     errorAlumnos.value = "";
-    alumnosCurso.value = [];
 
-    try {
-        const res = await obtenerAlumnosCurso(idCurso);
-        const data = res.data || res;
-        alumnosCurso.value = Array.isArray(data) ? data : [];
-    } catch (e) {
-        errorAlumnos.value =
-            "No se pudo cargar la lista de alumnos. Verificá la conexión.";
-    } finally {
-        cargandoAlumnos.value = false;
+    const res = await obtenerAlumnosCurso(idCurso);
+
+    if (!res.success) {
+        errorAlumnos.value = res.message;
+        alumnosCurso.value = [];
+    } else {
+        alumnosCurso.value = Array.isArray(res.data) ? res.data : [];
     }
+
+    cargandoAlumnos.value = false;
 };
 
 const fetchProfesores = async () => {
-    cargando.value = true;
-    errorCarga.value = "";
-    try {
-        const res = await obtenerProfesores();
-        profesoresDisponibles.value = Array.isArray(res.data) ? res.data : [];
-    } catch {
-        errorCarga.value =
-            "Error crítico de red al sincronizar el padrón de profesores.";
-    } finally {
-        cargando.value = false;
+    const res = await obtenerProfesores();
+
+    if (!res.success) {
+        profesoresDisponibles.value = [];
+        return;
     }
+
+    profesoresDisponibles.value = Array.isArray(res.data) ? res.data : [];
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -662,15 +658,40 @@ const cambiarVista = (nuevaVista, curso = null) => {
 
 // ── CRUD ─────────────────────────────────────────────────────────────────────
 const fetchCursos = async () => {
+    /*
+  cargando.value = true;
+    errorCarga.value = "";
+
+    const res = await obtenerCursos();
+
+    if (!res.success) {
+        // Si el error es el 404 de "no se encontraron cursos", lo tratamos como estado vacío
+        if (res.message && res.message.toLowerCase().includes("encontraron")) {
+            cursos.value = [];
+        } else {
+            // Si es un error real (ej. 500 o sin conexión), sí mostramos el banner rojo
+            errorCarga.value = res.message;
+            cursos.value = [];
+        }
+    } else {
+        cursos.value = Array.isArray(res.data) ? res.data : [];
+    }
+
+    cargando.value = false;
+*/
     cargando.value = true;
     errorCarga.value = "";
     try {
         const res = await obtenerCursos();
-        const data = res.data || res;
+        // Soporta tanto si el array viene directo en res o dentro de res.data
+        const data = res?.data || res;
         cursos.value = Array.isArray(data) ? data : [];
-    } catch {
+    } catch (error) {
         errorCarga.value =
-            "No se pudo cargar la lista de cursos. Verificá la conexión con el servidor.";
+            error?.response?.data?.message ||
+            error?.response?.data?.mensaje ||
+            error?.message ||
+            "Error crítico de red al listar todos los cursos.";
     } finally {
         cargando.value = false;
     }
@@ -681,35 +702,39 @@ const guardarCurso = async () => {
     exitoGuardar.value = false;
     guardando.value = true;
 
-    try {
-        // Parseamos ints
-        form.value.ciclo_lectivo = parseInt(form.value.ciclo_lectivo);
+    form.value.ciclo_lectivo = parseInt(form.value.ciclo_lectivo);
 
-        // Solo intentamos parsear si existe un valor, de lo contrario enviamos null
-        form.value.id_profesor_titular = form.value.id_profesor_titular
-            ? parseInt(form.value.id_profesor_titular)
-            : null;
+    form.value.capacidad_maxima = form.value.capacidad_maxima
+        ? parseInt(form.value.capacidad_maxima)
+        : null;
 
-        if (form.value.capacidad_maxima) {
-            form.value.capacidad_maxima = parseInt(form.value.capacidad_maxima);
-        }
+    form.value.id_profesor_titular = form.value.id_profesor_titular
+        ? parseInt(form.value.id_profesor_titular)
+        : null;
 
-        if (vistaActiva.value === "crear") {
-            await crearCurso(form.value);
-        } else {
-            await modificarCurso(form.value);
-        }
-        exitoGuardar.value = true;
-        await fetchCursos();
-        setTimeout(() => cambiarVista("lista"), 800);
-    } catch (e) {
-        errorGuardar.value =
-            e?.response?.data?.mensaje ||
-            e?.response?.data ||
-            "Error al guardar el curso. Intentá de nuevo.";
-    } finally {
-        guardando.value = false;
+    let res;
+
+    if (vistaActiva.value === "crear") {
+        res = await crearCurso(form.value);
+    } else {
+        res = await modificarCurso(form.value);
     }
+
+    if (!res.success) {
+        errorGuardar.value = res.message;
+        guardando.value = false;
+        return;
+    }
+
+    exitoGuardar.value = true;
+
+    await fetchCursos();
+
+    setTimeout(() => {
+        cambiarVista("lista");
+    }, 800);
+
+    guardando.value = false;
 };
 
 const pedirConfirmacion = (curso) => {
@@ -721,27 +746,22 @@ const confirmarEliminar = async () => {
     eliminando.value = true;
     errorEliminar.value = "";
 
-    try {
-        const respuesta = await eliminarCurso(cursoAEliminar.value.id_curso);
+    const res = await eliminarCurso(cursoAEliminar.value.id_curso);
 
-        // Si tu backend arroja catch directo en error, esto asume que success es false.
-        if (respuesta && respuesta.success === false) {
-            errorEliminar.value = respuesta.message;
-        } else {
-            cursos.value = cursos.value.filter(
-                (c) => c.id_curso !== cursoAEliminar.value.id_curso,
-            );
-            cursoAEliminar.value = null;
-        }
-    } catch (e) {
-        errorEliminar.value =
-            e?.response?.data?.mensaje ||
-            "Ocurrió un error inesperado al eliminar el curso.";
-    } finally {
+    if (!res.success) {
+        errorEliminar.value = res.message;
         eliminando.value = false;
+        return;
     }
-};
 
+    cursos.value = cursos.value.filter(
+        (c) => c.id_curso !== cursoAEliminar.value.id_curso,
+    );
+
+    cursoAEliminar.value = null;
+
+    eliminando.value = false;
+};
 //onMounted(fetchCursos);
 onMounted(() => {
     fetchCursos();

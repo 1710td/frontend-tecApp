@@ -10,7 +10,14 @@
         </div>
 
         <div class="user-section" ref="profileMenuRef">
-            <div class="user-meta-info" style="display: inline-flex; align-items: center; margin-right: 16px;">
+            <div
+                class="user-meta-info"
+                style="
+                    display: inline-flex;
+                    align-items: center;
+                    margin-right: 16px;
+                "
+            >
                 <span class="curso-tag">{{ curso }}</span>
             </div>
             <button
@@ -195,13 +202,13 @@ const cerrarSesion = () => {
 }
 
 .curso-tag {
-    background: #e0f2fe;
-    color: #0369a1;
+    background: #fdf2f2; /* Fondo rojizo claro */
+    color: #cd322c; /* Rojo solicitado */
     font-weight: 600;
     font-size: 12px;
     padding: 4px 10px;
     border-radius: 9999px;
-    border: 1px solid #bae6fd;
+    border: 1px solid #fca5a5; /* Borde rojizo claro */
 }
 
 .avatar-btn {
@@ -303,7 +310,7 @@ const cerrarSesion = () => {
 .badge-value {
     font-size: 12px;
     font-weight: 600;
-    color: #007bff;
+    color: #cd322c; /* Rojo solicitado */
 }
 
 .dropdown-item {

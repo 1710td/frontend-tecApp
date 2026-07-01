@@ -662,13 +662,21 @@ async function fetchNoticias() {
     errorCarga.value = "";
     try {
         const res = await obtenerNoticias();
-        noticias.value = Array.isArray(res)
+        /*
+      noticias.value = Array.isArray(res)
             ? res
             : Array.isArray(res?.noticias)
               ? res.noticias
-              : [];
+            : [];
+*/
+        noticias.value = Array.isArray(data) ? data : [];
     } catch {
-        errorCarga.value = "Error de red al sincronizar las noticias.";
+        //errorCarga.value = "Error de red al sincronizar las noticias.";
+        errorCarga.value =
+            error?.response?.data?.message ||
+            error?.response?.data?.mensaje ||
+            error?.message ||
+            "Error crítico al listar noticias.";
     } finally {
         cargando.value = false;
     }

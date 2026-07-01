@@ -82,6 +82,13 @@
             <i class="ti ti-speakerphone" aria-hidden="true"></i>Noticias
         </div>
 
+        <div
+            class="nav-item"
+            :class="{ active: vistaActual === 'comunicados' }"
+            @click="$emit('cambiar-vista', 'comunicados')"
+        >
+            <i class="ti ti-speakerphone" aria-hidden="true"></i>Comunicados
+        </div>
         <div class="sidebar-section">Sistema</div>
         <div
             class="nav-item"

@@ -206,6 +206,13 @@
                             alumnoSeleccionado.domicilio || "No registrado"
                         }}</span>
                     </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">ID de usuario</span>
+                        <span class="detail-value">{{
+                            alumnoSeleccionado.id_usuario || "Aún no registrado como usuario"
+                        }}</span>
+                    </div>
                 </div>
 
                 <div class="info-box">
@@ -500,7 +507,6 @@ const etiquetaEstado = {
     inactive: "Baja / Inactivo",
 };
 
-// Se mantiene id_curso como "" por defecto para que coincida con la opción "Sin asignar"
 const formVacio = () => ({
     id_alumno: null,
     nombre: "",
@@ -521,7 +527,6 @@ const cambiarVista = (nuevaVista, alumno = null) => {
     exitoGuardar.value = false;
 
     if (nuevaVista === "editar" && alumno) {
-        // Al editar, nos aseguramos de bindear todos los campos
         form.value = {
             ...alumno,
             id_curso: alumno.id_curso || "",
@@ -535,15 +540,20 @@ const cambiarVista = (nuevaVista, alumno = null) => {
     }
 };
 
-// ── Controladores CRUD Async ──────────────────────────────────────────────────
+// ── Controladores CRUD Async con Manejo de Errores Corregido ─────────────────
 const fetchAlumnos = async () => {
     cargando.value = true;
     errorCarga.value = "";
     try {
         const res = await obtenerAlumnos();
-        alumnos.value = Array.isArray(res.data) ? res.data : [];
-    } catch {
+        // Soporta tanto si el array viene directo en res o dentro de res.data
+        const data = res?.data || res;
+        alumnos.value = Array.isArray(data) ? data : [];
+    } catch (error) {
         errorCarga.value =
+            error?.response?.data?.message ||
+            error?.response?.data?.mensaje ||
+            error?.message ||
             "Error crítico de red al sincronizar el padrón de alumnos.";
     } finally {
         cargando.value = false;
@@ -553,9 +563,13 @@ const fetchAlumnos = async () => {
 const fetchCursos = async () => {
     try {
         const res = await obtenerCursos();
-        cursosDisponibles.value = Array.isArray(res.data) ? res.data : [];
-    } catch (e) {
-        console.error("No se pudieron cargar los cursos disponibles:", e);
+        const data = res?.data || res;
+        cursosDisponibles.value = Array.isArray(data) ? data : [];
+    } catch (error) {
+        console.error(
+            "No se pudieron cargar los cursos disponibles:",
+            error?.response?.data?.message || error?.message || error,
+        );
     }
 };
 
@@ -565,8 +579,6 @@ const guardarAlumno = async () => {
     guardando.value = true;
 
     try {
-        // Si el valor es "", lo parseamos a null si el backend lo requiere,
-        // de lo contrario lo enviamos como viene en el objeto
         const payload = { ...form.value };
         if (payload.id_curso === "") {
             payload.id_curso = null;
@@ -580,9 +592,11 @@ const guardarAlumno = async () => {
         exitoGuardar.value = true;
         await fetchAlumnos();
         setTimeout(() => cambiarVista("lista"), 800);
-    } catch (e) {
+    } catch (error) {
         errorGuardar.value =
-            e?.response?.data?.mensaje ||
+            error?.response?.data?.message ||
+            error?.response?.data?.mensaje ||
+            error?.message ||
             "No se pudo actualizar la ficha del alumno.";
     } finally {
         guardando.value = false;
@@ -600,16 +614,24 @@ const confirmarEliminar = async () => {
 
     try {
         const respuesta = await eliminarAlumno(alumnoAEliminar.value.id_alumno);
-        if (respuesta.success) {
+
+        // Maneja tanto el caso donde el servicio lanza un Error HTTP, como si devuelve un objeto { success: false }
+        if (respuesta && respuesta.success === false) {
+            errorEliminar.value =
+                respuesta.message ||
+                respuesta.mensaje ||
+                "No se pudo completar la eliminación.";
+        } else {
             alumnos.value = alumnos.value.filter(
                 (a) => a.id_alumno !== alumnoAEliminar.value.id_alumno,
             );
             alumnoAEliminar.value = null;
-        } else {
-            errorEliminar.value = respuesta.message;
         }
-    } catch {
+    } catch (error) {
         errorEliminar.value =
+            error?.response?.data?.message ||
+            error?.response?.data?.mensaje ||
+            error?.message ||
             "Ocurrió un error inesperado al dar de baja el registro.";
     } finally {
         eliminando.value = false;

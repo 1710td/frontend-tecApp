@@ -158,12 +158,7 @@
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Contraseña</span>
-                        <span class="detail-value">
-                            {{
-                                usuarioSeleccionado.contrasena ||
-                                "Sin contraseña"
-                            }}
-                        </span>
+                        <span class="detail-value"> ******** </span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">ID Usuario</span>
@@ -237,7 +232,8 @@
                         <input
                             v-model="form.contrasena"
                             type="password"
-                            required
+                            :required="vistaActiva === 'crear'"
+                            placeholder="Dejar en blanco para conservar la actual"
                         />
                     </div>
                 </div>
@@ -251,10 +247,10 @@
                             </option>
                             <option
                                 v-for="rol in listaRoles"
-                                :key="rol.id_rol || 'Rol'"
-                                :value="rol.id_rol || 'Rol'"
+                                :key="rol.id_rol"
+                                :value="rol.id_rol"
                             >
-                                {{ rol.nombre_rol || "Rol" }}
+                                {{ rol.nombre_rol }}
                             </option>
                         </select>
                     </div>
@@ -405,7 +401,14 @@ const cambiarVista = (nuevaVista, usuario = null) => {
     exitoGuardar.value = false;
 
     if (nuevaVista === "editar" && usuario) {
-        form.value = { ...usuario };
+        form.value = {
+            id_usuario: usuario.id_usuario,
+            nombre: usuario.nombre,
+            apellido: usuario.apellido,
+            email: usuario.email,
+            contrasena: "",
+            id_rol: usuario.id_rol ?? usuario.rol?.id_rol ?? null,
+        };
     } else if (nuevaVista === "crear") {
         form.value = formVacio();
     } else if (nuevaVista === "detalles" && usuario) {
@@ -419,13 +422,15 @@ const fetchUsuarios = async () => {
     errorCarga.value = "";
     try {
         const res = await obtenerUsuarios();
-        if (!res) throw new Error("No se obtuvo respuesta del servidor");
 
-        const data = res.data;
+        const data = res?.data || res;
         usuarios.value = Array.isArray(data) ? data : data?.data || [];
     } catch (e) {
         errorCarga.value =
-            "No se pudo cargar la lista de usuarios. Verificá la conexión con el servidor.";
+            error?.response?.data?.message ||
+            error?.response?.data?.mensaje ||
+            error?.message ||
+            "Error crítico de red al sincronizar el padrón de usuarios.";
     } finally {
         cargando.value = false;
     }
@@ -454,18 +459,23 @@ const guardarUsuario = async () => {
     try {
         const payload = { ...form.value };
 
+        let respuesta;
         if (vistaActiva.value === "crear") {
-            await crearUsuario(payload);
+            respuesta = await crearUsuario(payload);
         } else {
-            await modificarUsuario(payload);
+            respuesta = await modificarUsuario(payload);
         }
-
+        if (!respuesta.success) {
+            errorGuardar.value = respuesta.message;
+            return;
+        }
         exitoGuardar.value = true;
         await fetchUsuarios();
         setTimeout(() => cambiarVista("lista"), 800);
     } catch (e) {
         errorGuardar.value =
-            e?.response?.data?.mensaje ||
+            respuesta?.message ||
+            e?.response?.data?.message ||
             "Error al guardar los datos del usuario. Intentá de nuevo.";
     } finally {
         guardando.value = false;
@@ -487,7 +497,7 @@ const confirmarEliminar = async () => {
         );
 
         // Ajustá esta validación según cómo devuelva los datos tu API
-        if (respuesta && !respuesta.error) {
+        if (respuesta?.success) {
             usuarios.value = usuarios.value.filter(
                 (u) => u.id_usuario !== usuarioAEliminar.value.id_usuario,
             );

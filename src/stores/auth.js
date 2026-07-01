@@ -53,6 +53,10 @@ export const useAuthStore = defineStore("auth", () => {
   // Extra: Un helper muy útil para usar con v-if en tus componentes Vue
   const tienePermiso = (permiso) => permisos.value.includes(permiso);
 
+  const guardarInfo = (info) => {
+    localStorage.setItem("alumno", JSON.stringify(info));
+  };
+
   return {
     token,
     usuario,
@@ -62,5 +66,6 @@ export const useAuthStore = defineStore("auth", () => {
     login,
     logout,
     tienePermiso,
+    guardarInfo,
   };
 });

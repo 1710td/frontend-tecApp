@@ -162,7 +162,7 @@ const registroData = reactive({
     email: "",
     codigo: "",
     contrasena: "",
-    id_rol: 3,
+    id_rol: 1,
 });
 
 const solicitarCodigo = async () => {

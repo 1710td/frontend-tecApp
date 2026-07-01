@@ -19,6 +19,7 @@
                 <PersonalView v-if="currentView === 'personal'" />
                 <UsuariosView v-if="currentView === 'usuarios'" />
                 <AsistenciasView v-if="currentView === 'asistencias'" />
+                <ComunicadosView v-if="currentView === 'comunicados'" />
             </div>
         </div>
     </div>
@@ -33,6 +34,7 @@ import AlumnosView from "./views/AlumnosView.vue";
 import ProfesoresView from "./views/ProfesoresView.vue";
 import CursosView from "./views/CursosView.vue";
 import NoticiasView from "./views/NoticiasView.vue";
+import ComunicadosView from "./views/ComunicadosView.vue";
 import AsignacionesView from "./views/AsignacionesView.vue";
 import MateriasView from "./views/MateriasView.vue";
 import PersonalView from "./views/PersonalView.vue";
