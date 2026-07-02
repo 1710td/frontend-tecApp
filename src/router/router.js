@@ -29,7 +29,12 @@ import PrestamosBiblotecario from "../components/bibliotecario/PrestamosBiblotec
 import BibliotecaDashboard from "../components/bibliotecario/BibliotecaDashboard.vue";
 
 // Profesores
-import CursosMaestros from "../components/profesores/CursosMaestros.vue";
+import DashboardProfesor from "../components/profesores/DashboardProfesor.vue";
+import MateriasView from "../components/profesores/views/MateriasView.vue";
+import AsistenciasView from "../components/profesores/views/AsistenciasView.vue";
+import InicioViewProfesor from "../components/profesores/views/InicioView.vue";
+import NoticiasViewProfesor from "../components/profesores/views/NoticiasView.vue";
+import CursosViewProfesor from "../components/profesores/views/CursosView.vue";
 
 const routes = [
   { path: "/", component: Login },
@@ -44,6 +49,8 @@ const routes = [
   {
     path: "/alumno",
     component: DashboardAlumno, // El layout que contiene Sidebar y Topbar
+    meta: { requiresAuth: true, role: "alumno" },
+
     children: [
       { path: "inicio", component: InicioView },
       { path: "noticias", component: NoticiasView },
@@ -81,7 +88,20 @@ const routes = [
     meta: { requiresAuth: true, role: "bibliotecario" },
   },
   { path: "/perfil/administrador", component: UsuarioPerfil },
-  { path: "/cursos-maestros", component: CursosMaestros },
+
+  {
+    path: "/profesor",
+    component: DashboardProfesor,
+    //meta: { requiresAuth: true, role: "profesor" },
+    children: [
+      { path: "inicio", component: InicioViewProfesor },
+      { path: "noticias", component: NoticiasViewProfesor },
+      { path: "cursos", component: CursosViewProfesor },
+      { path: "materias", component: MateriasView },
+      { path: "asistencias", component: AsistenciasView },
+      { path: "", redirect: "/profesor/inicio" },
+    ],
+  },
 
   { path: "/:pathMatch(.*)*", redirect: "/" },
 ];
@@ -98,11 +118,7 @@ router.beforeEach((to, from, next) => {
     return next("/");
   }
 
-  if (
-    to.meta.role &&
-    authStore.rol !== to.meta.role &&
-    authStore.rol !== "root"
-  ) {
+  if (to.meta.role && authStore.rol !== to.meta.role && authStore.rol !== "root") {
     return next("/unauthorized");
   }
 
