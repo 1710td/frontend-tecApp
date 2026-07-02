@@ -80,10 +80,9 @@ export const login = async (loginData) => {
         break;
 
       case "alumno":
-        //alert(usuario.id);
         const alumnoInfo = await obtenerInfoAlumno(usuario.id);
         authStore.guardarInfo(alumnoInfo);
-        router.push("/dashboard-alumno");
+        router.push("/alumno/inicio");
         break;
 
       default:

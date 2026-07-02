@@ -1,65 +1,49 @@
 <template>
-    <aside class="sidebar" aria-label="Navegación Alumno">
-        <div class="sidebar-header">
-            <div class="sidebar-logo">
-                <div class="logo-dot">SGE</div>
-                <div>
-                    <div class="logo-title">Gestión Escolar</div>
-                    <div class="logo-sub">Portal Alumno</div>
-                </div>
-            </div>
-        </div>
+    <aside class="sidebar" :class="{ open: abierto }" id="sidebar-alumno">
+        <div class="sidebar-inner">
+            <!-- Mobile close button -->
+            <button class="sidebar-close" @click="$emit('close')" aria-label="Cerrar menú">
+                <i class="fas fa-times"></i>
+            </button>
 
-        <div class="sidebar-section">General</div>
-        <div
-            class="nav-item"
-            :class="{ active: vistaActual === 'curso' }"
-            @click="$emit('cambiar-vista', 'curso')"
-        >
-            <i class="ti ti-layout-dashboard" aria-hidden="true"></i>Mi curso
-        </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <RouterLink to="/alumno/inicio" active-class="active" @click="$emit('close')">
+                        <li>
+                            <div class="nav-icon"><i class="fas fa-home"></i></div>
+                            <span>Inicio</span>
+                        </li>
+                    </RouterLink>
+                    <RouterLink to="/alumno/noticias" active-class="active" @click="$emit('close')">
+                        <li>
+                            <div class="nav-icon"><i class="fas fa-newspaper"></i></div>
+                            <span>Noticias</span>
+                        </li>
+                    </RouterLink>
+                    <RouterLink to="/alumno/cursos" active-class="active" @click="$emit('close')">
+                        <li>
+                            <div class="nav-icon"><i class="fas fa-graduation-cap"></i></div>
+                            <span>Cursos</span>
+                        </li>
+                    </RouterLink>
+                    <RouterLink to="/alumno/objetos-perdidos" active-class="active" @click="$emit('close')">
+                        <li>
+                            <div class="nav-icon"><i class="fas fa-box"></i></div>
+                            <span>Objetos Perdidos</span>
+                        </li>
+                    </RouterLink>
+                </ul>
+            </nav>
 
-        <div class="sidebar-section">Académico</div>
-        <div
-            class="nav-item"
-            :class="{ active: vistaActual === 'materias' }"
-            @click="$emit('cambiar-vista', 'materias')"
-        >
-            <i class="ti ti-book" aria-hidden="true"></i>Mis Materias
-        </div>
-        <div
-            class="nav-item"
-            :class="{ active: vistaActual === 'profesores' }"
-            @click="$emit('cambiar-vista', 'profesores')"
-        >
-            <i class="ti ti-chalkboard" aria-hidden="true"></i>Mis Profesores
-        </div>
-        <div
-            class="nav-item"
-            :class="{ active: vistaActual === 'calificaciones' }"
-            @click="$emit('cambiar-vista', 'calificaciones')"
-        >
-            <i class="ti ti-report-analytics" aria-hidden="true"></i>Boletín
-            Digital
-        </div>
-
-        <div class="sidebar-section">Comunidad</div>
-        <div
-            class="nav-item"
-            :class="{ active: vistaActual === 'noticias' }"
-            @click="$emit('cambiar-vista', 'noticias')"
-        >
-            <i class="ti ti-speakerphone" aria-hidden="true"></i>Noticias
-        </div>
-
-        <div class="sidebar-footer">
-            <div class="user-pill">
-                <div class="user-avatar">
-                    {{ initial }}
-                </div>
-                <div class="user-info">
-                    <p>{{ shortName }}</p>
-                    <span>{{ curso }}</span>
+            <div class="sidebar-footer">
+                <div class="sidebar-help" id="sidebar-help-btn">
+                    <div class="help-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <div class="help-text">
+                        <p class="help-title">¿Necesitás ayuda?</p>
+                        <p class="help-sub">Pixelina resolverá tu consulta.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -67,154 +51,197 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
-
-const props = defineProps({
-    vistaActual: {
-        type: String,
-        required: true,
+defineProps({
+    abierto: {
+        type: Boolean,
+        default: false,
     },
-    studentName: {
-        type: String,
-        default: "Alumno",
-    },
-    curso: {
-        type: String,
-        default: "Sin curso",
-    },
-});
+})
 
-defineEmits(["cambiar-vista"]);
-
-const initial = computed(() => {
-    return props.studentName.charAt(0).toUpperCase();
-});
-
-const shortName = computed(() => {
-    const parts = props.studentName.split(" ");
-    if (parts.length > 2) {
-        return `${parts[0]} ${parts[1]}`;
-    }
-    return props.studentName;
-});
+defineEmits(['close'])
 </script>
 
 <style scoped>
 .sidebar {
-    background: var(--color-background-primary, #ffffff);
-    border-right: 0.5px solid var(--color-border-tertiary, #e5e7eb);
+    width: 240px;
+    min-width: 240px;
+    background: linear-gradient(180deg, #d41515 0%, #8b0000 50%, #3d0000 100%);
+    color: white;
+    flex-shrink: 0;
+    position: sticky;
+    top: 70px;
+    height: calc(100vh - 70px);
+    z-index: 100;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sidebar-inner {
     display: flex;
     flex-direction: column;
+    height: 100%;
+    padding: 20px 14px;
 }
 
-.sidebar-header {
-    padding: 16px;
-    border-bottom: 0.5px solid var(--color-border-tertiary, #e5e7eb);
-}
-
-.sidebar-logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.logo-dot {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    background: #cd322c;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 11px;
-    font-weight: 500;
-    flex-shrink: 0;
-}
-
-.logo-title {
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--color-text-primary, #111827);
-}
-
-.logo-sub {
-    font-size: 10px;
-    color: var(--color-text-tertiary, #6b7280);
-}
-
-.sidebar-section {
-    padding: 8px 8px 4px;
-    font-size: 11px;
-    color: var(--color-text-tertiary, #6b7280);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-top: 8px;
-}
-
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 12px;
-    border-radius: 6px;
+.sidebar-close {
+    display: none;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
     cursor: pointer;
-    color: var(--color-text-secondary, #4b5563);
-    margin: 1px 6px;
-    transition: background 0.15s;
-    font-size: 12.5px;
+    font-size: 14px;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
 }
 
-.nav-item:hover {
-    background: var(--color-background-secondary, #f3f4f6);
-    color: var(--color-text-primary, #111827);
+.sidebar-close:hover {
+    background: rgba(255, 255, 255, 0.25);
 }
 
-.nav-item.active {
-    background: #fbf0f0;
-    color: #a52420;
+.sidebar-nav {
+    flex: 1;
 }
 
-.nav-item i {
-    font-size: 16px;
-    flex-shrink: 0;
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.sidebar-footer {
-    margin-top: auto;
-    padding: 12px;
-    border-top: 0.5px solid var(--color-border-tertiary, #e5e7eb);
+.sidebar-nav a {
+    text-decoration: none;
+    color: inherit;
+    display: block;
 }
 
-.user-pill {
+.sidebar-nav li {
+    padding: 12px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
 }
 
-.user-avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #cd322c;
-    color: #fff;
-    font-size: 11px;
-    font-weight: 500;
+.nav-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.sidebar-nav li:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.sidebar-nav li:hover .nav-icon {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-nav a.active li {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-nav a.active .nav-icon {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Footer help card */
+.sidebar-footer {
+    padding-top: 16px;
+}
+
+.sidebar-help {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sidebar-help:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.help-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.7);
     flex-shrink: 0;
 }
 
-.user-info p {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--color-text-primary, #111827);
-    line-height: 1.2;
+.help-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: white;
+    margin: 0;
 }
 
-.user-info span {
-    font-size: 11px;
-    color: var(--color-text-tertiary, #6b7280);
+.help-sub {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.55);
+    margin: 3px 0 0 0;
+}
+
+/* Responsive: mobile sidebar slides in from left */
+@media (max-width: 900px) {
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: none;
+        z-index: 200;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .sidebar-close {
+        display: flex;
+    }
+
+    .sidebar-inner {
+        padding-top: 56px;
+    }
 }
 </style>

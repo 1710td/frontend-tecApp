@@ -63,7 +63,6 @@
 <script setup>
 import { ref, reactive } from "vue";
 import { login } from "../../services/auth-service";
-import router from "../../router/router.js";
 
 const isLoading = ref(false);
 const errorMessage = ref("");
@@ -85,26 +84,7 @@ const handleLogin = async () => {
             return;
         }
 
-        switch (response.usuario.nombre_rol) {
-            case "root":
-                router.push("/dashboard-administrador");
-                break;
-
-            case "administrador":
-                router.push("/dashboard-administrador");
-                break;
-
-            case "profesor":
-                router.push("/dashboard-profesor");
-                break;
-
-            case "alumno":
-                router.push("/dashboard-alumno");
-                break;
-
-            default:
-                router.push("/");
-        }
+        // La redirección según rol ya la maneja auth-service.js
     } catch (error) {
         console.error(error);
         errorMessage.value = "No se pudo conectar con el servidor.";
