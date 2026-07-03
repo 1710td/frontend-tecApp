@@ -5,7 +5,8 @@ import { useAuthStore } from "../stores/auth.js";
 //      CONFIGURACIÓN Y HELPERS
 // ==========================================
 
-const API_URL = "http://localhost:9000/api/academico";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:9000/api";
+const API_URL = `${BASE_URL}/academico`;
 
 /**
  * Genera dinámicamente los headers con el token actualizado de Pinia
@@ -30,10 +31,7 @@ const manejarErrorApi = (error, mensajePorDefecto) => {
     return {
       success: false,
       status: error.response.status,
-      message:
-        error.response.data?.message ||
-        error.response.data?.error ||
-        mensajePorDefecto,
+      message: error.response.data?.message || error.response.data?.error || mensajePorDefecto,
     };
   }
 
@@ -71,11 +69,7 @@ export const crearCurso = async (cursoData) => {
       id_profesor_titular: cursoData.id_profesor_titular,
       estado: cursoData.estado,
     };
-    const response = await axios.post(
-      `${API_URL}/cursos`,
-      payload,
-      getConfig(),
-    );
+    const response = await axios.post(`${API_URL}/cursos`, payload, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al crear el curso");
@@ -95,11 +89,7 @@ export const modificarCurso = async (cursoData) => {
       id_profesor_titular: cursoData.id_profesor_titular,
       estado: cursoData.estado,
     };
-    const response = await axios.patch(
-      `${API_URL}/cursos`,
-      payload,
-      getConfig(),
-    );
+    const response = await axios.patch(`${API_URL}/cursos`, payload, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al modificar el curso");
@@ -111,10 +101,7 @@ export const eliminarCurso = async (id) => {
     const response = await axios.delete(`${API_URL}/cursos/${id}`, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
-    return manejarErrorApi(
-      error,
-      "No se puede eliminar el curso. Verificá que no tenga alumnos asignados e intentá de nuevo.",
-    );
+    return manejarErrorApi(error, "No se puede eliminar el curso. Verificá que no tenga alumnos asignados e intentá de nuevo.");
   }
 };
 
@@ -133,10 +120,7 @@ export const obtenerProfesores = async () => {
 
 export const obtenerProfesor = async (id) => {
   try {
-    const response = await axios.get(
-      `${API_URL}/profesores/${id}`,
-      getConfig(),
-    );
+    const response = await axios.get(`${API_URL}/profesores/${id}`, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "No se encontró el profesor");
@@ -145,16 +129,13 @@ export const obtenerProfesor = async (id) => {
 
 export const obtenerAsignacionesProfesor = async (id) => {
   try {
-    const response = await axios.get(
-      `${API_URL}/asignaciones/profesor/${id}`,
-      getConfig(),
-    );
-    return { success: true, data: response.data };
+    const response = await axios.get(`${API_URL}/asignaciones/profesor/${id}`, getConfig());
+    return {
+      success: true,
+      data: response.data
+    };
   } catch (error) {
-    return manejarErrorApi(
-      error,
-      "No se encontraron asignaciones para este profesor",
-    );
+    return manejarErrorApi(error, "No se encontraron asignaciones para este profesor");
   }
 };
 
@@ -173,11 +154,7 @@ export const crearProfesor = async (profesorData) => {
       titulo_habilitante: profesorData.titulo_habilitante,
       especialidad: profesorData.especialidad,
     };
-    const response = await axios.post(
-      `${API_URL}/profesores`,
-      payload,
-      getConfig(),
-    );
+    const response = await axios.post(`${API_URL}/profesores`, payload, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al crear el profesor");
@@ -200,11 +177,7 @@ export const modificarProfesor = async (profesorData) => {
       titulo_habilitante: profesorData.titulo_habilitante,
       especialidad: profesorData.especialidad,
     };
-    const response = await axios.patch(
-      `${API_URL}/profesores`,
-      payload,
-      getConfig(),
-    );
+    const response = await axios.patch(`${API_URL}/profesores`, payload, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al modificar el profesor");
@@ -213,16 +186,10 @@ export const modificarProfesor = async (profesorData) => {
 
 export const eliminarProfesor = async (id) => {
   try {
-    const response = await axios.delete(
-      `${API_URL}/profesores/${id}`,
-      getConfig(),
-    );
+    const response = await axios.delete(`${API_URL}/profesores/${id}`, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
-    return manejarErrorApi(
-      error,
-      "No se puede eliminar el Profesor. Verificá que no tenga cursos asignados e intentá de nuevo.",
-    );
+    return manejarErrorApi(error, "No se puede eliminar el Profesor. Verificá que no tenga cursos asignados e intentá de nuevo.");
   }
 };
 
@@ -232,10 +199,7 @@ export const eliminarProfesor = async (id) => {
 
 export const obtenerMiCurso = async (idCurso) => {
   try {
-    const response = await axios.get(
-      `${API_URL}/alumnos/mi-curso/${idCurso}`,
-      getConfig(),
-    );
+    const response = await axios.get(`${API_URL}/alumnos/mi-curso/${idCurso}`, getConfig());
     return {
       success: true,
       data: response.data,
@@ -259,10 +223,7 @@ export const obtenerAlumnos = async () => {
 
 export const obtenerAlumnosCurso = async (id) => {
   try {
-    const response = await axios.get(
-      `${API_URL}/alumnos/curso/${id}`,
-      getConfig(),
-    );
+    const response = await axios.get(`${API_URL}/alumnos/curso/${id}`, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "No se encontraron alumnos para este curso");
@@ -281,11 +242,7 @@ export const crearAlumno = async (alumnoData) => {
       domicilio: alumnoData.domicilio,
       id_curso: alumnoData.id_curso,
     };
-    const response = await axios.post(
-      `${API_URL}/alumnos`,
-      payload,
-      getConfig(),
-    );
+    const response = await axios.post(`${API_URL}/alumnos`, payload, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al crear el alumno");
@@ -305,11 +262,7 @@ export const modificarAlumno = async (alumnoData) => {
       domicilio: alumnoData.domicilio,
       id_curso: alumnoData.id_curso,
     };
-    const response = await axios.patch(
-      `${API_URL}/alumnos`,
-      payload,
-      getConfig(),
-    );
+    const response = await axios.patch(`${API_URL}/alumnos`, payload, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al modificar el alumno");
@@ -318,16 +271,10 @@ export const modificarAlumno = async (alumnoData) => {
 
 export const eliminarAlumno = async (id) => {
   try {
-    const response = await axios.delete(
-      `${API_URL}/alumnos/${id}`,
-      getConfig(),
-    );
+    const response = await axios.delete(`${API_URL}/alumnos/${id}`, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
-    return manejarErrorApi(
-      error,
-      "No se puede eliminar el alumno. Intentá de nuevo.",
-    );
+    return manejarErrorApi(error, "No se puede eliminar el alumno. Intentá de nuevo.");
   }
 };
 
@@ -337,11 +284,7 @@ export const eliminarAlumno = async (id) => {
 
 export async function guardarAsistenciasLote(payload) {
   try {
-    const response = await axios.post(
-      `${API_URL}/asistencias/lote`,
-      { payload },
-      getConfig(),
-    );
+    const response = await axios.post(`${API_URL}/asistencias/lote`, { payload }, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al guardar el lote de asistencias");
@@ -368,11 +311,7 @@ export const crearAsignacion = async (asignacionData) => {
       id_materia: asignacionData.id_materia,
       id_profesor: asignacionData.id_profesor,
     };
-    const response = await axios.post(
-      `${API_URL}/asignaciones`,
-      payload,
-      getConfig(),
-    );
+    const response = await axios.post(`${API_URL}/asignaciones`, payload, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al crear la asignación");
@@ -387,11 +326,7 @@ export const modificarAsignacion = async (asignacionData) => {
       id_materia: asignacionData.id_materia,
       id_profesor: asignacionData.id_profesor,
     };
-    const response = await axios.patch(
-      `${API_URL}/asignaciones`,
-      payload,
-      getConfig(),
-    );
+    const response = await axios.patch(`${API_URL}/asignaciones`, payload, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al modificar la asignación");
@@ -400,10 +335,7 @@ export const modificarAsignacion = async (asignacionData) => {
 
 export const eliminarAsignacion = async (id) => {
   try {
-    const response = await axios.delete(
-      `${API_URL}/asignaciones/${id}`,
-      getConfig(),
-    );
+    const response = await axios.delete(`${API_URL}/asignaciones/${id}`, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "No se puede eliminar la asignación.");
@@ -430,11 +362,7 @@ export const crearMateria = async (materiaData) => {
       carga_horaria: materiaData.carga_horaria,
       descripcion: materiaData.descripcion_materia,
     };
-    const response = await axios.post(
-      `${API_URL}/materias`,
-      payload,
-      getConfig(),
-    );
+    const response = await axios.post(`${API_URL}/materias`, payload, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al crear la materia");
@@ -449,11 +377,7 @@ export const modificarMateria = async (materiaData) => {
       carga_horaria: materiaData.carga_horaria,
       descripcion: materiaData.descripcion_materia,
     };
-    const response = await axios.patch(
-      `${API_URL}/materias`,
-      payload,
-      getConfig(),
-    );
+    const response = await axios.patch(`${API_URL}/materias`, payload, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al modificar la materia");
@@ -462,10 +386,7 @@ export const modificarMateria = async (materiaData) => {
 
 export const eliminarMateria = async (id) => {
   try {
-    const response = await axios.delete(
-      `${API_URL}/materias/${id}`,
-      getConfig(),
-    );
+    const response = await axios.delete(`${API_URL}/materias/${id}`, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "No se puede eliminar la materia.");
@@ -509,11 +430,7 @@ export const crearPersonal = async (personalData) => {
       id_usuario: personalData.id_usuario,
       id_cargo: personalData.id_cargo,
     };
-    const response = await axios.post(
-      `${API_URL}/personal`,
-      payload,
-      getConfig(),
-    );
+    const response = await axios.post(`${API_URL}/personal`, payload, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al registrar el personal");
@@ -536,11 +453,7 @@ export const modificarPersonal = async (personalData) => {
       id_usuario: personalData.id_usuario,
       id_cargo: personalData.id_cargo,
     };
-    const response = await axios.patch(
-      `${API_URL}/personal`,
-      payload,
-      getConfig(),
-    );
+    const response = await axios.patch(`${API_URL}/personal`, payload, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al modificar el personal");
@@ -549,10 +462,7 @@ export const modificarPersonal = async (personalData) => {
 
 export const eliminarPersonal = async (id) => {
   try {
-    const response = await axios.delete(
-      `${API_URL}/personal/${id}`,
-      getConfig(),
-    );
+    const response = await axios.delete(`${API_URL}/personal/${id}`, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "No se puede eliminar el personal.");
@@ -587,11 +497,7 @@ export const crearCargo = async (cargoData) => {
       nombre_cargo: cargoData.nombre_cargo,
       descripcion: cargoData.descripcion,
     };
-    const response = await axios.post(
-      `${API_URL}/cargos`,
-      payload,
-      getConfig(),
-    );
+    const response = await axios.post(`${API_URL}/cargos`, payload, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al crear el cargo");
@@ -605,11 +511,7 @@ export const modificarCargo = async (cargoData) => {
       nombre_cargo: cargoData.nombre_cargo,
       descripcion: cargoData.descripcion,
     };
-    const response = await axios.patch(
-      `${API_URL}/cargos`,
-      payload,
-      getConfig(),
-    );
+    const response = await axios.patch(`${API_URL}/cargos`, payload, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al modificar el cargo");
@@ -622,5 +524,48 @@ export const eliminarCargo = async (id) => {
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "No se puede eliminar el cargo.");
+  }
+};
+
+// ==========================================
+//               ALUMNOS (VISTA ALUMNO)
+// ==========================================
+
+export const obtenerMisMaterias = async () => {
+  try {
+    const alumnoRaw = localStorage.getItem("alumno");
+    if (!alumnoRaw) throw new Error("No hay información del alumno");
+    const alumno = JSON.parse(alumnoRaw);
+    const idCurso = alumno.data?.id_curso || alumno.id_curso;
+    if (!idCurso) throw new Error("El alumno no tiene curso asignado");
+
+    const response = await axios.get(`${API_URL}/asignaciones/curso/${idCurso}`, getConfig());
+    return response.data.map((asig) => ({
+      id: asig.id_asignacion,
+      materia: asig.materiaAsignacion?.nombre_materia || "Materia",
+      horario: "08:00 - 09:30", // Opcional, o mockeado si no está en asignaciones
+      dias: "Lun / Mié",
+      profesor: asig.profesorAsignacion ? `Prof. ${asig.profesorAsignacion.apellido}, ${asig.profesorAsignacion.nombre}` : "Sin profesor",
+    }));
+  } catch (error) {
+    console.error("Error al obtener mis materias:", error);
+    return [];
+  }
+};
+
+export const obtenerComunicados = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/comunidad/comunicados`, getConfig());
+    const arrayComunicados = response.data.data || response.data.comunicados || response.data || [];
+    return arrayComunicados.map((c) => ({
+      id: c.id_comunicado || c.id,
+      titulo: c.titulo,
+      fecha: c.fecha_publicacion ? c.fecha_publicacion.split("T")[0] : new Date().toISOString().split("T")[0],
+      profesor: c.autor || "Dirección",
+      contenido: c.mensaje || c.contenido,
+    }));
+  } catch (error) {
+    console.error("Error al obtener los comunicados:", error);
+    return [];
   }
 };

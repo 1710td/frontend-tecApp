@@ -6,7 +6,7 @@ import { useAuthStore } from "../stores/auth.js";
 // ==========================================
 
 // Usamos la URL base general. Ajustá si comunicados/noticias usan /academico u otro prefijo.
-const API_URL = "http://localhost:9000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9000/api";
 
 /**
  * Genera dinámicamente los headers con el token actualizado de Pinia.
@@ -55,10 +55,7 @@ const manejarErrorApi = (error, mensajePorDefecto) => {
 
 export const obtenerNoticias = async () => {
   try {
-    const response = await axios.get(
-      `${API_URL}/comunidad/noticias`,
-      getConfig(),
-    );
+    const response = await axios.get(`${API_URL}/comunidad/noticias`, getConfig());
     return response.data.noticias;
   } catch (error) {
     throw manejarErrorApi(error, "Error al obtener las noticias");
@@ -77,11 +74,7 @@ export const crearNoticia = async (noticiaData) => {
     }
 
     // Le pasamos true a getConfig para que no pise el Content-Type necesario para archivos
-    const response = await axios.post(
-      `${API_URL}/comunidad/noticias`,
-      formData,
-      getConfig(true),
-    );
+    const response = await axios.post(`${API_URL}/comunidad/noticias`, formData, getConfig(true));
     return response.data;
   } catch (error) {
     throw manejarErrorApi(error, "Error al crear la noticia");
@@ -90,10 +83,7 @@ export const crearNoticia = async (noticiaData) => {
 
 export const eliminarNoticia = async (id) => {
   try {
-    const response = await axios.delete(
-      `${API_URL}/comunidad/noticias/${id}`,
-      getConfig(),
-    );
+    const response = await axios.delete(`${API_URL}/comunidad/noticias/${id}`, getConfig());
     return response.data;
   } catch (error) {
     throw manejarErrorApi(error, "Error al eliminar la noticia");
@@ -106,10 +96,7 @@ export const eliminarNoticia = async (id) => {
 
 export const obtenerTodosComunicados = async () => {
   try {
-    const response = await axios.get(
-      `${API_URL}/comunidad/comunicados`,
-      getConfig(),
-    );
+    const response = await axios.get(`${API_URL}/comunidad/comunicados`, getConfig());
     console.log("COMUNICADOS:", response.data);
     return {
       success: true,
@@ -122,10 +109,7 @@ export const obtenerTodosComunicados = async () => {
 
 export const obtenerComunicado = async (id) => {
   try {
-    const response = await axios.get(
-      `${API_URL}/comunidad/comunicados/${id}`,
-      getConfig(),
-    );
+    const response = await axios.get(`${API_URL}/comunidad/comunicados/${id}`, getConfig());
     return response.data;
   } catch (error) {
     throw manejarErrorApi(error, `Error al obtener el comunicado ${id}`);
@@ -134,11 +118,7 @@ export const obtenerComunicado = async (id) => {
 
 export const crearComunicado = async (comunicadoData) => {
   try {
-    const response = await axios.post(
-      `${API_URL}/comunidad/comunicados`,
-      comunicadoData,
-      getConfig(),
-    );
+    const response = await axios.post(`${API_URL}/comunidad/comunicados`, comunicadoData, getConfig());
     return response.data;
   } catch (error) {
     throw manejarErrorApi(error, "Error al crear el comunicado");
@@ -147,11 +127,7 @@ export const crearComunicado = async (comunicadoData) => {
 
 export const actualizarComunicado = async (id, comunicadoData) => {
   try {
-    const response = await axios.put(
-      `${API_URL}/comunidad/comunicados/${id}`,
-      comunicadoData,
-      getConfig(),
-    );
+    const response = await axios.put(`${API_URL}/comunidad/comunicados/${id}`, comunicadoData, getConfig());
     return response.data;
   } catch (error) {
     throw manejarErrorApi(error, `Error al actualizar el comunicado ${id}`);
@@ -160,12 +136,49 @@ export const actualizarComunicado = async (id, comunicadoData) => {
 
 export const eliminarComunicado = async (id) => {
   try {
-    const response = await axios.delete(
-      `${API_URL}/comunidad/comunicados/${id}`,
-      getConfig(),
-    );
+    const response = await axios.delete(`${API_URL}/comunidad/comunicados/${id}`, getConfig());
     return response.data;
   } catch (error) {
     throw manejarErrorApi(error, `Error al eliminar el comunicado ${id}`);
+  }
+};
+
+// ==========================================
+//        SERVICIOS DE OBJETOS PERDIDOS
+// ==========================================
+
+export const obtenerObjetosPerdidos = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/comunidad/objetos-perdidos`, getConfig());
+    return response.data;
+  } catch (error) {
+    throw manejarErrorApi(error, "Error al obtener los objetos perdidos");
+  }
+};
+
+export const reportarObjetoPerdido = async (objetoData) => {
+  try {
+    const response = await axios.post(`${API_URL}/comunidad/objetos-perdidos`, objetoData, getConfig());
+    return response.data;
+  } catch (error) {
+    throw manejarErrorApi(error, "Error al reportar el objeto perdido");
+  }
+};
+
+export const actualizarEstadoObjetoPerdido = async (id, estado) => {
+  try {
+    const response = await axios.put(`${API_URL}/comunidad/objetos-perdidos/${id}`, { estado }, getConfig());
+    return response.data;
+  } catch (error) {
+    throw manejarErrorApi(error, "Error al actualizar el estado del objeto");
+  }
+};
+
+export const eliminarObjetoPerdido = async (id) => {
+  try {
+    const response = await axios.delete(`${API_URL}/comunidad/objetos-perdidos/${id}`, getConfig());
+    return response.data;
+  } catch (error) {
+    throw manejarErrorApi(error, "Error al eliminar el objeto perdido");
   }
 };

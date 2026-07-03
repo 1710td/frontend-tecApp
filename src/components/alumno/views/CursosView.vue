@@ -82,10 +82,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-// Ajusta la ruta a tu archivo de servicios donde tengas definidas estas funciones
-import {} from //obtenerMisMaterias,
-//obtenerComunicados,
-"@/services/academico-service.js";
+import { obtenerMisMaterias, obtenerComunicados } from "@/services/academico-service.js";
 
 const tabActivo = ref("materias");
 const materias = ref([]);

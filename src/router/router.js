@@ -12,12 +12,9 @@ import CursosView from "../components/alumno/views/CursosView.vue";
 import ObjetosPerdidosView from "../components/alumno/views/ObjetosPerdidosView.vue";
 
 // Auth y otros componentes
+import Inicio from "../components/auth/Inicio.vue";
 import Login from "../components/auth/Login.vue";
-import LoginAlumno from "../components/auth/LoginAlumno.vue";
-import LoginProfesor from "../components/auth/LoginProfesor.vue";
-import LoginAdministrador from "../components/auth/LoginAdministrador.vue";
-import RegistroAdministrador from "../components/auth/RegistroAdministrador.vue";
-import RegistroAlumno from "../components/auth/RegistroAlumno.vue";
+import Registro from "../components/auth/Registro.vue";
 import Unauthorized from "../components/auth/Unauthorized.vue";
 import UsuarioPerfil from "../components/administrador/views/UsuarioPerfil.vue";
 
@@ -37,12 +34,9 @@ import NoticiasViewProfesor from "../components/profesores/views/NoticiasView.vu
 import CursosViewProfesor from "../components/profesores/views/CursosView.vue";
 
 const routes = [
-  { path: "/", component: Login },
-  { path: "/login/alumno", component: LoginAlumno },
-  { path: "/login/profesor", component: LoginProfesor },
-  { path: "/login/administrador", component: LoginAdministrador },
-  { path: "/registro/administrador", component: RegistroAdministrador },
-  { path: "/registro/alumno", component: RegistroAlumno },
+  { path: "/", component: Inicio },
+  { path: "/login", component: Login },
+  { path: "/registro", component: Registro },
   { path: "/unauthorized", component: Unauthorized },
 
   // --- RUTA MODULAR DEL ALUMNO ---
@@ -92,14 +86,14 @@ const routes = [
   {
     path: "/profesor",
     component: DashboardProfesor,
-    //meta: { requiresAuth: true, role: "profesor" },
+    meta: { requiresAuth: true, role: "profesor" },
     children: [
       { path: "inicio", component: InicioViewProfesor },
       { path: "noticias", component: NoticiasViewProfesor },
       { path: "cursos", component: CursosViewProfesor },
       { path: "materias", component: MateriasView },
       { path: "asistencias", component: AsistenciasView },
-      { path: "", redirect: "/profesor/inicio" },
+      { path: "", redirect: "/profesor/inicio" }, // Si entran a /alumno, van a inicio
     ],
   },
 

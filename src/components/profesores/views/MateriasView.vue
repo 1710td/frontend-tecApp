@@ -2,84 +2,66 @@
   <section class="tab-panel active">
     <div class="tab-toolbar">
       <div class="tab-toolbar-left">
-        <h2 class="section-title"><i class="fas fa-chalkboard-teacher"></i> Materias que enseño</h2>
-      </div>
-      <button class="btn-add-subject" @click="abrirModalMateria"><i class="fas fa-plus"></i> Agregar Materia</button>
-    </div>
-
-    <div class="materias-grid">
-      <div v-if="materiasProfesor.length === 0" class="noticia-empty" style="grid-column: 1/-1">
-        <i class="fas fa-chalkboard-teacher" style="font-size: 2rem; color: #cbd5e1"></i>
-        <p>Todavía no agregaste materias. Usá el botón <strong>Agregar Materia</strong>.</p>
-      </div>
-
-      <div v-for="(mat, idx) in materiasProfesor" :key="idx" class="materia-card">
-        <button class="btn-eliminar-materia" title="Eliminar materia" @click="eliminarMateria(idx)">
-          <i class="fas fa-trash"></i>
-        </button>
-        <div class="materia-icon"><i class="fas fa-book"></i></div>
-        <div class="materia-nombre">{{ mat.nombre }}</div>
-        <div class="materia-cursos-tag">{{ mat.cursos.length > 0 ? mat.cursos.join(" · ") : "Sin cursos asignados" }}</div>
+        <h2 class="section-title"><i class="fas fa-graduation-cap"></i> Mis Cursos Asignados</h2>
       </div>
     </div>
 
-    <div v-if="modalMateria" class="modal-overlay active" @click.self="modalMateria = false">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Agregar materia</h3>
-          <button class="close-modal" @click="modalMateria = false">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label>Nombre de la materia</label>
-            <input type="text" v-model="materiaForm.nombre" placeholder="Ej: Matemática Discreta" />
-          </div>
-          <div class="form-group" style="margin-top: 14px">
-            <label>Cursos en que la enseñás</label>
-            <div class="cursos-checkboxes">
-              <label v-for="curso in todosCursos" :key="curso" :class="{ checked: materiaForm.cursos.includes(curso) }">
-                <input type="checkbox" :value="curso" v-model="materiaForm.cursos" />
-                <span class="curso-check-label">{{ curso }}</span>
-              </label>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="modalMateria = false">Cancelar</button>
-          <button class="btn-submit" @click="guardarMateria"><i class="fas fa-check"></i>&nbsp;Guardar</button>
-        </div>
-      </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Curso</th>
+            <th>Materia</th>
+            <th>Aula</th>
+            <th>Turno</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="asig in asignaciones" :key="asig.id_asignacion">
+            <td>
+              <strong>{{ asig.cursoAsignacion?.nombre_curso }}</strong>
+            </td>
+            <td>{{ asig.materiaAsignacion?.nombre_materia }}</td>
+            <td>{{ asig.cursoAsignacion?.aula || "S/D" }}</td>
+            <td>{{ asig.cursoAsignacion?.turno || "S/D" }}</td>
+          </tr>
+          <tr v-if="asignaciones.length === 0">
+            <td colspan="4">
+              <div class="empty-state">
+                <i class="fas fa-users-slash empty-icon"></i>
+                <p>No hay cursos asignados para este periodo lectivo.</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </section>
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, onMounted } from "vue";
+import { obtenerAsignacionesProfesor } from "@/services/academico-service.js";
 
-const materiasProfesor = ref([]);
-const modalMateria = ref(false);
-const todosCursos = ["1° Primera", "2° Segunda", "3° Primera", "4° Programación"]; // Mock
+const asignaciones = ref([]);
 
-const materiaForm = reactive({ nombre: "", cursos: [] });
+onMounted(async () => {
+  try {
+    const profesorRaw = localStorage.getItem("alumno");
+    if (!profesorRaw) return;
+    const profesor = JSON.parse(profesorRaw);
+    const idProfesor = profesor.data?.id_profesor || profesor.id_profesor;
 
-const abrirModalMateria = () => {
-  materiaForm.nombre = "";
-  materiaForm.cursos = [];
-  modalMateria.value = true;
-};
-
-const guardarMateria = () => {
-  if (!materiaForm.nombre.trim()) return;
-  materiasProfesor.value.push({
-    nombre: materiaForm.nombre.trim(),
-    cursos: [...materiaForm.cursos],
-  });
-  modalMateria.value = false;
-};
-
-const eliminarMateria = (idx) => {
-  materiasProfesor.value.splice(idx, 1);
-};
+    if (idProfesor) {
+      const res = await obtenerAsignacionesProfesor(idProfesor);
+      if (res.success && res.data) {
+        asignaciones.value = res.data;
+      }
+    }
+  } catch (error) {
+    console.error("Error al cargar cursos asignados:", error);
+  }
+});
 </script>
 
 <style scoped src="../profesores.css"></style>

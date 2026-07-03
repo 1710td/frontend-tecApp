@@ -16,11 +16,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import Topbar from './views/Topbar.vue'
-import Sidebar from './views/Sidebar.vue'
+import { ref } from "vue";
+import Topbar from "./views/Topbar.vue";
+import Sidebar from "./views/Sidebar.vue";
 
-const sidebarAbierto = ref(false)
+const sidebarAbierto = ref(false);
 </script>
 
 <style scoped>
@@ -70,7 +70,9 @@ const sidebarAbierto = ref(false)
 /* Transiciones de router-view */
 .fade-slide-enter-active,
 .fade-slide-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .fade-slide-enter-from {
