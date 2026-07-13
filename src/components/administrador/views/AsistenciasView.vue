@@ -1,5 +1,6 @@
 <template>
     <div class="asistencias-wrapper">
+        <!-- ── CARD: Tomar Asistencia ─────────────────────────────── -->
         <div class="card animate-fade-in">
             <div class="card-header">
                 <div class="card-title">
@@ -13,9 +14,7 @@
                     <div class="form-group">
                         <label for="id_curso">Curso / División</label>
                         <select id="id_curso" v-model="cursoSeleccionado">
-                            <option value="" disabled>
-                                Seleccionar curso...
-                            </option>
+                            <option value="" disabled>Seleccionar curso...</option>
                             <option
                                 v-for="curso in cursosDisponibles"
                                 :key="curso.id_curso"
@@ -52,6 +51,7 @@
             </div>
         </div>
 
+        <!-- ── CARD: Planilla ─────────────────────────────────────── -->
         <div
             v-if="planillaVisible"
             class="card animate-fade-in"
@@ -69,28 +69,16 @@
 
             <div class="table-responsive">
                 <div v-if="alumnos.length === 0" class="empty-state">
-                    <i
-                        class="ti ti-user-off"
-                        style="font-size: 28px; opacity: 0.4"
-                    ></i>
-                    <p>
-                        No hay alumnos registrados en este curso para la fecha
-                        seleccionada.
-                    </p>
+                    <i class="ti ti-user-off" style="font-size: 28px; opacity: 0.4"></i>
+                    <p>No hay alumnos registrados en este curso para la fecha seleccionada.</p>
                 </div>
 
-                <table
-                    v-else
-                    class="mini"
-                    aria-label="Planilla de toma de asistencia"
-                >
+                <table v-else class="mini" aria-label="Planilla de toma de asistencia">
                     <thead>
                         <tr>
                             <th>Alumno</th>
                             <th>DNI</th>
-                            <th style="width: 160px; text-align: center">
-                                Estado
-                            </th>
+                            <th style="width: 160px; text-align: center">Estado</th>
                             <th>Observaciones (Opcional)</th>
                         </tr>
                     </thead>
@@ -101,8 +89,7 @@
                             class="table-row"
                         >
                             <td>
-                                <strong>{{ alumno.apellido }}</strong
-                                >, {{ alumno.nombre }}
+                                <strong>{{ alumno.apellido }}</strong>, {{ alumno.nombre }}
                             </td>
                             <td class="mono">{{ alumno.dni }}</td>
 
@@ -110,52 +97,22 @@
                                 <div class="attendance-toggles">
                                     <button
                                         type="button"
-                                        :class="[
-                                            'toggle-btn present',
-                                            alumno.asistencia.estado ===
-                                            'presente'
-                                                ? 'active'
-                                                : '',
-                                        ]"
-                                        @click="
-                                            alumno.asistencia.estado =
-                                                'presente'
-                                        "
+                                        :class="['toggle-btn present', alumno.asistencia.estado === 'presente' ? 'active' : '']"
+                                        @click="alumno.asistencia.estado = 'presente'"
                                         title="Presente"
-                                    >
-                                        P
-                                    </button>
+                                    >P</button>
                                     <button
                                         type="button"
-                                        :class="[
-                                            'toggle-btn absent',
-                                            alumno.asistencia.estado ===
-                                            'ausente'
-                                                ? 'active'
-                                                : '',
-                                        ]"
-                                        @click="
-                                            alumno.asistencia.estado = 'ausente'
-                                        "
+                                        :class="['toggle-btn absent', alumno.asistencia.estado === 'ausente' ? 'active' : '']"
+                                        @click="alumno.asistencia.estado = 'ausente'"
                                         title="Ausente"
-                                    >
-                                        A
-                                    </button>
+                                    >A</button>
                                     <button
                                         type="button"
-                                        :class="[
-                                            'toggle-btn late',
-                                            alumno.asistencia.estado === 'tarde'
-                                                ? 'active'
-                                                : '',
-                                        ]"
-                                        @click="
-                                            alumno.asistencia.estado = 'tarde'
-                                        "
+                                        :class="['toggle-btn late', alumno.asistencia.estado === 'tarde' ? 'active' : '']"
+                                        @click="alumno.asistencia.estado = 'tarde'"
                                         title="Llegada Tarde"
-                                    >
-                                        T
-                                    </button>
+                                    >T</button>
                                 </div>
                             </td>
 
@@ -177,16 +134,11 @@
                     <i class="ti ti-alert-circle"></i> {{ errorGuardar }}
                 </div>
                 <div v-if="exitoGuardar" class="exito-banner">
-                    <i class="ti ti-check"></i> Asistencias guardadas
-                    correctamente.
+                    <i class="ti ti-check"></i> Asistencias guardadas correctamente.
                 </div>
 
                 <div class="footer-actions">
-                    <button
-                        @click="ocultarPlanilla"
-                        class="tb-btn outline"
-                        :disabled="guardando"
-                    >
+                    <button @click="ocultarPlanilla" class="tb-btn outline" :disabled="guardando">
                         Cancelar
                     </button>
                     <button
@@ -194,17 +146,152 @@
                         class="tb-btn primary"
                         :disabled="guardando || alumnos.length === 0"
                     >
-                        <i
-                            class="ti ti-loader animate-spin"
-                            v-if="guardando"
-                        ></i>
+                        <i class="ti ti-loader animate-spin" v-if="guardando"></i>
                         <i class="ti ti-device-floppy" v-else></i>
-                        {{
-                            guardando
-                                ? "Guardando en lote..."
-                                : "Guardar Registro Completo"
-                        }}
+                        {{ guardando ? "Guardando en lote..." : "Guardar Registro Completo" }}
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── CARD: Historial de Asistencias ─────────────────────── -->
+        <div class="card animate-fade-in hist-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="ti ti-history" aria-hidden="true"></i>
+                    Historial de Asistencias
+                </div>
+            </div>
+
+            <!-- Filtros de historial -->
+            <div class="card-body">
+                <div class="form-row hist-filters">
+                    <div class="form-group">
+                        <label for="hist_curso">Curso</label>
+                        <select id="hist_curso" v-model="histCursoId">
+                            <option value="">Todos los cursos</option>
+                            <option
+                                v-for="curso in cursosDisponibles"
+                                :key="curso.id_curso"
+                                :value="curso.id_curso"
+                            >
+                                {{ curso.nombre_curso }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="hist_desde">Desde</label>
+                        <input id="hist_desde" type="date" v-model="histDesde" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hist_hasta">Hasta</label>
+                        <input id="hist_hasta" type="date" v-model="histHasta" />
+                    </div>
+                    <div class="form-group form-group-action">
+                        <label>&nbsp;</label>
+                        <button
+                            class="tb-btn primary"
+                            @click="buscarHistorial"
+                            :disabled="cargandoHistorial"
+                        >
+                            <i class="ti ti-loader animate-spin" v-if="cargandoHistorial"></i>
+                            <i class="ti ti-search" v-else></i>
+                            {{ cargandoHistorial ? "Buscando…" : "Buscar" }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultados -->
+            <div class="table-responsive">
+                <div v-if="!historialCargado" class="empty-state">
+                    <i class="ti ti-calendar-stats" style="font-size: 28px; opacity: 0.35"></i>
+                    <p>Aplicá los filtros y presioná <strong>Buscar</strong> para ver el historial.</p>
+                </div>
+
+                <div v-else-if="historial.length === 0" class="empty-state">
+                    <i class="ti ti-mood-empty" style="font-size: 28px; opacity: 0.35"></i>
+                    <p>No se encontraron registros para los filtros seleccionados.</p>
+                </div>
+
+                <table v-else class="mini" aria-label="Historial de asistencias">
+                    <thead>
+                        <tr>
+                            <th style="width: 30px;"></th>
+                            <th>Fecha</th>
+                            <th>Curso</th>
+                            <th style="text-align:center">Presentes</th>
+                            <th style="text-align:center">Ausentes</th>
+                            <th style="text-align:center">Tardanzas</th>
+                            <th style="text-align:center">Total</th>
+                            <th style="text-align:center">% Asistencia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template v-for="(fila, idx) in historial" :key="idx">
+                            <tr class="table-row">
+                                <td style="text-align:center">
+                                    <button 
+                                        class="expand-btn" 
+                                        @click="fila.expandido = !fila.expandido"
+                                        :title="fila.expandido ? 'Ocultar detalles' : 'Ver detalles'"
+                                    >
+                                        <i class="ti" :class="fila.expandido ? 'ti-chevron-up' : 'ti-chevron-down'"></i>
+                                    </button>
+                                </td>
+                                <td class="mono">{{ formatFecha(fila.fecha) }}</td>
+                                <td><strong>{{ fila.curso || fila.nombre_curso || '—' }}</strong></td>
+                                <td style="text-align:center">
+                                    <span class="hist-badge badge-present">{{ fila.presentes ?? 0 }}</span>
+                                </td>
+                                <td style="text-align:center">
+                                    <span class="hist-badge badge-absent">{{ fila.ausentes ?? 0 }}</span>
+                                </td>
+                                <td style="text-align:center">
+                                    <span class="hist-badge badge-late">{{ fila.tardanzas ?? fila.tarde ?? 0 }}</span>
+                                </td>
+                                <td style="text-align:center" class="mono">{{ fila.total ?? ((fila.presentes ?? 0) + (fila.ausentes ?? 0) + (fila.tardanzas ?? fila.tarde ?? 0)) }}</td>
+                                <td style="text-align:center">
+                                    <span
+                                        class="pct-pill"
+                                        :class="pctClass(fila)"
+                                    >{{ calcPct(fila) }}%</span>
+                                </td>
+                            </tr>
+                            <tr v-if="fila.expandido" class="detail-row">
+                                <td colspan="8" style="padding: 0;">
+                                    <div class="detail-content animate-fade-in">
+                                        <div class="detail-header">
+                                            <i class="ti ti-users"></i> Detalle de Asistencia
+                                        </div>
+                                        <ul class="detail-list">
+                                            <li v-for="reg in fila.registros" :key="reg.id_alumno" class="detail-item">
+                                                <span class="detail-name">
+                                                    {{ reg.alumno?.apellido }}, {{ reg.alumno?.nombre }}
+                                                </span>
+                                                <span 
+                                                    class="detail-status"
+                                                    :class="[
+                                                        reg.estado === 'presente' ? 'badge-present' : '',
+                                                        reg.estado === 'ausente' ? 'badge-absent' : '',
+                                                        (reg.estado === 'tardanza' || reg.estado === 'tarde') ? 'badge-late' : ''
+                                                    ]"
+                                                >
+                                                    {{ reg.estado ? reg.estado.toUpperCase() : 'SIN ESTADO' }}
+                                                </span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <div v-if="errorHistorial" class="card-footer">
+                <div class="error-banner">
+                    <i class="ti ti-alert-circle"></i> {{ errorHistorial }}
                 </div>
             </div>
         </div>
@@ -213,18 +300,18 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-// Ajusta la ruta de tus servicios según corresponda en tu árbol de carpetas
 import {
     obtenerCursos,
     obtenerAlumnosCurso,
     guardarAsistenciasLote,
+    obtenerHistorialAsistencias,
 } from "../../../services/academico-service.js";
 import { useAuthStore } from "../../../stores/auth.js";
 
 // ── Estado Reactivo ──────────────────────────────────────────────────────────
 const cursosDisponibles = ref([]);
 const cursoSeleccionado = ref("");
-const fecha = ref(new Date().toISOString().split("T")[0]); // Fecha de hoy por defecto
+const fecha = ref(new Date().toISOString().split("T")[0]);
 const alumnos = ref([]);
 const authStore = useAuthStore();
 
@@ -235,6 +322,15 @@ const planillaVisible = ref(false);
 const errorFiltros = ref("");
 const errorGuardar = ref("");
 const exitoGuardar = ref(false);
+
+// ── Historial ────────────────────────────────────────────────────────────────
+const histCursoId   = ref("");
+const histDesde     = ref("");
+const histHasta     = ref("");
+const historial     = ref([]);
+const historialCargado  = ref(false);
+const cargandoHistorial = ref(false);
+const errorHistorial    = ref("");
 
 // ── Controladores ────────────────────────────────────────────────────────────
 const fetchCursos = async () => {
@@ -257,18 +353,17 @@ const cargarPlanilla = async () => {
 
     cargando.value = true;
     try {
-        const res = await obtenerAlumnosCurso(
-            cursoSeleccionado.value,
-            fecha.value,
-        );
+        const cursoId = (typeof cursoSeleccionado.value === 'object' && cursoSeleccionado.value !== null)
+            ? (cursoSeleccionado.value.id_curso || cursoSeleccionado.value.id)
+            : cursoSeleccionado.value;
+        if (!cursoId) throw new Error('Id de curso inválido');
+
+        const res = await obtenerAlumnosCurso(cursoId, fecha.value);
         const dataAlumnos = Array.isArray(res.data) ? res.data : [];
 
-        // Mapeamos los alumnos para inyectarles el estado local de asistencia
         alumnos.value = dataAlumnos.map((alumno) => ({
             ...alumno,
             asistencia: {
-                // Si el backend te devuelve un estado previo para esta fecha, lo usás.
-                // Si no, por defecto todos "presente" para agilizar la carga.
                 estado: alumno.estado_previo || "presente",
                 observaciones: alumno.observaciones_previas || "",
             },
@@ -294,7 +389,6 @@ const confirmarGuardado = async () => {
     exitoGuardar.value = false;
     guardando.value = true;
 
-    // Armamos el payload estructurado para el endpoint de lote
     const payload = {
         registrado_por: authStore.usuario.id,
         id_curso: cursoSeleccionado.value,
@@ -302,15 +396,12 @@ const confirmarGuardado = async () => {
         registros: alumnos.value.map((al) => ({
             id_alumno: al.id_alumno,
             estado: al.asistencia.estado,
-            //observaciones: al.asistencia.observaciones,
         })),
     };
 
     try {
         await guardarAsistenciasLote(payload);
         exitoGuardar.value = true;
-        // Opcional: ocultar la planilla después de unos segundos
-        // setTimeout(() => ocultarPlanilla(), 2500);
     } catch (e) {
         errorGuardar.value =
             e?.response?.data?.mensaje || "Error al registrar las asistencias.";
@@ -319,36 +410,97 @@ const confirmarGuardado = async () => {
     }
 };
 
-// ── Hooks de entrada ─────────────────────────────────────────────────────────
+// ── Historial ────────────────────────────────────────────────────────────────
+const buscarHistorial = async () => {
+    errorHistorial.value = "";
+    cargandoHistorial.value = true;
+    historialCargado.value = false;
+
+    const res = await obtenerHistorialAsistencias({
+        id_curso:    histCursoId.value || undefined,
+        fecha_desde: histDesde.value   || undefined,
+        fecha_hasta: histHasta.value   || undefined,
+    });
+
+    if (res.success) {
+        const rawData = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+        
+        const agrupado = {};
+        rawData.forEach(item => {
+            const key = `${item.id_curso}-${item.fecha}`;
+            if (!agrupado[key]) {
+                const cursoEncontrado = cursosDisponibles.value.find(c => c.id_curso == item.id_curso);
+                agrupado[key] = {
+                    id_curso: item.id_curso,
+                    curso: cursoEncontrado ? cursoEncontrado.nombre_curso : `Curso #${item.id_curso}`,
+                    fecha: item.fecha,
+                    presentes: 0,
+                    ausentes: 0,
+                    tardanzas: 0,
+                    total: 0,
+                    expandido: false,
+                    registros: []
+                };
+            }
+            agrupado[key].total++;
+            const est = item.estado ? item.estado.toLowerCase() : '';
+            if (est === 'presente') agrupado[key].presentes++;
+            else if (est === 'ausente') agrupado[key].ausentes++;
+            else if (est === 'tardanza' || est === 'tarde') agrupado[key].tardanzas++;
+            
+            agrupado[key].registros.push({
+                id_alumno: item.id_alumno || item.alumno?.id_alumno,
+                estado: est,
+                alumno: item.alumno || { nombre: '', apellido: 'Alumno' }
+            });
+        });
+
+        historial.value = Object.values(agrupado).sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    } else {
+        errorHistorial.value = res.message || "Error al obtener el historial.";
+        historial.value = [];
+    }
+
+    historialCargado.value = true;
+    cargandoHistorial.value = false;
+};
+
+const formatFecha = (iso) => {
+    if (!iso) return "—";
+    const [y, m, d] = iso.split("T")[0].split("-");
+    return `${d}/${m}/${y}`;
+};
+
+const calcPct = (fila) => {
+    const total = fila.total ?? ((fila.presentes ?? 0) + (fila.ausentes ?? 0) + (fila.tardanzas ?? fila.tarde ?? 0));
+    if (!total) return "—";
+    return Math.round(((fila.presentes ?? 0) / total) * 100);
+};
+
+const pctClass = (fila) => {
+    const pct = calcPct(fila);
+    if (pct === "—") return "";
+    if (pct >= 85) return "pct-green";
+    if (pct >= 65) return "pct-yellow";
+    return "pct-red";
+};
+
+// ── Hooks ────────────────────────────────────────────────────────────────────
 onMounted(() => {
     fetchCursos();
 });
 </script>
 
 <style scoped>
-/* Reutilizamos exactamente la misma base CSS que en tu vista de Alumnos
-  para garantizar la cohesión visual del proyecto.
-*/
-
 /* Transiciones y Microanimaciones */
 .animate-fade-in {
     animation: fadeIn 0.22s ease-in-out;
 }
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(3px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(3px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 .animate-spin {
     animation: spin 0.85s linear infinite;
     display: inline-block;
@@ -358,7 +510,7 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    max-width: 950px;
+    max-width: 980px;
     width: 100%;
 }
 
@@ -367,7 +519,7 @@ onMounted(() => {
     background: var(--color-background-primary, #fff);
     border: 0.5px solid var(--color-border-tertiary, #e5e7eb);
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     overflow: hidden;
 }
 .card-header {
@@ -378,10 +530,8 @@ onMounted(() => {
     border-bottom: 1px solid #e5e7eb;
     background: #fafafa;
 }
-.card-body {
-    padding: 20px;
-}
-.card-footer {
+.card-body    { padding: 20px; }
+.card-footer  {
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -390,14 +540,8 @@ onMounted(() => {
     border-top: 1px solid #e5e7eb;
     background: #f9fafb;
 }
-.flex-footer {
-    justify-content: space-between;
-}
-.footer-actions {
-    display: flex;
-    gap: 10px;
-    margin-left: auto;
-}
+.flex-footer  { justify-content: space-between; }
+.footer-actions { display: flex; gap: 10px; margin-left: auto; }
 .card-title {
     font-size: 13.5px;
     font-weight: 600;
@@ -406,10 +550,7 @@ onMounted(() => {
     align-items: center;
     gap: 8px;
 }
-.card-title i {
-    font-size: 16px;
-    color: #cd322c;
-}
+.card-title i { font-size: 16px; color: #cd322c; }
 
 /* Formularios */
 .form-row {
@@ -417,11 +558,13 @@ onMounted(() => {
     grid-template-columns: 1fr 1fr;
     gap: 14px;
 }
+.hist-filters { grid-template-columns: 2fr 1fr 1fr auto; }
 .form-group {
     display: flex;
     flex-direction: column;
     gap: 5px;
 }
+.form-group-action { justify-content: flex-end; }
 .form-group label {
     font-size: 11.5px;
     font-weight: 600;
@@ -434,18 +577,16 @@ onMounted(() => {
     border-radius: 6px;
     font-size: 12.5px;
     outline: none;
-    transition:
-        border-color 0.15s,
-        box-shadow 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s;
     background: #fff;
 }
 .form-group input:focus,
 .form-group select:focus {
     border-color: #cd322c;
-    box-shadow: 0 0 0 2px rgba(205, 50, 44, 0.08);
+    box-shadow: 0 0 0 2px rgba(205,50,44,0.08);
 }
 
-/* Botonería Semántica */
+/* Botonería */
 .tb-btn {
     padding: 7px 14px;
     border-radius: 6px;
@@ -458,39 +599,15 @@ onMounted(() => {
     gap: 6px;
     transition: all 0.12s;
 }
-.tb-btn.primary {
-    background: #cd322c;
-    color: #fff;
-    border-color: #cd322c;
-}
-.tb-btn.primary:hover:not(:disabled) {
-    background: #a52420;
-}
-.tb-btn.outline {
-    background: white;
-    color: #4b5563;
-    border-color: #d1d5db;
-}
-.tb-btn.outline:hover:not(:disabled) {
-    background: #f9fafb;
-    color: #111827;
-}
-.tb-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
+.tb-btn.primary              { background: #cd322c; color: #fff; border-color: #cd322c; }
+.tb-btn.primary:hover:not(:disabled) { background: #a52420; }
+.tb-btn.outline              { background: white; color: #4b5563; border-color: #d1d5db; }
+.tb-btn.outline:hover:not(:disabled) { background: #f9fafb; color: #111827; }
+.tb-btn:disabled             { opacity: 0.6; cursor: not-allowed; }
 
-/* Tabla Estilo Compacto */
-.table-responsive {
-    width: 100%;
-    overflow-x: auto;
-    padding: 12px;
-}
-.mini {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12.5px;
-}
+/* Tabla */
+.table-responsive { width: 100%; overflow-x: auto; padding: 12px; }
+.mini { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .mini th {
     text-align: left;
     padding: 8px 10px;
@@ -505,125 +622,149 @@ onMounted(() => {
     color: var(--color-text-primary, #111827);
     vertical-align: middle;
 }
-.table-row:hover {
-    background: var(--color-background-secondary, #f9fafb);
-}
-.mono {
-    font-family: monospace;
-    font-size: 11.5px;
-    color: #4b5563;
-}
+.table-row:hover { background: var(--color-background-secondary, #f9fafb); }
+.mono { font-family: monospace; font-size: 11.5px; color: #4b5563; }
 
-/* Badges y Banners */
+/* Badges */
 .metric-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 4px;
+    display: inline-flex; align-items: center;
+    gap: 3px; font-size: 10px; padding: 2px 6px; border-radius: 4px;
 }
-.badge-gray {
-    background: #f3f4f6;
-    color: #4b5563;
-}
+.badge-gray { background: #f3f4f6; color: #4b5563; }
 
+/* Historial badges */
+.hist-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    min-width: 28px;
+    text-align: center;
+}
+.badge-present { background: #dcfce7; color: #166534; }
+.badge-absent  { background: #fef2f2; color: #991b1b; }
+.badge-late    { background: #fef9c3; color: #a16207; }
+
+/* Porcentaje pill */
+.pct-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+.pct-green  { background: #dcfce7; color: #166534; }
+.pct-yellow { background: #fef9c3; color: #a16207; }
+.pct-red    { background: #fef2f2; color: #991b1b; }
+
+/* Banners */
 .error-banner {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: #fef2f2;
-    border: 1px solid #fee2e2;
-    color: #991b1b;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 12px;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #fef2f2; border: 1px solid #fee2e2;
+    color: #991b1b; padding: 8px 12px; border-radius: 6px; font-size: 12px;
 }
 .exito-banner {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: #eaf3de;
-    border: 1px solid #bbf7d0;
-    color: #166534;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 12px;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #eaf3de; border: 1px solid #bbf7d0;
+    color: #166534; padding: 8px 12px; border-radius: 6px; font-size: 12px;
 }
 .empty-state {
-    padding: 36px 16px;
-    text-align: center;
-    color: #9ca3af;
-    font-size: 12.5px;
+    padding: 36px 16px; text-align: center;
+    color: #9ca3af; font-size: 12.5px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+
+/* Toggle buttons P/A/T */
+.attendance-toggles {
+    display: inline-flex; background: #f3f4f6;
+    border-radius: 6px; padding: 2px; gap: 2px; border: 1px solid #e5e7eb;
+}
+.toggle-btn {
+    width: 28px; height: 26px; border: none; background: transparent;
+    border-radius: 4px; font-size: 11.5px; font-weight: 600;
+    color: #6b7280; cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+}
+.toggle-btn:hover               { background: #e5e7eb; }
+.toggle-btn.present.active      { background: #eaf3de; color: #3b6d11; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.toggle-btn.absent.active       { background: #fef2f2; color: #991b1b; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.toggle-btn.late.active         { background: #fef08a; color: #a16207; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+.row-input {
+    width: 100%; padding: 6px 10px;
+    border: 1px solid transparent; border-radius: 4px;
+    font-size: 11.5px; background: #f9fafb;
+    transition: all 0.15s; outline: none;
+}
+.row-input:focus, .row-input:hover { border-color: #d1d5db; background: #fff; }
+.row-input:focus { border-color: #cd322c; }
+
+/* hist-card top margin */
+.hist-card { margin-top: 14px; }
+
+@media (max-width: 720px) {
+    .hist-filters { grid-template-columns: 1fr 1fr; }
+    .form-group-action { grid-column: span 2; }
+}
+
+/* ── Expand Details ────────────────────────────────────────────── */
+.expand-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+    font-size: 14px;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+.expand-btn:hover {
+    background: #e5e7eb;
+    color: #111827;
+}
+.detail-row td {
+    background-color: #fafafa;
+    border-bottom: 1px solid #e5e7eb;
+}
+.detail-content {
+    padding: 16px 20px;
+}
+.detail-header {
+    font-weight: 600;
+    font-size: 12px;
+    color: #4b5563;
+    margin-bottom: 10px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     gap: 6px;
 }
-
-/* ESTILOS ESPECÍFICOS DE ESTA VISTA
-   Botones de P/A/T (Presente, Ausente, Tarde) y Observaciones
-*/
-.attendance-toggles {
-    display: inline-flex;
-    background: #f3f4f6;
-    border-radius: 6px;
-    padding: 2px;
-    gap: 2px;
-    border: 1px solid #e5e7eb;
+.detail-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
 }
-.toggle-btn {
-    width: 28px;
-    height: 26px;
-    border: none;
-    background: transparent;
-    border-radius: 4px;
-    font-size: 11.5px;
-    font-weight: 600;
-    color: #6b7280;
-    cursor: pointer;
-    transition: all 0.15s;
+.detail-item {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-}
-.toggle-btn:hover {
-    background: #e5e7eb;
-}
-
-/* Estados activos */
-.toggle-btn.present.active {
-    background: #eaf3de;
-    color: #3b6d11;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-.toggle-btn.absent.active {
-    background: #fef2f2;
-    color: #991b1b;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-.toggle-btn.late.active {
-    background: #fef08a;
-    color: #a16207;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.row-input {
-    width: 100%;
-    padding: 6px 10px;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    font-size: 11.5px;
-    background: #f9fafb;
-    transition: all 0.15s;
-    outline: none;
-}
-.row-input:focus,
-.row-input:hover {
-    border-color: #d1d5db;
     background: #fff;
+    padding: 6px 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 11.5px;
 }
-.row-input:focus {
-    border-color: #cd322c;
+.detail-name {
+    font-weight: 500;
+    color: #111827;
+}
+.detail-status {
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 12px;
 }
 </style>

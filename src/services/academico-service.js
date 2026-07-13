@@ -221,9 +221,49 @@ export const obtenerAlumnos = async () => {
   }
 };
 
-export const obtenerAlumnosCurso = async (id) => {
+export const obtenerAlumnosCurso = async (idOCurso, fecha) => {
+  // Esta función acepta:
+  // - un id primitivo (number|string)
+  // - un objeto que contenga el id bajo claves comunes (id_curso, idCurso, id)
+  // - opcionalmente un `fecha` que se añadirá como query param
+  const extraerIdCurso = (param) => {
+    if (param === null || param === undefined) {
+      return null;
+    }
+
+    if (typeof param === "number" || typeof param === "string") {
+      return String(param);
+    }
+
+    if (typeof param === "object") {
+      // Formas comunes que queremos soportar
+      const candidatos = [
+        param.id_curso,
+        param.idCurso,
+        param.id,
+        param.cursoId,
+        // formas anidadas
+        param.curso?.id_curso,
+        param.curso?.id,
+      ];
+      for (const c of candidatos) {
+        if (c !== undefined && c !== null && c !== "") return String(c);
+      }
+    }
+    return null;
+  };
+
   try {
-    const response = await axios.get(`${API_URL}/alumnos/curso/${id}`, getConfig());
+    const idCurso = extraerIdCurso(idOCurso);
+    if (!idCurso) {
+
+      return manejarErrorApi({ message: "Id de curso inválido" }, "Id de curso inválido");
+    }
+
+    let url = `${API_URL}/alumnos/curso/${encodeURIComponent(idCurso)}`;
+    if (fecha) url += `?fecha=${encodeURIComponent(fecha)}`;
+
+    const response = await axios.get(url, getConfig());
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "No se encontraron alumnos para este curso");
@@ -288,6 +328,25 @@ export async function guardarAsistenciasLote(payload) {
     return { success: true, data: response.data };
   } catch (error) {
     return manejarErrorApi(error, "Error al guardar el lote de asistencias");
+  }
+}
+
+/**
+ * Obtiene el historial de asistencias de un curso en un rango de fechas.
+ * @param {Object} params - { id_curso, fecha_desde, fecha_hasta }
+ */
+export async function obtenerHistorialAsistencias({ id_curso, fecha_desde, fecha_hasta } = {}) {
+  try {
+    const params = new URLSearchParams();
+    if (id_curso) params.append("id_curso", id_curso);
+    if (fecha_desde) params.append("fecha_desde", fecha_desde);
+    if (fecha_hasta) params.append("fecha_hasta", fecha_hasta);
+
+    const url = `${API_URL}/asistencias/historial?${params.toString()}`;
+    const response = await axios.get(url, getConfig());
+    return { success: true, data: response.data };
+  } catch (error) {
+    return manejarErrorApi(error, "No se pudo obtener el historial de asistencias");
   }
 }
 
@@ -556,16 +615,25 @@ export const obtenerMisMaterias = async () => {
 export const obtenerComunicados = async () => {
   try {
     const response = await axios.get(`${BASE_URL}/comunidad/comunicados`, getConfig());
-    const arrayComunicados = response.data.data || response.data.comunicados || response.data || [];
-    return arrayComunicados.map((c) => ({
-      id: c.id_comunicado || c.id,
-      titulo: c.titulo,
-      fecha: c.fecha_publicacion ? c.fecha_publicacion.split("T")[0] : new Date().toISOString().split("T")[0],
-      profesor: c.autor || "Dirección",
-      contenido: c.mensaje || c.contenido,
-    }));
+
+    return {
+      success: true,
+      data: response.data,
+    }
+
   } catch (error) {
-    console.error("Error al obtener los comunicados:", error);
-    return [];
+    return manejarErrorApi(error, "No se pudo obtener los comunicados");
+  }
+};
+
+export const obtenerComunicado = async (id) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/comunidad/comunicados/${id}`, getConfig());
+    return {
+      success: true,
+      data: response.data,
+    }
+  } catch (error) {
+    return manejarErrorApi(error, "No se pudo obtener el comunicado");
   }
 };

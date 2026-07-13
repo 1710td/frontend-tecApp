@@ -82,6 +82,6 @@ const sidebarAbierto = ref(false);
 
 .fade-slide-leave-to {
   opacity: 0;
-  transform: translateY(-4px);
 }
 </style>
+<style src="./alumno.css"></style>

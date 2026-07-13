@@ -62,19 +62,13 @@ export const obtenerNoticias = async () => {
   }
 };
 
-export const crearNoticia = async (noticiaData) => {
+export const crearNoticia = async (formDataArmado) => {
   try {
-    const formData = new FormData();
-    formData.append("titulo", noticiaData.titulo);
-    formData.append("contenido", noticiaData.contenido);
-    formData.append("autor_id", noticiaData.autor_id);
-
-    if (noticiaData.file) {
-      formData.append("imagen", noticiaData.file);
-    }
-
-    // Le pasamos true a getConfig para que no pise el Content-Type necesario para archivos
-    const response = await axios.post(`${API_URL}/comunidad/noticias`, formData, getConfig(true));
+    const response = await axios.post(
+      `${API_URL}/comunidad/noticias`, 
+      formDataArmado, 
+      getConfig(true)
+    );
     return response.data;
   } catch (error) {
     throw manejarErrorApi(error, "Error al crear la noticia");
@@ -94,9 +88,11 @@ export const eliminarNoticia = async (id) => {
 //      SERVICIOS DE COMUNICADOS
 // ==========================================
 
-export const obtenerTodosComunicados = async () => {
+export const obtenerTodosComunicados = async (params = {}) => {
   try {
-    const response = await axios.get(`${API_URL}/comunidad/comunicados`, getConfig());
+    const queryString = new URLSearchParams(params).toString();
+    const url = queryString ? `${API_URL}/comunidad/comunicados?${queryString}` : `${API_URL}/comunidad/comunicados`;
+    const response = await axios.get(url, getConfig());
     console.log("COMUNICADOS:", response.data);
     return {
       success: true,

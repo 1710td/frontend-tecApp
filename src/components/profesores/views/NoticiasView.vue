@@ -1,101 +1,254 @@
 <template>
-  <section class="tab-panel active">
-    <div class="tab-toolbar">
-      <div class="tab-toolbar-left">
-        <h2 class="section-title"><i class="fas fa-newspaper"></i> Noticias y Comunicados</h2>
-      </div>
-      <button class="btn-add-subject" @click="mostrarRedactar = true"><i class="fas fa-plus"></i> Redactar Noticia</button>
-    </div>
+    <section class="tab-panel active">
+        <div class="tab-toolbar">
+            <div class="tab-toolbar-left">
+                <h2 class="section-title"><i class="fas fa-newspaper"></i> Noticias</h2>
+            </div>
+        </div>
 
-    <div class="noticias-grid">
-      <div v-for="n in noticias" :key="n.id_noticia" class="noticia-card-prof">
-        <h3>{{ n.titulo }}</h3>
-        <p>{{ n.contenido }}</p>
-        <span class="fecha-lbl">{{ new Date(n.fecha).toLocaleDateString() }}</span>
-        <button class="btn-delete-noticia" @click="eliminarNoticia(n.id_noticia)"><i class="fas fa-trash"></i> Eliminar</button>
-      </div>
-      <div v-if="noticias.length === 0" class="noticia-empty" style="grid-column: 1/-1">
-        <i class="fas fa-newspaper" style="font-size: 2rem; color: #cbd5e1"></i>
-        <p>Aún no has publicado ninguna noticia. Usa el botón <strong>Redactar Noticia</strong>.</p>
-      </div>
-    </div>
+        <div class="noticias-grid">
+            <Card v-for="n in noticias" :key="n.id_noticia" class="noticia-card-prof">
+                <div class="noticia-horizontal">
+                    <div class="noticia-content noticia-clickable" @click="openNews(n)">
+                        <h3 class="noticia-titulo">{{ n.titulo }}</h3>
+                        <p class="noticia-extracto">{{ n.contenido }}</p>
+                        <div class="card-footer">
+                            <span class="fecha-lbl">{{ new Date(n.fecha).toLocaleDateString() }}</span>
+                            <button class="btn-cancel" @click.stop="openNews(n)" aria-label="Leer más">Leer más</button>
+                        </div>
+                    </div>
 
-    <div v-if="mostrarRedactar" class="modal-overlay active" @click.self="mostrarRedactar = false">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Redactar Noticia</h3>
-          <button class="close-modal" @click="mostrarRedactar = false">&times;</button>
+                    <div v-if="n.imagen_url" class="noticia-side">
+                        <div :class="['noticia-image-wrap', { 'image-loading': !loadedImages[n.id_noticia] }]">
+                            <img
+                                :src="n.imagen_url"
+                                :alt="n.titulo"
+                                class="noticia-card-image"
+                                loading="lazy"
+                                decoding="async"
+                                @load="marcarCargada(n.id_noticia)"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </Card>
+            <div v-if="noticias.length === 0">
+                <EmptyState icon="fas fa-newspaper">Aún no hay noticias disponibles.</EmptyState>
+            </div>
         </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label>Título</label>
-            <input type="text" v-model="nuevaNoticia.titulo" placeholder="Ej: Feriado puente escolar" />
-          </div>
-          <div class="form-group" style="margin-top: 14px">
-            <label>Contenido</label>
-            <textarea v-model="nuevaNoticia.contenido" placeholder="Escribe el contenido aquí..."></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="mostrarRedactar = false">Cancelar</button>
-          <button class="btn-submit" @click="publicarNoticia"><i class="fas fa-check"></i>&nbsp;Publicar</button>
-        </div>
-      </div>
-    </div>
-  </section>
+
+        <Modal v-model="showNews" :title="selectedNews?.titulo" wide>
+            <div class="imagen-preview-container">
+                <div v-if="selectedNews?.imagen_url" :class="['imagen-preview', { 'image-loading': !loadedImages[selectedNews.id_noticia] }]">
+                    <img
+                        :src="selectedNews.imagen_url"
+                        :alt="selectedNews.titulo"
+                        loading="lazy"
+                        decoding="async"
+                        @load="marcarCargada(selectedNews.id_noticia)"
+                    />
+                </div>
+                <div v-else class="fallback-detail" style="padding:12px 0;">
+                    <i class="fas fa-photo-video"></i>
+                    <span style="margin-left:8px;color:var(--muted)">Sin imagen adjunta</span>
+                </div>
+            </div>
+            <p class="noticia-cuerpo">{{ selectedNews?.contenido }}</p>
+            <template #footer>
+                <button class="btn-cancel" @click="closeNews()">Cerrar</button>
+            </template>
+        </Modal>
+    </section>
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from "vue";
-import { obtenerNoticias, crearNoticia, eliminarNoticia as eliminarNoticiaApi } from "@/services/comunidad-service.js";
-import { useAuthStore } from "@/stores/auth.js";
+import { ref, onMounted, onUnmounted } from "vue";
+import EmptyState from "../EmptyState.vue";
+import { obtenerNoticias } from "@/services/comunidad-service.js";
+import Modal from "@/components/ui/Modal.vue";
+import Card from "@/components/ui/Card.vue";
 
-const authStore = useAuthStore();
 const noticias = ref([]);
-const mostrarRedactar = ref(false);
-const nuevaNoticia = reactive({ titulo: "", contenido: "" });
+const showNews = ref(false);
+const selectedNews = ref(null);
+
+// track image load state to show LQIP / blur placeholder until loaded
+const loadedImages = ref({});
+const marcarCargada = (id) => {
+    if (!id) return;
+    loadedImages.value = { ...(loadedImages.value || {}), [id]: true };
+};
 
 const cargarNoticias = async () => {
-  try {
-    const data = await obtenerNoticias();
-    if (data) {
-      noticias.value = data;
-    }
-  } catch (error) {
-    console.error("Error al obtener noticias:", error);
-  }
-};
-
-onMounted(cargarNoticias);
-
-const publicarNoticia = async () => {
-  if (!nuevaNoticia.titulo.trim() || !nuevaNoticia.contenido.trim()) return;
-  try {
-    await crearNoticia({
-      titulo: nuevaNoticia.titulo.trim(),
-      contenido: nuevaNoticia.contenido.trim(),
-      autor_id: authStore.usuario?.id || 1,
-    });
-    alert("Noticia publicada correctamente.");
-    nuevaNoticia.titulo = "";
-    nuevaNoticia.contenido = "";
-    mostrarRedactar.value = false;
-    await cargarNoticias();
-  } catch (error) {
-    alert("Error al publicar la noticia.");
-  }
-};
-
-const eliminarNoticia = async (id) => {
-  if (confirm("¿Estás seguro de eliminar esta noticia?")) {
     try {
-      await eliminarNoticiaApi(id);
-      await cargarNoticias();
+        const data = await obtenerNoticias();
+        if (data) {
+            noticias.value = data;
+        }
     } catch (error) {
-      alert("Error al eliminar la noticia.");
+        console.error("Error al obtener noticias:", error);
     }
-  }
 };
+
+const openNews = (n) => {
+    selectedNews.value = n;
+    showNews.value = true;
+};
+
+const closeNews = () => {
+    selectedNews.value = null;
+    showNews.value = false;
+};
+
+const handleKeyDown = (e) => {
+    if (e.key === "Escape" && showNews.value) {
+        closeNews();
+    }
+};
+
+onMounted(() => {
+    cargarNoticias();
+    window.addEventListener("keydown", handleKeyDown);
+});
+
+onUnmounted(() => {
+    window.removeEventListener("keydown", handleKeyDown);
+});
+
 </script>
 
 <style scoped src="../profesores.css"></style>
+<style scoped>
+.noticias-grid {
+    display: grid;
+    gap: 20px;
+    margin-top: 16px;
+}
+.noticia-card-prof {
+    background: var(--surface, #fff);
+    border-radius: var(--radius-lg, 16px);
+    border: 1px solid var(--line, #e5e7eb);
+    padding: 20px;
+    box-shadow: var(--elev-1, 0 6px 18px rgba(2,6,23,0.06));
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.noticia-card-prof:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--elev-2, 0 12px 40px rgba(2,6,23,0.10));
+}
+.noticia-horizontal {
+    display: flex;
+    gap: 24px;
+    align-items: stretch;
+}
+.noticia-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+.noticia-clickable {
+    cursor: pointer;
+}
+.noticia-titulo {
+    margin: 0 0 10px 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text, #1f2937);
+    transition: color 0.2s;
+}
+.noticia-card-prof:hover .noticia-titulo {
+    color: var(--primary, #c0152a);
+}
+.noticia-extracto {
+    margin: 0;
+    color: var(--muted, #6b7280);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+}
+.fecha-lbl {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.fecha-lbl::before {
+    content: "\f133";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 400;
+}
+.btn-cancel {
+    padding: 8px 16px;
+    border-radius: var(--radius-sm, 10px);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.noticia-side {
+    width: 240px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+.noticia-image-wrap {
+    width: 100%;
+    height: 160px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+}
+.noticia-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+.noticia-card-prof:hover .noticia-card-image {
+    transform: scale(1.05);
+}
+.imagen-preview-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+.imagen-preview img {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 12px;
+    object-fit: contain;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.noticia-cuerpo {
+    white-space: pre-wrap;
+    color: var(--text, #334155);
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+@media (max-width: 720px) {
+    .noticia-horizontal {
+        flex-direction: column-reverse;
+    }
+    .noticia-side {
+        width: 100%;
+    }
+    .noticia-image-wrap {
+        height: 200px;
+    }
+}
+</style>

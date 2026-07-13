@@ -32,6 +32,7 @@ import AsistenciasView from "../components/profesores/views/AsistenciasView.vue"
 import InicioViewProfesor from "../components/profesores/views/InicioView.vue";
 import NoticiasViewProfesor from "../components/profesores/views/NoticiasView.vue";
 import CursosViewProfesor from "../components/profesores/views/CursosView.vue";
+import ComunicadosViewProfesor from "../components/profesores/views/ComunicadosView.vue";
 
 const routes = [
   { path: "/", component: Inicio },
@@ -90,6 +91,7 @@ const routes = [
     children: [
       { path: "inicio", component: InicioViewProfesor },
       { path: "noticias", component: NoticiasViewProfesor },
+      { path: "comunicados", component: ComunicadosViewProfesor },
       { path: "cursos", component: CursosViewProfesor },
       { path: "materias", component: MateriasView },
       { path: "asistencias", component: AsistenciasView },

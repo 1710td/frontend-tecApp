@@ -50,6 +50,17 @@ export const useAuthStore = defineStore("auth", () => {
     localStorage.removeItem("usuario");
   };
 
+  // Actualiza campos del perfil localmente y persiste en localStorage
+  const updateProfile = (patch) => {
+    if (!usuario.value) usuario.value = {};
+    usuario.value = { ...usuario.value, ...patch };
+    try {
+      localStorage.setItem("usuario", JSON.stringify(usuario.value));
+    } catch (e) {
+      console.error("No se pudo guardar usuario en localStorage:", e);
+    }
+  };
+
   // Extra: Un helper muy útil para usar con v-if en tus componentes Vue
   const tienePermiso = (permiso) => permisos.value.includes(permiso);
 
@@ -65,6 +76,7 @@ export const useAuthStore = defineStore("auth", () => {
     permisos,
     login,
     logout,
+    updateProfile,
     tienePermiso,
     guardarInfo,
   };

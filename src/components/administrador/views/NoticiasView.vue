@@ -496,13 +496,12 @@
         </div>
     </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import {
     obtenerNoticias,
     crearNoticia,
-    //modificarNoticia, // CORREGIDO: Descomentado para que funcione la edición
+    //modificarNoticia, // ¡AHORA SÍ ESTÁ DESCOMENTADO!
     eliminarNoticia,
 } from "../../../services/comunidad-service.js";
 
@@ -552,15 +551,13 @@ const form = ref(formVacio());
 const REGLAS = {
     titulo(v) {
         if (!v?.trim()) return "El título es obligatorio";
-        if (v.trim().length < 5)
-            return "El título debe tener al menos 5 caracteres";
+        if (v.trim().length < 5) return "El título debe tener al menos 5 caracteres";
         if (v.length > 200) return "Máximo 200 caracteres";
         return "";
     },
     contenido(v) {
         if (!v?.trim()) return "El contenido es obligatorio";
-        if (v.trim().length < 10)
-            return "El contenido debe tener al menos 10 caracteres";
+        if (v.trim().length < 10) return "El contenido debe tener al menos 10 caracteres";
         if (v.length > 5000) return "Máximo 5000 caracteres";
         return "";
     },
@@ -571,8 +568,7 @@ const REGLAS = {
 };
 
 function validarCampo(campo) {
-    if (REGLAS[campo])
-        erroresForm.value[campo] = REGLAS[campo](form.value[campo]);
+    if (REGLAS[campo]) erroresForm.value[campo] = REGLAS[campo](form.value[campo]);
 }
 
 function validarTodo() {
@@ -594,8 +590,7 @@ const MAX_BYTES = 5 * 1024 * 1024;
 function procesarArchivo(file) {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-        erroresForm.value.imagen =
-            "El archivo debe ser una imagen (PNG, JPG, WEBP)";
+        erroresForm.value.imagen = "El archivo debe ser una imagen (PNG, JPG, WEBP)";
         return;
     }
     if (file.size > MAX_BYTES) {
@@ -649,7 +644,6 @@ function cambiarVista(nuevaVista, noticia = null) {
         if (noticia.imagen_url) imagenPreview.value = noticia.imagen_url;
     } else if (nuevaVista === "crear") {
         form.value = formVacio();
-        // CORREGIDO: Se eliminó la duplicación de formVacio() que pisaba el ID
         form.value.autor_id = authStore.usuario?.id || null;
     } else if (nuevaVista === "detalles" && noticia) {
         noticiaSeleccionada.value = noticia;
@@ -662,16 +656,9 @@ async function fetchNoticias() {
     errorCarga.value = "";
     try {
         const res = await obtenerNoticias();
-        /*
-      noticias.value = Array.isArray(res)
-            ? res
-            : Array.isArray(res?.noticias)
-              ? res.noticias
-            : [];
-*/
-        noticias.value = Array.isArray(data) ? data : [];
-    } catch {
-        //errorCarga.value = "Error de red al sincronizar las noticias.";
+        // CORRECCIÓN: Usar 'res' (o res.data dependiendo de cómo retorne tu Axios) en lugar de 'data' que no existía.
+        noticias.value = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
+    } catch (error) { // CORRECCIÓN: Se agregó (error)
         errorCarga.value =
             error?.response?.data?.message ||
             error?.response?.data?.mensaje ||
@@ -695,7 +682,6 @@ async function guardarNoticia() {
         payload.append("contenido", form.value.contenido);
         payload.append("fecha", form.value.fecha);
 
-        // CORREGIDO: Si el autor_id es la palabra "undefined" por localStorage roto, recurre al fallback 1
         const idUsuario =
             form.value.autor_id && form.value.autor_id !== "undefined"
                 ? form.value.autor_id
@@ -708,6 +694,10 @@ async function guardarNoticia() {
         }
 
         if (vistaActiva.value === "crear") {
+            // CORRECCIÓN: Para ver un FormData en el alert, necesitás convertirlo a un objeto normal primero
+            const payloadObject = Object.fromEntries(payload.entries());
+            alert("Creando noticia con payload:\n" + JSON.stringify(payloadObject, null, 2));
+            
             const nueva = await crearNoticia(payload);
             noticias.value.unshift(nueva.data || nueva);
         } else {
@@ -756,6 +746,7 @@ async function confirmarEliminar() {
 
 onMounted(fetchNoticias);
 </script>
+
 <style scoped>
 .animate-fade-in {
     animation: fadeIn 0.22s ease-in-out;

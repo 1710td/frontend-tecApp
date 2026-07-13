@@ -48,10 +48,25 @@ const obtenerInfoAlumno = async (idUsuario) => {
   }
 };
 
+const obtenerInfoProfesor = async (idUsuario) => {
+  const authStore = useAuthStore();
+  try {
+    const response = await axios.get(`${ALUMNOS_API_URL}/profesores-mi-info/${idUsuario}`, {
+      headers: { Authorization: `Bearer ${authStore.token}` },
+    });
+    return { success: true, data: response.data };
+  } catch (error) {
+    return estandarizarError(error, "No se pudo obtener el perfil de profesor");
+  }
+};
+
 const cargarPerfilAdicional = async (usuario) => {
   const authStore = useAuthStore();
   if (usuario.nombre_rol === "alumno") {
     const info = await obtenerInfoAlumno(usuario.id);
+    if (info.success) authStore.guardarInfo(info.data);
+  } else if (usuario.nombre_rol === "profesor") {
+    const info = await obtenerInfoProfesor(usuario.id);
     if (info.success) authStore.guardarInfo(info.data);
   }
 };

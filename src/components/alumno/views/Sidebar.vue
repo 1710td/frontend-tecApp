@@ -63,9 +63,9 @@ defineEmits(["close"]);
 
 <style scoped>
 .sidebar {
-  width: 240px;
-  min-width: 240px;
-  background: linear-gradient(180deg, #d41515 0%, #8b0000 50%, #3d0000 100%);
+  width: 250px;
+  min-width: 250px;
+  background: linear-gradient(180deg, #b01020 0%, #7a0a18 45%, #3a0008 100%);
   color: white;
   flex-shrink: 0;
   position: sticky;
@@ -74,13 +74,14 @@ defineEmits(["close"]);
   z-index: 100;
   overflow-y: auto;
   overflow-x: hidden;
+  box-shadow: 4px 0 16px rgba(0,0,0,0.08);
 }
 
 .sidebar-inner {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 20px 14px;
+  padding: 20px 12px;
 }
 
 .sidebar-close {
@@ -102,11 +103,12 @@ defineEmits(["close"]);
 }
 
 .sidebar-close:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .sidebar-nav {
   flex: 1;
+  margin-top: 8px;
 }
 
 .sidebar-nav ul {
@@ -115,7 +117,7 @@ defineEmits(["close"]);
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .sidebar-nav a {
@@ -125,21 +127,21 @@ defineEmits(["close"]);
 }
 
 .sidebar-nav li {
-  padding: 12px 16px;
+  padding: 11px 14px;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 0.92rem;
+  font-size: 0.93rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .nav-icon {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.08);
   display: flex;
@@ -147,32 +149,36 @@ defineEmits(["close"]);
   justify-content: center;
   font-size: 15px;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .sidebar-nav li:hover {
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
+  transform: translateX(2px);
 }
 
 .sidebar-nav li:hover .nav-icon {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .sidebar-nav a.active li {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.2);
   color: #fff;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255,255,255,0.12);
 }
 
 .sidebar-nav a.active .nav-icon {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.32);
+  box-shadow: 0 0 12px rgba(255,255,255,0.15);
 }
 
 /* Footer help card */
 .sidebar-footer {
   padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin-top: 8px;
 }
 
 .sidebar-help {
@@ -189,36 +195,36 @@ defineEmits(["close"]);
 
 .sidebar-help:hover {
   background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
 .help-icon {
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.14);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.75);
   flex-shrink: 0;
 }
 
 .help-title {
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 700;
   color: white;
   margin: 0;
 }
 
 .help-sub {
   font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.5);
   margin: 3px 0 0 0;
 }
 
-/* Responsive: mobile sidebar slides in from left */
+/* Responsive */
 @media (max-width: 900px) {
   .sidebar {
     position: fixed;
@@ -233,7 +239,7 @@ defineEmits(["close"]);
 
   .sidebar.open {
     transform: translateX(0);
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+    box-shadow: 6px 0 32px rgba(0, 0, 0, 0.3);
   }
 
   .sidebar-close {

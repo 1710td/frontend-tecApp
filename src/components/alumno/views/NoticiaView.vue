@@ -1,182 +1,115 @@
 <template>
   <main class="main-content">
-    <div class="news-layout">
-      <div class="news-left-section">
-        <div class="news-header-box">
-          <div class="news-header-icon">
-            <img src="/noticias-header.png" alt="Noticias" />
-          </div>
-          <div class="news-header-text">
-            <h1>Noticias</h1>
-            <p>Mantente informado sobre lo que sucede en la Técnica 2</p>
-            <div class="news-line"></div>
-          </div>
-        </div>
 
-        <div class="filter-bar">
-          <div class="filter-tabs">
-            <button
-              v-for="cat in categoriasFiltro"
-              :key="cat"
-              class="filter-btn"
-              :class="{ active: filtroCategoria === cat }"
-              @click="cambiarFiltro(cat)"
-            >
-              {{ cat }}
-            </button>
-          </div>
-          <select class="sort-select" v-model="ordenarPor">
-            <option value="recientes">Más recientes</option>
-            <option value="antiguos">Más antiguos</option>
-          </select>
-        </div>
-
-        <div class="crear-noticia" v-if="puedeCrear">
-          <h3>Nueva publicación</h3>
-          <input type="text" v-model="nuevaNoticia.titulo" placeholder="Título" />
-          <textarea v-model="nuevaNoticia.descripcion" placeholder="Escriba la noticia"></textarea>
-          <select v-model="nuevaNoticia.categoria">
-            <option value="Anuncios">Anuncios</option>
-            <option value="Eventos">Eventos</option>
-            <option value="Comunicados">Comunicados</option>
-            <option value="Logros">Logros</option>
-            <option value="Recordatorios">Recordatorios</option>
-          </select>
-          <button @click="crearNoticia">Publicar</button>
-        </div>
-
-        <div class="news-list">
-          <article v-for="(noticia, index) in noticiasPaginadas" :key="index" class="news-card">
-            <div class="news-card-content">
-              <span class="badge" :class="'badge-' + noticia.categoria.toLowerCase()">{{ noticia.categoria }}</span>
-              <h3 class="news-card-title">
-                {{ noticia.titulo }}
-              </h3>
-              <p class="news-card-description">
-                {{ noticia.descripcion }}
-              </p>
-              <div class="news-card-meta">
-                <span><i class="far fa-calendar"></i> {{ formatearFecha(noticia.fecha) }}</span>
-                <span>•</span>
-                <span><i class="fas fa-user"></i> Publicado por: {{ noticia.autor }}</span>
-              </div>
-              <div class="card-actions" v-if="puedeCrear">
-                <button class="loan-btn" @click="editarNoticia(noticia)"><i class="fas fa-pencil-alt"></i> Editar</button>
-                <button class="loan-btn btn-delete" @click="eliminarNoticia(noticia)"><i class="fas fa-trash"></i> Eliminar</button>
-              </div>
-            </div>
-            <div class="news-card-arrow">
-              <i class="fas fa-chevron-right"></i>
-            </div>
-          </article>
-        </div>
-
-        <div class="pagination-container" v-if="totalPaginas > 1">
-          <div>
-            Mostrando página {{ paginaActual }} de
-            {{ totalPaginas }}
-          </div>
-          <ul class="pagination-list">
-            <li class="pagination-item" @click="cambiarPagina(paginaActual - 1)">
-              <i class="fas fa-chevron-left"></i>
-            </li>
-            <li
-              v-for="p in totalPaginas"
-              :key="p"
-              class="pagination-item"
-              :class="{ active: paginaActual === p }"
-              @click="cambiarPagina(p)"
-            >
-              {{ p }}
-            </li>
-            <li class="pagination-item" @click="cambiarPagina(paginaActual + 1)">
-              <i class="fas fa-chevron-right"></i>
-            </li>
-          </ul>
-        </div>
+    <!-- Header -->
+    <div class="news-header-box">
+      <div class="news-header-icon">
+        <img src="/noticias-header.png" alt="Noticias" />
       </div>
-
-      <div class="news-right-section">
-        <div class="promo-banner">
-          <img src="/fondo.jpg" alt="Banner Noticias" />
-        </div>
-
-        <div class="sidebar-widget">
-          <div class="widget-header">
-            <div class="widget-title text-anuncios"><i class="fas fa-bullhorn"></i> Anuncios importantes</div>
-            <a href="#" class="widget-link">Ver todos</a>
-          </div>
-          <div class="widget-list">
-            <div v-for="(anuncio, i) in anunciosWidget" :key="i" class="widget-item">
-              <div class="widget-icon-box widget-icon-red">
-                <i class="fas fa-user-edit"></i>
-              </div>
-              <div class="widget-item-info">
-                <h4>{{ anuncio.titulo }}</h4>
-                <p>{{ anuncio.descripcion.substring(0, 40) }}...</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="sidebar-widget">
-          <div class="widget-header">
-            <div class="widget-title text-eventos"><i class="far fa-calendar-alt"></i> Próximos eventos</div>
-            <a href="#" class="widget-link">Ver todos</a>
-          </div>
-          <div class="widget-list">
-            <div v-for="(evento, i) in eventosWidget" :key="i" class="event-calendar-item">
-              <div class="calendar-box">
-                <div class="calendar-month">
-                  {{ obtenerMes(evento.fecha) }}
-                </div>
-                <div class="calendar-day">
-                  {{ obtenerDia(evento.fecha) }}
-                </div>
-              </div>
-              <div class="widget-item-info">
-                <h4>{{ evento.titulo }}</h4>
-                <p>{{ evento.descripcion.substring(0, 40) }}...</p>
-              </div>
-            </div>
-          </div>
-          <button class="btn-widget-action" @click="modalEventosAbierto = true">
-            Ver todos los eventos
-            <i class="fas fa-chevron-right"></i>
-          </button>
-        </div>
+      <div class="news-header-text">
+        <h1>Noticias y Comunicados</h1>
+        <p>Mantente informado sobre lo que sucede en la Técnica 2</p>
+        <div class="news-line"></div>
       </div>
     </div>
 
-    <div class="modal" v-if="modalEventosAbierto">
-      <div class="modal-content">
-        <span class="cerrar-modal" @click="modalEventosAbierto = false">&times;</span>
-        <h2>📅 Próximos Eventos</h2>
-        <div v-for="(evt, i) in todosLosEventos" :key="i" class="evento-modal">
-          <h4>{{ evt.titulo }} ({{ formatearFecha(evt.fecha) }})</h4>
-          <p>{{ evt.descripcion }}</p>
-        </div>
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="filter-tabs">
+        <button
+          v-for="cat in categoriasFiltro"
+          :key="cat"
+          class="filter-btn"
+          :class="{ active: filtroCategoria === cat }"
+          @click="cambiarFiltro(cat)"
+        >
+          {{ cat }}
+        </button>
       </div>
+      <select class="sort-select" v-model="ordenarPor">
+        <option value="recientes">Más recientes</option>
+        <option value="antiguos">Más antiguos</option>
+      </select>
     </div>
+
+    <!-- Formulario nueva noticia (solo admins/profesores) -->
+    <div class="crear-noticia" v-if="puedeCrear">
+      <h3>Nueva publicación</h3>
+      <input type="text" v-model="nuevaNoticia.titulo" placeholder="Título" />
+      <textarea v-model="nuevaNoticia.descripcion" rows="4" placeholder="Escriba la noticia"></textarea>
+      <select v-model="nuevaNoticia.categoria">
+        <option value="Anuncios">Anuncios</option>
+        <option value="Comunicados">Comunicados</option>
+      </select>
+      <button @click="crearNoticia">Publicar</button>
+    </div>
+
+    <!-- Lista de noticias -->
+    <div class="news-list" v-if="noticiasPaginadas.length > 0">
+      <article v-for="(noticia, index) in noticiasPaginadas" :key="index" class="news-card">
+        <div class="news-card-content">
+          <span class="badge" :class="'badge-' + noticia.categoria.toLowerCase()">
+            {{ noticia.categoria }}
+          </span>
+          <h3 class="news-card-title">{{ noticia.titulo }}</h3>
+          <p class="news-card-description">{{ noticia.descripcion }}</p>
+          <div class="news-card-meta">
+            <span><i class="far fa-calendar"></i> {{ formatearFecha(noticia.fecha) }}</span>
+            <span>•</span>
+            <span><i class="fas fa-user"></i> {{ noticia.autor }}</span>
+          </div>
+          <div class="card-actions" v-if="puedeCrear">
+            <button class="loan-btn" @click="editarNoticia(noticia)"><i class="fas fa-pencil-alt"></i> Editar</button>
+            <button class="loan-btn btn-delete" @click="eliminarNoticia(noticia)"><i class="fas fa-trash"></i> Eliminar</button>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Estado vacío -->
+    <div class="empty-state" v-else>
+      <i class="fas fa-newspaper"></i>
+      <p>No hay noticias disponibles en esta categoría.</p>
+    </div>
+
+    <!-- Paginación -->
+    <div class="pagination-container" v-if="totalPaginas > 1">
+      <div>Página {{ paginaActual }} de {{ totalPaginas }}</div>
+      <ul class="pagination-list">
+        <li class="pagination-item" @click="cambiarPagina(paginaActual - 1)">
+          <i class="fas fa-chevron-left"></i>
+        </li>
+        <li
+          v-for="p in totalPaginas"
+          :key="p"
+          class="pagination-item"
+          :class="{ active: paginaActual === p }"
+          @click="cambiarPagina(p)"
+        >{{ p }}</li>
+        <li class="pagination-item" @click="cambiarPagina(paginaActual + 1)">
+          <i class="fas fa-chevron-right"></i>
+        </li>
+      </ul>
+    </div>
+
   </main>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth.js";
-import { obtenerNoticias, crearNoticia as crearNoticiaApi, eliminarNoticia as eliminarNoticiaApi } from "@/services/comunidad-service.js";
+import { obtenerNoticias, crearNoticia as crearNoticiaApi, eliminarNoticia as eliminarNoticiaApi, obtenerTodosComunicados } from "@/services/comunidad-service.js";
 
 const authStore = useAuthStore();
 // Permitir crear noticias si es root, podes ajustarlo según tu backend
 const puedeCrear = computed(() => ["root", "profesor"].includes(authStore.rol));
 
-const modalEventosAbierto = ref(false);
 const filtroCategoria = ref("Todas");
 const ordenarPor = ref("recientes");
 const paginaActual = ref(1);
-const noticiasPorPagina = 3;
+const noticiasPorPagina = 5;
 
-const categoriasFiltro = ["Todas", "Anuncios", "Eventos", "Comunicados", "Logros", "Recordatorios"];
+const categoriasFiltro = ["Todas", "Anuncios", "Comunicados"];
 
 const nuevaNoticia = ref({
   titulo: "",
@@ -188,16 +121,49 @@ const noticias = ref([]);
 
 const cargarNoticias = async () => {
   try {
-    const data = await obtenerNoticias();
-    if (data && data.length > 0) {
-      noticias.value = data.map((n) => ({
+    const dataNoticias = await obtenerNoticias();
+    let combinadas = [];
+    if (dataNoticias && dataNoticias.length > 0) {
+      combinadas = dataNoticias.map((n) => ({
         id: n.id_noticia,
         titulo: n.titulo,
         descripcion: n.contenido,
         categoria: n.categoria || "Anuncios",
         autor: n.autor || "Equipo Directivo",
         fecha: new Date(n.fecha),
+        esComunicado: false,
       }));
+    }
+
+    try {
+      let cursoAlumno = null;
+      try {
+        const alumnoRaw = localStorage.getItem("alumno");
+        if (alumnoRaw) {
+          const alumno = JSON.parse(alumnoRaw);
+          cursoAlumno = alumno.curso?.nombre_curso || alumno.data?.curso?.nombre_curso;
+        }
+      } catch (e) {}
+
+      const comunicadosRes = await obtenerTodosComunicados({ rol: "alumno", curso: cursoAlumno || "" });
+      if (comunicadosRes.success && comunicadosRes.data && comunicadosRes.data.length > 0) {
+        const comunicadosMapped = comunicadosRes.data.map(c => ({
+          id: c.id_comunicado,
+          titulo: c.titulo,
+          descripcion: c.mensaje,
+          categoria: "Comunicados",
+          autor: c.autor_id ? "Profesor/Autoridad" : "Sistema",
+          fecha: new Date(c.fecha_publicacion),
+          esComunicado: true,
+        }));
+        combinadas = combinadas.concat(comunicadosMapped);
+      }
+    } catch (e) {
+      console.error("Error al cargar comunicados:", e);
+    }
+
+    if (combinadas.length > 0) {
+      noticias.value = combinadas;
     } else {
       noticias.value = noticiasEstaticas;
     }
@@ -275,371 +241,256 @@ const cambiarPagina = (p) => {
   if (p >= 1 && p <= totalPaginas.value) paginaActual.value = p;
 };
 
-const anunciosWidget = computed(() => noticias.value.filter((n) => n.categoria === "Anuncios"));
-const eventosWidget = computed(() => noticias.value.filter((n) => n.categoria === "Eventos"));
-const todosLosEventos = computed(() => eventosWidget.value);
-
 const formatearFecha = (fecha) =>
   fecha.toLocaleDateString("es-AR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
-const obtenerMes = (fecha) => ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"][fecha.getMonth()];
-const obtenerDia = (fecha) => fecha.getDate();
 </script>
+
 
 <style scoped>
 .main-content {
   flex: 1;
   padding: 28px 32px;
-  background: var(--color-bg, #f5f6fa);
-}
-
-.news-layout {
-  display: flex;
-  gap: 25px;
-  align-items: flex-start;
-}
-
-.news-left-section {
-  flex: 1;
-  min-width: 0;
-}
-
-.news-right-section {
-  width: 320px;
-  flex-shrink: 0;
+  background: #f1f5f9;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
 }
 
+/* ── Header ───────────────────────────────── */
 .news-header-box {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-bottom: 25px;
+  background: linear-gradient(135deg, #fff 0%, #fdf8f8 100%);
+  padding: 22px 28px;
+  border-radius: 20px;
+  border: 1px solid #f0e8e8;
+  box-shadow: 0 4px 14px rgba(192, 21, 42, 0.04);
 }
 
 .news-header-icon img {
-  width: 150px;
-  height: 150px;
+  width: 90px;
+  height: 90px;
   object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.08));
 }
 
 .news-header-text h1 {
   font-size: 1.6rem;
-  color: #1e293b;
-  margin-bottom: 4px;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+  font-weight: 800;
+  letter-spacing: -0.3px;
 }
 
 .news-header-text p {
   color: #64748b;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
+  margin: 0;
 }
 
 .news-line {
-  width: 45px;
+  width: 40px;
   height: 3px;
-  background: #ef4444;
+  background: linear-gradient(90deg, #c0152a, #ef4444);
   border-radius: 10px;
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
+/* ── Filter Bar ───────────────────────────── */
 .filter-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 12px;
   background: #fff;
-  padding: 12px 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-  margin-bottom: 20px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  border: 1px solid #e8edf2;
 }
 
-.filter-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
+.filter-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
 
 .filter-btn {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 7px 16px;
+  border-radius: 999px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: #64748b;
   transition: all 0.2s;
 }
 
+.filter-btn:hover { background: #f1f5f9; }
+
 .filter-btn.active {
-  background: #fef2f2;
-  border-color: #fca5a5;
-  color: #ef4444;
-  font-weight: 600;
+  background: rgba(192, 21, 42, 0.08);
+  border-color: rgba(192, 21, 42, 0.25);
+  color: #c0152a;
+  font-weight: 700;
 }
 
 .sort-select {
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 7px 12px;
+  border-radius: 10px;
   border: 1px solid #e2e8f0;
   outline: none;
-}
-
-.news-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  min-height: 300px;
-}
-
-.news-card {
-  display: flex;
+  font-size: 0.85rem;
+  color: #475569;
   background: #fff;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-  align-items: center;
-  gap: 20px;
-  border: 1px solid #f1f5f9;
-  transition: transform 0.2s;
+  cursor: pointer;
 }
 
-.news-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
-}
-
-.news-card-content {
-  flex: 1;
-}
-
-.badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-
-.badge-anuncios {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.badge-eventos {
-  background: #dbeafe;
-  color: #2563eb;
-}
-
-.badge-comunicados {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.badge-logros {
-  background: #fef3c7;
-  color: #d97706;
-}
-
-.badge-recordatorios {
-  background: #f3e8ff;
-  color: #9333ea;
-}
-
-.news-card-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.news-card-description {
-  color: #64748b;
-  font-size: 0.9rem;
-  margin-bottom: 10px;
-}
-
-.news-card-meta {
-  display: flex;
-  gap: 15px;
-  color: #94a3b8;
-  font-size: 0.8rem;
-}
-
+/* ── Formulario Nueva Noticia ─────────────── */
 .crear-noticia {
-  background: white;
+  background: #fff;
   padding: 20px;
-  border-radius: 16px;
-  margin-bottom: 20px;
+  border-radius: 18px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  border: 1px solid #e8edf2;
 }
+
+.crear-noticia h3 { margin: 0 0 4px 0; font-size: 1rem; color: #0f172a; }
 
 .crear-noticia input,
 .crear-noticia textarea,
 .crear-noticia select {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  background: #f8fafc;
+  transition: all 0.2s;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.crear-noticia input:focus,
+.crear-noticia textarea:focus,
+.crear-noticia select:focus {
+  border-color: #c0152a;
+  box-shadow: 0 0 0 3px rgba(192, 21, 42, 0.1);
+  outline: none;
 }
 
 .crear-noticia button,
 .loan-btn {
-  background: #ca0d0d;
+  background: linear-gradient(135deg, #c0152a, #a81124);
   color: white;
   border: none;
   padding: 10px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.3s;
-  font-weight: 600;
-}
-
-.crear-noticia button:hover,
-.loan-btn:hover {
-  background: #a80b0b;
-}
-
-.sidebar-widget {
-  background: #fff;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  border: 1px solid #f1f5f9;
-}
-
-.widget-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.widget-title {
-  font-weight: 700;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.text-anuncios {
-  color: #b10d0d;
-}
-
-.text-eventos {
-  color: #16a34a;
-}
-
-.widget-link {
-  font-size: 0.8rem;
-  color: #94a3b8;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.widget-link:hover {
-  color: #ca0d0d;
-}
-
-.widget-item-info h4 {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #1e2430;
-  margin-bottom: 2px;
-}
-
-.widget-item-info p {
-  font-size: 0.78rem;
-  color: #94a3b8;
-  margin: 0;
-}
-
-.widget-item {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  margin-bottom: 10px;
-}
-
-.widget-icon-box {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 14px;
-}
-
-.widget-icon-red {
-  background-color: #fbb7b7;
-  color: #b10d0d;
-}
-
-.event-calendar-item {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-  padding-bottom: 10px;
-  border-bottom: 1px dashed #f1f5f9;
-  margin-bottom: 10px;
-}
-
-.calendar-box {
-  width: 45px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  text-align: center;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.calendar-month {
-  background-color: #22c55e;
-  color: #fff;
-  font-size: 0.65rem;
-  font-weight: bold;
-  padding: 2px 0;
-}
-
-.calendar-day {
-  font-size: 1.1rem;
-  font-weight: 700;
-  padding: 4px 0;
-  color: #1e2430;
-}
-
-.btn-widget-action {
-  width: 100%;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #16a34a;
-  padding: 10px;
   border-radius: 10px;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 0.85rem;
-  display: flex;
+  transition: all 0.25s;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 10px rgba(192, 21, 42, 0.2);
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  transition: all 0.2s;
 }
 
-.btn-widget-action:hover {
-  background: #dcfce7;
+.crear-noticia button:hover, .loan-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(192, 21, 42, 0.28);
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
+}
+
+/* ── News List ────────────────────────────── */
+.news-list { display: flex; flex-direction: column; gap: 14px; }
+
+.news-card {
+  display: flex;
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+  align-items: flex-start;
+  gap: 16px;
+  border: 1px solid #e8edf2;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;        /* evita que el contenido se desborde */
+}
+
+.news-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.09);
+}
+
+.news-card-content {
+  flex: 1;
+  min-width: 0;            /* fundamental para que flex no ignore el overflow */
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.badge-anuncios    { background: #fee2e2; color: #dc2626; }
+.badge-comunicados { background: #dcfce7; color: #16a34a; }
+
+.news-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  color: #0f172a;
+  line-height: 1.35;
+  /* Truncar a 2 líneas */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.news-card-description {
+  color: #475569;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  margin: 0 0 12px 0;
+  /* Contener el texto dentro del card */
+  overflow-wrap: break-word;
+  word-break: break-word;
+  /* Limitar a 3 líneas */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.news-card-meta {
+  display: flex;
+  gap: 10px;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  flex-wrap: wrap;
 }
 
 .card-actions {
@@ -649,106 +500,75 @@ const obtenerDia = (fecha) => fecha.getDate();
   flex-wrap: wrap;
 }
 
-.promo-banner img {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 12px;
+.news-card-arrow {
+  color: #c0d0e0;
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 4px;
+  transition: color 0.2s, transform 0.2s;
 }
 
+.news-card:hover .news-card-arrow {
+  color: #c0152a;
+  transform: translateX(3px);
+}
+
+/* ── Empty State ──────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 0;
+  color: #94a3b8;
+  gap: 14px;
+  background: #fff;
+  border-radius: 18px;
+  border: 1px dashed #e2e8f0;
+}
+
+.empty-state i { font-size: 2.5rem; opacity: 0.5; }
+.empty-state p { font-size: 1rem; margin: 0; }
+
+/* ── Pagination ───────────────────────────── */
 .pagination-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 25px;
   color: #64748b;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
-.pagination-list {
-  display: flex;
-  list-style: none;
-  gap: 5px;
-  padding: 0;
-}
+.pagination-list { display: flex; list-style: none; gap: 4px; padding: 0; margin: 0; }
 
 .pagination-item {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   border: 1px solid transparent;
   transition: all 0.2s;
+  font-size: 0.88rem;
+  font-weight: 600;
 }
 
-.pagination-item:hover {
-  background: #f8fafc;
-  border-color: #e2e8f0;
-}
+.pagination-item:hover { background: #f8fafc; border-color: #e2e8f0; }
 
 .pagination-item.active {
-  border-color: #ef4444;
-  color: #ef4444;
-  font-weight: bold;
+  border-color: #c0152a;
+  color: #c0152a;
+  font-weight: 800;
+  background: rgba(192, 21, 42, 0.05);
 }
 
-.modal {
-  position: fixed;
-  z-index: 9999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(3px);
-}
-
-.modal-content {
-  background: #fff;
-  width: 60%;
-  max-width: 700px;
-  border-radius: 20px;
-  padding: 28px;
-  position: relative;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-.cerrar-modal {
-  position: absolute;
-  right: 20px;
-  top: 15px;
-  font-size: 28px;
-  cursor: pointer;
-  color: #ca0d0d;
-  line-height: 1;
-  transition: transform 0.2s;
-}
-
-.cerrar-modal:hover {
-  transform: scale(1.15);
-}
-
-.evento-modal {
-  border-bottom: 1px solid #eee;
-  padding: 15px 0;
-}
-
-.evento-modal h4 {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #1e2430;
-  margin-bottom: 4px;
-}
-
-.evento-modal p {
-  color: #64748b;
-  font-size: 0.88rem;
+/* ── Responsive ───────────────────────────── */
+@media (max-width: 600px) {
+  .main-content { padding: 16px; }
+  .news-card { flex-direction: column; }
+  .news-header-icon img { width: 64px; height: 64px; }
+  .news-header-text h1 { font-size: 1.3rem; }
 }
 </style>

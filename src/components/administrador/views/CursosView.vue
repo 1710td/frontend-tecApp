@@ -351,7 +351,19 @@ const fetchAlumnos = async (idCurso) => {
   cargandoAlumnos.value = true;
   errorAlumnos.value = "";
 
-  const res = await obtenerAlumnosCurso(idCurso);
+  const cursoId = (typeof idCurso === 'object' && idCurso !== null)
+    ? (idCurso.id_curso || idCurso.id || idCurso.cursoId)
+    : idCurso;
+
+  if (!cursoId) {
+    console.warn('fetchAlumnos: id de curso inválido recibido', idCurso);
+    errorAlumnos.value = 'Id de curso inválido';
+    alumnosCurso.value = [];
+    cargandoAlumnos.value = false;
+    return;
+  }
+
+  const res = await obtenerAlumnosCurso(cursoId);
 
   if (!res.success) {
     errorAlumnos.value = res.message;
